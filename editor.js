@@ -178,12 +178,39 @@ function getSVGEmbedStyles() {
   `;
 }
 
+// Cache of iconPath → SVG data URI (populated from manifest at startup)
+const iconDataURICache = new Map();
+
+/**
+ * Look up a data URI for an icon path.
+ * Data URIs are pre-populated from window.ICON_MANIFEST at panel-build time,
+ * so no fetch/XHR/canvas is needed — works under file:// protocol.
+ * Returns a Promise<string|null> for compatibility with existing callers.
+ */
+function loadIconAsDataURI(iconPath) {
+  return Promise.resolve(iconDataURICache.get(iconPath) || null);
+}
+
+/** Pre-cache data URIs for every symbol node currently in the diagram. */
+function cacheAllSymbolIcons() {
+  const paths = new Set();
+  for (const node of state.nodes.values()) {
+    if (node.type === 'symbol' && node.iconPath) paths.add(node.iconPath);
+  }
+  return Promise.all([...paths].map(loadIconAsDataURI));
+}
+
 /**
  * Build a clean, self-contained SVG string for export.
- * Selection state is stripped; resize handles and UI layer are removed.
+ * Symbol <image> elements are replaced with embedded base64 data URIs so the
+ * exported file is fully self-contained (no external file dependencies).
+ * Returns a Promise<string>.
  */
-function buildExportSVG() {
+async function buildExportSVG() {
   const PADDING = 40;
+
+  // Embed icon images as data URIs before cloning
+  await cacheAllSymbolIcons();
 
   // Compute content bounding box
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -224,6 +251,19 @@ function buildExportSVG() {
   if (uiLayer) uiLayer.innerHTML = '';
   clone.querySelectorAll('.resize-handle').forEach(el => el.remove());
 
+  // Replace icon <image> hrefs with embedded data URIs
+  clone.querySelectorAll('image').forEach(imgEl => {
+    const href = imgEl.getAttribute('href') ||
+                 imgEl.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
+    if (href && !href.startsWith('data:')) {
+      const dataURI = iconDataURICache.get(href);
+      if (dataURI) {
+        imgEl.setAttribute('href', dataURI);
+        imgEl.removeAttributeNS('http://www.w3.org/1999/xlink', 'href');
+      }
+    }
+  });
+
   // Set dimensions and viewBox
   clone.setAttribute('width', String(viewW));
   clone.setAttribute('height', String(viewH));
@@ -250,8 +290,8 @@ function buildExportSVG() {
   return new XMLSerializer().serializeToString(clone);
 }
 
-function exportSVG() {
-  const svgString = buildExportSVG();
+async function exportSVG() {
+  const svgString = await buildExportSVG();
   const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -261,8 +301,8 @@ function exportSVG() {
   URL.revokeObjectURL(url);
 }
 
-function exportPNG() {
-  const svgString = buildExportSVG();
+async function exportPNG() {
+  const svgString = await buildExportSVG();
 
   // Parse width/height from the SVG for canvas sizing
   const match = svgString.match(/width="([^"]+)"\s+height="([^"]+)"/);
@@ -536,21 +576,55 @@ function renderNodes() {
     const sel = state.selected.has(node.id);
     const g = svgEl('g', { 'data-id': node.id, 'data-type': 'node' });
 
-    const shapeEl = createShapeEl(node, sel);
-    shapeEl.style.fillOpacity = (node.opacity ?? 100) / 100;
-    applyStrokeStyle(shapeEl, node.strokeStyle);
-    g.appendChild(shapeEl);
+    if (node.type === 'symbol') {
+      // Symbol node: SVG image + selection outline + label below
+      const img = svgEl('image', {
+        href: node.iconPath,
+        x: node.x, y: node.y,
+        width: node.width, height: node.height,
+        preserveAspectRatio: 'xMidYMid meet',
+      });
+      g.appendChild(img);
 
-    const lbl = svgEl('text', {
-      x: node.x + node.width / 2,
-      y: node.y + node.height / 2,
-      'text-anchor': 'middle',
-      'dominant-baseline': 'middle',
-      class: 'node-label',
-    });
-    lbl.textContent = node.label || '';
-    applyFontStyle(lbl, node, { size: 13 });
-    g.appendChild(lbl);
+      if (sel) {
+        const outline = svgEl('rect', {
+          x: node.x, y: node.y,
+          width: node.width, height: node.height,
+          class: 'node-shape selected',
+          fill: 'none',
+        });
+        g.appendChild(outline);
+      }
+
+      if (node.label) {
+        const lbl = svgEl('text', {
+          x: node.x + node.width / 2,
+          y: node.y + node.height + 12,
+          'text-anchor': 'middle',
+          'dominant-baseline': 'middle',
+          class: 'node-label',
+        });
+        lbl.textContent = node.label;
+        applyFontStyle(lbl, node, { size: 11 });
+        g.appendChild(lbl);
+      }
+    } else {
+      const shapeEl = createShapeEl(node, sel);
+      shapeEl.style.fillOpacity = (node.opacity ?? 100) / 100;
+      applyStrokeStyle(shapeEl, node.strokeStyle);
+      g.appendChild(shapeEl);
+
+      const lbl = svgEl('text', {
+        x: node.x + node.width / 2,
+        y: node.y + node.height / 2,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'middle',
+        class: 'node-label',
+      });
+      lbl.textContent = node.label || '';
+      applyFontStyle(lbl, node, { size: 13 });
+      g.appendChild(lbl);
+    }
 
     // Resize handles (only when selected in select mode)
     if (sel && state.tool === 'select') {
@@ -1144,6 +1218,12 @@ function onKeyDown(e) {
     return;
   }
 
+  // Icon library toggle
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'i') {
+    document.getElementById('btn-toggle-icons').click();
+    return;
+  }
+
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); return; }
   if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redo(); return; }
 
@@ -1456,7 +1536,11 @@ function updatePropertiesPanel() {
   const ann = state.annotations.get(id);
 
   if (node) {
-    renderNodeProps(content, node);
+    if (node.type === 'symbol') {
+      renderSymbolProps(content, node);
+    } else {
+      renderNodeProps(content, node);
+    }
   } else if (edge) {
     renderEdgeProps(content, edge);
   } else if (ann) {
@@ -1493,6 +1577,25 @@ function bindColorInput(id, defaultValue, setter) {
     render();
     updatePropertiesPanel();
   });
+}
+
+function renderSymbolProps(container, node) {
+  const iconName = node.iconPath ? node.iconPath.split('/').pop().replace(/\.svg$/i, '') : '';
+  container.innerHTML = `
+    <div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
+    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>
+    <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
+    <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
+    <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
+    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
+  `;
+  bindFontControls(node, { size: 11 });
+  bindPropInput('p-label', v => { node.label = v; });
+  bindPropInput('p-x', v => { node.x = +v || 0; }, true);
+  bindPropInput('p-y', v => { node.y = +v || 0; }, true);
+  bindPropInput('p-w', v => { node.width  = Math.max(16, +v || 16); }, true);
+  bindPropInput('p-h', v => { node.height = Math.max(16, +v || 16); }, true);
 }
 
 function renderNodeProps(container, node) {
@@ -1831,6 +1934,209 @@ function updateEditButtons() {
 }
 
 // ============================================================
+// Icon Library
+// ============================================================
+
+/** Convert a raw filename to a human-readable label. */
+function iconLabel(filename) {
+  return filename
+    .replace(/\.svg$/i, '')
+    .replace(/^\d+-icon-service-/i, '')  // strip Azure numeric prefix
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+let iconManifest = null; // loaded once from icons/manifest.json
+
+function buildIconPanel(manifest) {
+  const tree = document.getElementById('icon-tree');
+  tree.innerHTML = '';
+
+  for (const [provider, categories] of Object.entries(manifest)) {
+    const providerDiv = document.createElement('div');
+    providerDiv.className = 'icon-provider';
+
+    const providerHeader = document.createElement('div');
+    providerHeader.className = 'icon-provider-header';
+    providerHeader.innerHTML = `<span class="icon-chevron open">▶</span><span>${provider}</span>`;
+    providerDiv.appendChild(providerHeader);
+
+    const providerBody = document.createElement('div');
+    providerBody.className = 'icon-provider-body';
+
+    for (const [category, files] of Object.entries(categories)) {
+      const catDiv = document.createElement('div');
+      catDiv.className = 'icon-category';
+
+      const catHeader = document.createElement('div');
+      catHeader.className = 'icon-category-header';
+      catHeader.innerHTML = `<span class="icon-chevron">▶</span><span>${category}</span><span style="color:#334155;margin-left:auto;font-size:10px">${files.length}</span>`;
+      catDiv.appendChild(catHeader);
+
+      const grid = document.createElement('div');
+      grid.className = 'icon-grid hidden';
+
+      for (const entry of files) {
+        // entry is { name, data } (new format) or a plain string (legacy)
+        const filename = typeof entry === 'string' ? entry : entry.name;
+        const dataURI  = typeof entry === 'object' ? entry.data : null;
+        const iconPath = `icons/${provider}/${category}/${filename}`;
+        const label = iconLabel(filename);
+
+        // Populate the export cache from manifest data — no fetch/canvas needed
+        if (dataURI) iconDataURICache.set(iconPath, dataURI);
+
+        const item = document.createElement('div');
+        item.className = 'icon-item';
+        item.draggable = true;
+        item.dataset.iconPath = iconPath;
+        item.dataset.label = label;
+        item.title = label;
+
+        const img = document.createElement('img');
+        // Use embedded data URI for display too — avoids file:// image load issues
+        img.src = dataURI || iconPath;
+        img.alt = label;
+        img.loading = 'lazy';
+
+        const span = document.createElement('span');
+        span.textContent = label;
+
+        item.appendChild(img);
+        item.appendChild(span);
+
+        item.addEventListener('dragstart', e => {
+          e.dataTransfer.effectAllowed = 'copy';
+          e.dataTransfer.setData('text/icon-path', iconPath);
+          e.dataTransfer.setData('text/icon-label', label);
+          item.classList.add('dragging');
+        });
+        item.addEventListener('dragend', () => item.classList.remove('dragging'));
+
+        grid.appendChild(item);
+      }
+
+      catDiv.appendChild(grid);
+      providerBody.appendChild(catDiv);
+
+      // Toggle category expand/collapse
+      catHeader.addEventListener('click', () => {
+        const open = !grid.classList.contains('hidden');
+        grid.classList.toggle('hidden', open);
+        catHeader.querySelector('.icon-chevron').classList.toggle('open', !open);
+      });
+    }
+
+    providerDiv.appendChild(providerBody);
+    tree.appendChild(providerDiv);
+
+    // Toggle provider expand/collapse
+    const providerBodyEl = providerBody;
+    providerHeader.addEventListener('click', () => {
+      const hidden = providerBodyEl.style.display === 'none';
+      providerBodyEl.style.display = hidden ? '' : 'none';
+      providerHeader.querySelector('.icon-chevron').classList.toggle('open', hidden);
+    });
+  }
+}
+
+function filterIconPanel(query) {
+  const q = query.trim().toLowerCase();
+  const tree = document.getElementById('icon-tree');
+  if (!q) {
+    // Restore default collapsed state
+    tree.querySelectorAll('.icon-item').forEach(el => el.style.display = '');
+    tree.querySelectorAll('.icon-grid').forEach(el => el.classList.add('hidden'));
+    tree.querySelectorAll('.icon-category-header .icon-chevron').forEach(el => el.classList.remove('open'));
+    tree.querySelectorAll('.icon-provider-body').forEach(el => el.style.display = '');
+    tree.querySelectorAll('.icon-provider-header .icon-chevron').forEach(el => el.classList.add('open'));
+    return;
+  }
+
+  // Show all categories and expand them; hide non-matching icons
+  tree.querySelectorAll('.icon-grid').forEach(el => el.classList.remove('hidden'));
+  tree.querySelectorAll('.icon-category-header .icon-chevron').forEach(el => el.classList.add('open'));
+  tree.querySelectorAll('.icon-provider-body').forEach(el => el.style.display = '');
+
+  tree.querySelectorAll('.icon-item').forEach(item => {
+    const matches = item.dataset.label.toLowerCase().includes(q);
+    item.style.display = matches ? '' : 'none';
+  });
+
+  // Hide empty categories
+  tree.querySelectorAll('.icon-category').forEach(cat => {
+    const visible = [...cat.querySelectorAll('.icon-item')].some(el => el.style.display !== 'none');
+    cat.style.display = visible ? '' : 'none';
+  });
+}
+
+function initIconLibrary() {
+  if (window.ICON_MANIFEST) {
+    iconManifest = window.ICON_MANIFEST;
+    buildIconPanel(iconManifest);
+  } else {
+    document.getElementById('icon-tree').innerHTML =
+      '<p style="color:#475569;font-size:11px;padding:12px">Icon manifest not found.<br>Run: node scripts/generate-manifest.js</p>';
+  }
+
+  // Toggle panel open/close
+  document.getElementById('btn-toggle-icons').addEventListener('click', () => {
+    const panel = document.getElementById('icon-panel');
+    const btn = document.getElementById('btn-toggle-icons');
+    const closed = panel.classList.toggle('icon-panel-closed');
+    btn.classList.toggle('active', !closed);
+  });
+
+  // Search
+  document.getElementById('icon-search').addEventListener('input', e => {
+    filterIconPanel(e.target.value);
+  });
+
+  // Canvas drag-and-drop
+  const canvasContainer = document.getElementById('canvas-container');
+  canvasContainer.addEventListener('dragover', e => {
+    if (e.dataTransfer.types.includes('text/icon-path')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  });
+  canvasContainer.addEventListener('drop', e => {
+    const iconPath = e.dataTransfer.getData('text/icon-path');
+    if (!iconPath) return;
+    e.preventDefault();
+
+    // Convert screen coordinates to diagram coordinates
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const diagramPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+    const SIZE = 64;
+    const id = genId();
+    const label = e.dataTransfer.getData('text/icon-label') || '';
+    state.nodes.set(id, {
+      id,
+      type: 'symbol',
+      iconPath,
+      label,
+      x: diagramPt.x - SIZE / 2,
+      y: diagramPt.y - SIZE / 2,
+      width: SIZE,
+      height: SIZE,
+    });
+    // Pre-cache the icon's data URI for export
+    loadIconAsDataURI(iconPath);
+    state.selected.clear();
+    state.selected.add(id);
+    pushHistory();
+    render();
+    updatePropertiesPanel();
+    updateToolbarStatus();
+  });
+}
+
+// ============================================================
 // Init
 // ============================================================
 function init() {
@@ -1838,6 +2144,7 @@ function init() {
 
   // Toolbar tool buttons
   document.querySelectorAll('.tool-btn').forEach(btn => {
+    if (!btn.dataset.tool) return; // skip non-tool buttons (e.g. icon library toggle)
     btn.addEventListener('click', () => setTool(btn.dataset.tool));
   });
 
@@ -1950,8 +2257,14 @@ function init() {
   // Initialise zoom (sets viewBox and wires ResizeObserver)
   initZoom();
 
+  // Initialise icon library panel
+  initIconLibrary();
+
   // Restore last diagram from localStorage (before seeding history)
   loadFromLocalStorage();
+
+  // Pre-cache data URIs for any symbol icons loaded from localStorage
+  cacheAllSymbolIcons();
 
   pushHistory(); // history[0] = initial/restored state
 

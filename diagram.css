@@ -95,6 +95,158 @@ html, body, #app {
 }
 
 /* ============================================================
+   Icon Library Panel
+   ============================================================ */
+#icon-panel {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  flex-shrink: 0;
+  background: #1e293b;
+  border-right: 1px solid #0f172a;
+  overflow: hidden;
+  transition: width 0.2s ease;
+}
+
+#icon-panel.icon-panel-closed {
+  width: 0;
+}
+
+#icon-panel-header {
+  padding: 8px;
+  border-bottom: 1px solid #0f172a;
+  flex-shrink: 0;
+}
+
+#icon-search {
+  width: 100%;
+  padding: 5px 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+#icon-search::placeholder { color: #475569; }
+#icon-search:focus { border-color: #3b82f6; }
+
+#icon-tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+
+#icon-tree::-webkit-scrollbar { width: 6px; }
+#icon-tree::-webkit-scrollbar-track { background: transparent; }
+#icon-tree::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+.icon-provider {
+  margin-bottom: 2px;
+}
+
+.icon-provider-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+  background: #162032;
+}
+
+.icon-provider-header:hover { color: #e2e8f0; background: #1e2d3e; }
+
+.icon-category {
+  margin-bottom: 1px;
+}
+
+.icon-category-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 18px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #64748b;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-category-header:hover { color: #94a3b8; background: #1e2d3e; }
+
+.icon-chevron {
+  font-size: 9px;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.icon-chevron.open { transform: rotate(90deg); }
+
+.icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 8px 6px 24px;
+}
+
+.icon-grid.hidden { display: none; }
+
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 52px;
+  padding: 4px 2px;
+  border-radius: 4px;
+  cursor: grab;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.icon-item:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+.icon-item.dragging { opacity: 0.4; }
+
+.icon-item img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.icon-item span {
+  font-size: 9px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  pointer-events: none;
+}
+
+.icon-item:hover span { color: #94a3b8; }
+
+/* ============================================================
    Left toolbar (drawing tools)
    ============================================================ */
 #left-toolbar {
