@@ -4,11 +4,33 @@ A lightweight, self-contained browser-based diagram editor. No installation, no 
 
 ## Getting Started
 
+### Option 1 — Use online (GitHub Pages)
+
+Open the hosted version directly in your browser — nothing to download or install:
+
 ```
+https://ballr73.github.io/diagram/
+```
+
+### Option 2 — Download a release
+
+1. Go to the [Releases page](https://github.com/ballr73/diagram/releases)
+2. Download `diagram-editor.tar.gz` from the latest release
+3. Extract the archive:
+   ```
+   tar -xzf diagram-editor.tar.gz
+   ```
+4. Open `index.html` in your browser
+
+### Option 3 — Clone the repo
+
+```
+git clone https://github.com/ballr73/diagram.git
+cd diagram
 open index.html
 ```
 
-or drag `index.html` into a browser window. That's it.
+> **Note:** All three options work offline once the files are on your machine. No server required.
 
 ---
 
@@ -24,12 +46,12 @@ or drag `index.html` into a browser window. That's it.
 │Conn. │   ▶Stor  │                               │               │
 │Text  │ ▶ Azure  │                               │               │
 │Icons │   ▶...   │                               │               │
-│Shapes│          │                               │               │
+│Shapes│ ▶ GCP    │                               │               │
 └──────┴──────────┴───────────────────────────────┴───────────────┘
 ```
 
 - **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
-- **Icon library panel** — collapsible sidebar with 1,025 AWS & Azure SVG icons, searchable
+- **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
 - **Top toolbar** — zoom controls, undo/redo, clipboard, z-order, align/distribute, export/import
 - **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
 - **Properties panel** — edit the selected element's properties
@@ -84,16 +106,17 @@ Free-floating text labels not attached to any shape. Place them by clicking on a
 
 Press `I` or click the **Icons** button in the left toolbar to open the icon library panel.
 
-The library contains **1,025 SVG icons** across two providers:
+The library contains **1,241 SVG icons** across three cloud providers:
 
-| Provider | Categories |
-|----------|-----------|
-| **AWS** | 26 categories (Compute, Storage, Networking, ML, Security, …) |
-| **Azure** | 29 categories (Compute, Containers, Databases, AI, Security, …) |
+| Provider | Icons | Layout |
+|----------|-------|--------|
+| **AWS** | ~615 icons across 26 categories | `icons/AWS/<Category>/` |
+| **Azure** | ~410 icons across 29 categories | `icons/Azure/<Category>/` |
+| **GCP** | 216 icons | `icons/GCP/` |
 
 ### Placing icons
 
-1. Expand a provider and category in the panel
+1. Expand a provider (and category for AWS/Azure) in the panel
 2. Use the **search box** at the top to filter icons by name
 3. **Drag** an icon thumbnail onto the canvas — it is placed as a 64×64 resizable symbol node
 
@@ -101,7 +124,7 @@ Icon nodes behave like regular shapes: they can be moved, resized, labelled, con
 
 ### Adding more icons
 
-Icons live in `icons/<Provider>/<Category>/name.svg`. After adding or removing SVG files, regenerate the manifest:
+Icons live in `icons/<Provider>/<Category>/name.svg` (categorised) or `icons/<Provider>/name.svg` (flat). After adding or removing SVG files, regenerate the manifest:
 
 ```
 node scripts/generate-manifest.js
@@ -302,19 +325,37 @@ index.html                        — HTML shell and SVG canvas
 editor.js                         — All editor logic (~2,300 lines)
 diagram.css                       — UI and SVG styling (~800 lines)
 README.md                         — This file
-icons/                            — SVG icon library (1,025 icons)
+icons/                            — SVG icon library (1,241 icons total)
   AWS/                            — 26 AWS service categories
   Azure/                          — 29 Azure service categories
-  manifest.js                     — Embedded data URIs (loaded at runtime)
+  GCP/                            — 216 GCP icons (flat, no subcategories)
+  manifest.js                     — Embedded data URIs (loaded at runtime, ~4.3 MB)
   manifest.json                   — Lightweight file listing (reference)
 scripts/
   generate-manifest.js            — Regenerates manifest.js / manifest.json
-.github/workflows/release.yml     — GitHub Actions release workflow
+.github/workflows/release.yml     — GitHub Actions release + Pages deployment workflow
 ```
 
 No build tool, no package manager, no server required.
 
-## Releases
+---
 
-Pushing to `main` automatically creates a GitHub release tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-editor.tar.gz` download containing all app files and the complete icon library.
+## Releases & Deployment
 
+Every push to `main` automatically:
+
+1. **Creates a GitHub release** tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-editor.tar.gz` download containing all app files and the complete icon library
+2. **Deploys to GitHub Pages** at `https://ballr73.github.io/diagram/`
+
+### Download a specific release
+
+Visit the [Releases page](https://github.com/ballr73/diagram/releases) and download `diagram-editor.tar.gz` from any release.
+
+```
+tar -xzf diagram-editor.tar.gz
+open index.html
+```
+
+### GitHub Pages setup (one-time, repo owner only)
+
+To enable the Pages deployment, go to **Settings → Pages → Source** and select **GitHub Actions**. This only needs to be done once.
