@@ -657,7 +657,8 @@ function renderAnnotations() {
 // ============================================================
 // Interaction — drag state machine
 // ============================================================
-let drag = null; // Active drag descriptor
+let drag = null;    // Active draw/move/resize drag descriptor
+let panDrag = null; // Active pan descriptor (right-mouse-button)
 
 function svgCoords(e) {
   const pt = svg.createSVGPoint();
@@ -692,6 +693,19 @@ function hitTest(x, y) {
 }
 
 function onMouseDown(e) {
+  // Right-click: start pan
+  if (e.button === 2) {
+    e.preventDefault();
+    panDrag = {
+      startScreenX: e.clientX,
+      startScreenY: e.clientY,
+      startCenterX: state.viewCenterX,
+      startCenterY: state.viewCenterY,
+    };
+    svg.style.cursor = 'grabbing';
+    return;
+  }
+
   if (e.button !== 0) return;
   e.preventDefault();
   const p = svgCoords(e);
@@ -706,6 +720,14 @@ function onMouseDown(e) {
 }
 
 function onMouseMove(e) {
+  // Pan takes priority
+  if (panDrag) {
+    state.viewCenterX = panDrag.startCenterX - (e.clientX - panDrag.startScreenX) / state.zoom;
+    state.viewCenterY = panDrag.startCenterY - (e.clientY - panDrag.startScreenY) / state.zoom;
+    updateViewBox();
+    return;
+  }
+
   const p = svgCoords(e);
   if (!drag) {
     updateCursor(p);
@@ -715,6 +737,13 @@ function onMouseMove(e) {
 }
 
 function onMouseUp(e) {
+  // End pan on right-button release
+  if (e.button === 2 && panDrag) {
+    panDrag = null;
+    svg.style.cursor = state.tool === 'select' ? 'default' : 'crosshair';
+    return;
+  }
+
   if (!drag) return;
   const p = svgCoords(e);
   dragEnd(p);
@@ -1880,7 +1909,16 @@ function init() {
   svg.addEventListener('mousemove', onMouseMove);
   svg.addEventListener('mouseup', onMouseUp);
   svg.addEventListener('dblclick', onDblClick);
-  svg.addEventListener('mouseleave', () => { if (drag) { dragEnd({ x: 0, y: 0 }); } });
+  svg.addEventListener('mouseleave', () => {
+    if (drag) { dragEnd({ x: 0, y: 0 }); }
+    if (panDrag) {
+      panDrag = null;
+      svg.style.cursor = state.tool === 'select' ? 'default' : 'crosshair';
+    }
+  });
+
+  // Suppress context menu so right-click pan doesn't trigger the browser menu
+  svg.addEventListener('contextmenu', e => e.preventDefault());
 
   // Wheel zoom: Ctrl+scroll zooms in/out centred on pointer
   svg.addEventListener('wheel', e => {
