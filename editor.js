@@ -1166,6 +1166,45 @@ function distributeV() {
 }
 
 // ============================================================
+// Z-order — Bring to Front / Send to Back
+// ============================================================
+
+function mapForId(id) {
+  if (state.nodes.has(id))       return state.nodes;
+  if (state.edges.has(id))       return state.edges;
+  if (state.annotations.has(id)) return state.annotations;
+  return null;
+}
+
+function bringToFront() {
+  if (state.selected.size === 0) return;
+  for (const id of state.selected) {
+    const map = mapForId(id);
+    if (!map) continue;
+    const item = map.get(id);
+    map.delete(id);
+    map.set(id, item); // re-insert at end = rendered on top
+  }
+  pushHistory(); render();
+}
+
+function sendToBack() {
+  if (state.selected.size === 0) return;
+  for (const id of state.selected) {
+    const map = mapForId(id);
+    if (!map) continue;
+    const item = map.get(id);
+    map.delete(id);
+    // Prepend by rebuilding the map
+    const rest = [...map.entries()];
+    map.clear();
+    map.set(id, item);
+    rest.forEach(([k, v]) => map.set(k, v));
+  }
+  pushHistory(); render();
+}
+
+// ============================================================
 // Clipboard — Copy, Cut, Paste, Duplicate
 // ============================================================
 function copySelected() {
@@ -1503,6 +1542,12 @@ function updateEditButtons() {
     const el = document.getElementById(id);
     if (el) el.disabled = !canDist;
   });
+
+  // Bring to front / Send to back require any selection
+  const btnFront = document.getElementById('btn-bring-front');
+  const btnBack  = document.getElementById('btn-send-back');
+  if (btnFront) btnFront.disabled = !hasSel;
+  if (btnBack)  btnBack.disabled  = !hasSel;
 }
 
 // ============================================================
@@ -1543,6 +1588,10 @@ function init() {
   document.getElementById('btn-align-bottom').addEventListener('click', alignBottom);
   document.getElementById('btn-dist-h').addEventListener('click', distributeH);
   document.getElementById('btn-dist-v').addEventListener('click', distributeV);
+
+  // Z-order
+  document.getElementById('btn-bring-front').addEventListener('click', bringToFront);
+  document.getElementById('btn-send-back').addEventListener('click', sendToBack);
 
   // Export / Import
   document.getElementById('btn-export').addEventListener('click', exportDiagram);

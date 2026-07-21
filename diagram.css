@@ -150,6 +150,23 @@ html, body, #app {
   box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
 }
 
+.left-tb-sep {
+  width: 80%;
+  border-top: 1px solid #334155;
+  margin: 6px 0;
+}
+
+#app-version {
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 9px;
+  color: #475569;
+  text-align: center;
+  user-select: none;
+  letter-spacing: 0.04em;
+  word-break: break-all;
+}
+
 /* ============================================================
    Canvas
    ============================================================ */
@@ -447,8 +464,8 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   background: #334155;
   color: #e2e8f0;
@@ -458,6 +475,11 @@ kbd {
   font-size: 14px;
   transition: background 0.1s, border-color 0.1s;
   user-select: none;
+}
+
+.shape-btn svg {
+  width: 24px;
+  height: 24px;
 }
 
 .shape-btn:hover { background: #475569; }
