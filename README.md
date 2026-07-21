@@ -15,21 +15,23 @@ or drag `index.html` into a browser window. That's it.
 ## Interface Overview
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  Top toolbar: Undo/Redo │ Clipboard │ Order │ Align │ Export │
-├──────┬───────────────────────────────────────┬───────────────┤
-│      │                                       │               │
-│ ◀    │            Canvas                     │  Properties   │
-│ Tools│                                       │    Panel      │
-│ Shape│                                       │               │
-│ Pick │                                       │               │
-│ ver  │                                       │               │
-└──────┴───────────────────────────────────────┴───────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export/Import    │
+├──────┬──────────┬───────────────────────────────┬───────────────┤
+│      │ 🔍 Srch  │                               │               │
+│Select│ ▶ AWS    │                               │  Properties   │
+│Shape │   ▶Comp  │         Canvas                │    Panel      │
+│Conn. │   ▶Stor  │                               │               │
+│Text  │ ▶ Azure  │                               │               │
+│Icons │   ▶...   │                               │               │
+│Shapes│          │                               │               │
+└──────┴──────────┴───────────────────────────────┴───────────────┘
 ```
 
-- **Left toolbar** — drawing tools, shape picker, version number
-- **Top toolbar** — undo/redo, clipboard, z-order, align/distribute, export/import
-- **Canvas** — the drawing surface with a dot-grid background
+- **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
+- **Icon library panel** — collapsible sidebar with 1,025 AWS & Azure SVG icons, searchable
+- **Top toolbar** — zoom controls, undo/redo, clipboard, z-order, align/distribute, export/import
+- **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
 - **Properties panel** — edit the selected element's properties
 
 ---
@@ -42,6 +44,7 @@ or drag `index.html` into a browser window. That's it.
 | **Shape** | `B` | Click and drag to draw a new shape |
 | **Connect** | `C` | Drag from one shape to another to draw a connector |
 | **Text** | `T` | Click on the canvas to place a standalone text annotation |
+| **Icons** | `I` | Toggle the icon library panel |
 
 ### Shapes
 
@@ -77,6 +80,62 @@ Free-floating text labels not attached to any shape. Place them by clicking on a
 
 ---
 
+## Icon Library
+
+Press `I` or click the **Icons** button in the left toolbar to open the icon library panel.
+
+The library contains **1,025 SVG icons** across two providers:
+
+| Provider | Categories |
+|----------|-----------|
+| **AWS** | 26 categories (Compute, Storage, Networking, ML, Security, …) |
+| **Azure** | 29 categories (Compute, Containers, Databases, AI, Security, …) |
+
+### Placing icons
+
+1. Expand a provider and category in the panel
+2. Use the **search box** at the top to filter icons by name
+3. **Drag** an icon thumbnail onto the canvas — it is placed as a 64×64 resizable symbol node
+
+Icon nodes behave like regular shapes: they can be moved, resized, labelled, connected, copied, and exported.
+
+### Adding more icons
+
+Icons live in `icons/<Provider>/<Category>/name.svg`. After adding or removing SVG files, regenerate the manifest:
+
+```
+node scripts/generate-manifest.js
+```
+
+This updates `icons/manifest.js` (embedded data URIs used at runtime) and `icons/manifest.json` (lightweight reference file).
+
+---
+
+## Zoom & Pan
+
+### Zoom
+
+The zoom controls sit at the left of the top toolbar.
+
+| Control | Action |
+|---------|--------|
+| **🔍−** button | Zoom out 10% |
+| **Dropdown** | Jump to a preset: 25%, 50%, 75%, 100%, 125%, 150%, 200%, or Fit |
+| **🔍+** button | Zoom in 10% |
+| `Ctrl+=` / `Ctrl++` | Zoom in 10% |
+| `Ctrl+-` | Zoom out 10% |
+| `Ctrl+0` | Reset to 100% |
+| `Ctrl+Shift+0` | Fit diagram to window |
+| `Ctrl+Scroll` | Zoom centred on pointer |
+
+Zoom range: 10%–400%.
+
+### Pan
+
+**Right-click and drag** on the canvas to pan. The cursor changes to a grab hand while panning.
+
+---
+
 ## Editing Elements
 
 ### Moving
@@ -86,7 +145,7 @@ Select an element with the **Select** tool and drag it.
 Select a shape — eight resize handles appear around it. Drag any handle to resize.
 
 ### Editing Labels
-**Double-click** any shape, connector, or annotation to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
+**Double-click** any shape, connector, annotation, or icon to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
 
 ### Deleting
 Select one or more elements and press `Delete` or `Backspace`.
@@ -111,6 +170,16 @@ When one element is selected, the Properties panel on the right shows its editab
 | Stroke | Border colour (colour picker + reset) |
 | Line style | Solid / Dashed / Dotted border |
 | Opacity | Fill opacity 0–100% (stroke and label stay fully opaque) |
+| X / Y | Position on canvas |
+| Width / Height | Size |
+
+### Icon (symbol) properties
+
+| Property | Description |
+|----------|-------------|
+| Icon | Icon name (read-only) |
+| Label | Text displayed below the icon |
+| Font | Size, Bold, Italic, Underline |
 | X / Y | Position on canvas |
 | Width / Height | Size |
 
@@ -175,31 +244,16 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 
 ---
 
-## Zoom
-
-| Control | Action |
-|---------|--------|
-| **🔍−** button | Zoom out 10% |
-| **Dropdown** | Jump to a preset level: 25%, 50%, 75%, 100%, 125%, 150%, 200%, or Fit |
-| **🔍+** button | Zoom in 10% |
-| `Ctrl+=` / `Ctrl++` | Zoom in 10% |
-| `Ctrl+-` | Zoom out 10% |
-| `Ctrl+0` | Reset to 100% |
-| `Ctrl+Shift+0` | Fit diagram to window |
-| `Ctrl+Scroll` | Zoom centred on pointer |
-
-Zoom range: 10%–400%.
-
----
-
 ## Export & Import
 
 | Button | Description |
 |--------|-------------|
 | **JSON** | Download the diagram as `diagram.json` for later import |
-| **SVG** | Download a standalone `diagram.svg` (embeds all styles; opens in browsers, Inkscape, Figma, etc.) |
+| **SVG** | Download a standalone `diagram.svg` — icons are embedded as data URIs; opens in browsers, Inkscape, Figma, etc. |
 | **PNG** | Download a `diagram.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
 | **Import** | Load a previously exported `diagram.json` |
+
+Icon images are embedded as base64 data URIs in SVG and PNG exports, so exported files are fully self-contained.
 
 ---
 
@@ -222,6 +276,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `B` | Shape tool |
 | `C` | Connector tool |
 | `T` | Text tool |
+| `I` | Toggle icon library panel |
 | `Delete` / `Backspace` | Delete selected elements |
 | `Escape` | Cancel current operation / deselect |
 | `Ctrl+Z` | Undo |
@@ -235,6 +290,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Ctrl+0` | Reset zoom to 100% |
 | `Ctrl+Shift+0` | Fit diagram to window |
 | `Ctrl+Scroll` | Zoom in/out centred on pointer |
+| `Right-click drag` | Pan canvas |
 | `Dbl-click` | Edit label inline |
 
 ---
@@ -243,9 +299,16 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~1800 lines)
-diagram.css                       — UI and SVG styling (~660 lines)
+editor.js                         — All editor logic (~2,300 lines)
+diagram.css                       — UI and SVG styling (~800 lines)
 README.md                         — This file
+icons/                            — SVG icon library (1,025 icons)
+  AWS/                            — 26 AWS service categories
+  Azure/                          — 29 Azure service categories
+  manifest.js                     — Embedded data URIs (loaded at runtime)
+  manifest.json                   — Lightweight file listing (reference)
+scripts/
+  generate-manifest.js            — Regenerates manifest.js / manifest.json
 .github/workflows/release.yml     — GitHub Actions release workflow
 ```
 
@@ -253,4 +316,5 @@ No build tool, no package manager, no server required.
 
 ## Releases
 
-Pushing to `main` automatically creates a GitHub release tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-editor.zip` download containing all four app files.
+Pushing to `main` automatically creates a GitHub release tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-editor.tar.gz` download containing all app files and the complete icon library.
+
