@@ -159,13 +159,11 @@ html, body, #app {
   stroke-width: 1.5;
   fill: none;
   cursor: pointer;
-  marker-end: url(#arrowhead);
 }
 
 .edge-line.selected {
   stroke: #2563eb;
   stroke-width: 2;
-  marker-end: url(#arrowhead-sel);
 }
 
 .edge-label {

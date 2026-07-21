@@ -359,6 +359,7 @@ function renderEdges() {
     const to = state.nodes.get(edge.to);
     if (!from || !to) continue;
     const sel = state.selected.has(edge.id);
+    const dir = edge.direction || 'forward';
 
     const tc = nodeCenter(to);
     const fc = nodeCenter(from);
@@ -373,15 +374,21 @@ function renderEdges() {
       class: 'edge-hit',
     }));
 
-    g.appendChild(svgEl('line', {
+    // Resolve marker URLs based on direction
+    const endUrl   = sel ? 'url(#arrowhead-sel)'       : 'url(#arrowhead)';
+    const startUrl = sel ? 'url(#arrowhead-start-sel)' : 'url(#arrowhead-start)';
+    const lineAttrs = {
       x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
       class: 'edge-line' + (sel ? ' selected' : ''),
-    }));
+    };
+    if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
+    if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
+
+    g.appendChild(svgEl('line', lineAttrs));
 
     if (edge.label) {
       const mx = (p1.x + p2.x) / 2;
       const my = (p1.y + p2.y) / 2;
-      // Small background pill for readability
       g.appendChild(svgEl('text', {
         x: mx, y: my - 5,
         'text-anchor': 'middle',
@@ -681,7 +688,7 @@ function dragEnd(p) {
     const target = getNodeAt(p.x, p.y);
     if (!target || target.id === d.fromId) return;
     const id = genId();
-    state.edges.set(id, { id, from: d.fromId, to: target.id, label: '' });
+    state.edges.set(id, { id, from: d.fromId, to: target.id, label: '', direction: 'forward' });
     state.selected.clear();
     state.selected.add(id);
     pushHistory();
@@ -944,11 +951,25 @@ function renderNodeProps(container, node) {
 function renderEdgeProps(container, edge) {
   const fromNode = state.nodes.get(edge.from);
   const toNode = state.nodes.get(edge.to);
+  const dir = edge.direction || 'forward';
+  const dirOpts = [
+    ['forward', '→ Forward'],
+    ['back',    '← Backward'],
+    ['both',    '↔ Both'],
+    ['none',    '— None'],
+  ].map(([v, label]) => `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`).join('');
+
   container.innerHTML = `
+    <div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? (fromNode.label || fromNode.id) : edge.from)}</span></div>
     <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? (toNode.label || toNode.id) : edge.to)}</span></div>
   `;
+  document.getElementById('p-dir').addEventListener('change', e => {
+    edge.direction = e.target.value;
+    pushHistory();
+    render();
+  });
   bindPropInput('p-label', v => { edge.label = v; });
 }
 
