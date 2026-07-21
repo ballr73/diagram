@@ -281,6 +281,21 @@ function render() {
   renderAnnotations();
 }
 
+/**
+ * Apply font style properties as inline style on an SVG text element.
+ * defaults: { size, bold, italic, underline }
+ */
+function applyFontStyle(el, item, defaults = {}) {
+  const size      = item.fontSize    !== undefined ? item.fontSize    : (defaults.size      || 13);
+  const bold      = item.fontBold    !== undefined ? item.fontBold    : (defaults.bold      || false);
+  const italic    = item.fontItalic  !== undefined ? item.fontItalic  : (defaults.italic    || false);
+  const underline = item.fontUnderline !== undefined ? item.fontUnderline : (defaults.underline || false);
+  el.style.fontSize      = size + 'px';
+  el.style.fontWeight    = bold      ? 'bold'      : 'normal';
+  el.style.fontStyle     = italic    ? 'italic'    : 'normal';
+  el.style.textDecoration = underline ? 'underline' : 'none';
+}
+
 /** Create the correct SVG shape element for a node. */
 function createShapeEl(node, sel) {
   const { x, y, width: w, height: h } = node;
@@ -330,6 +345,7 @@ function renderNodes() {
       class: 'node-label',
     });
     lbl.textContent = node.label || '';
+    applyFontStyle(lbl, node, { size: 13 });
     g.appendChild(lbl);
 
     // Resize handles (only when selected in select mode)
@@ -405,11 +421,13 @@ function renderEdges() {
     if (edge.label) {
       const mx = (p1.x + p2.x) / 2;
       const my = (p1.y + p2.y) / 2;
-      g.appendChild(svgEl('text', {
+      const lblEl = svgEl('text', {
         x: mx, y: my - 5,
         'text-anchor': 'middle',
         class: 'edge-label',
-      }, edge.label));
+      }, edge.label);
+      applyFontStyle(lblEl, edge, { size: 11 });
+      g.appendChild(lblEl);
     }
 
     edgesLayer.appendChild(g);
@@ -421,10 +439,12 @@ function renderAnnotations() {
   for (const ann of state.annotations.values()) {
     const sel = state.selected.has(ann.id);
     const g = svgEl('g', { 'data-id': ann.id, 'data-type': 'annotation' });
-    g.appendChild(svgEl('text', {
+    const textEl = svgEl('text', {
       x: ann.x, y: ann.y,
       class: 'annotation-text' + (sel ? ' selected' : ''),
-    }, ann.text || ''));
+    }, ann.text || '');
+    applyFontStyle(textEl, ann, { size: 13, italic: true });
+    g.appendChild(textEl);
     annotationsLayer.appendChild(g);
   }
 }
@@ -977,6 +997,7 @@ function renderNodeProps(container, node) {
   container.innerHTML = `
     <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
     <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', node.stroke, '#475569')}</div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
@@ -989,6 +1010,7 @@ function renderNodeProps(container, node) {
     pushHistory();
     render();
   });
+  bindFontControls(node, { size: 13 });
   bindColorInput('p-fill',   '#ffffff', v => { node.fill   = v || undefined; });
   bindColorInput('p-stroke', '#475569', v => { node.stroke = v || undefined; });
   bindPropInput('p-label', v => { node.label = v; });
@@ -1013,6 +1035,7 @@ function renderEdgeProps(container, edge) {
     <div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
+    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? (fromNode.label || fromNode.id) : edge.from)}</span></div>
     <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? (toNode.label || toNode.id) : edge.to)}</span></div>
   `;
@@ -1023,15 +1046,18 @@ function renderEdgeProps(container, edge) {
   });
   bindColorInput('p-stroke', '#64748b', v => { edge.stroke = v || undefined; });
   bindPropInput('p-label', v => { edge.label = v; });
+  bindFontControls(edge, { size: 11 });
 }
 
 function renderAnnProps(container, ann) {
   container.innerHTML = `
     <div class="prop-group"><label>Text</label><input type="text" id="p-text" value="${esc(ann.text || '')}"></div>
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13, italic: true })}</div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(ann.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(ann.y)}"></div>
   `;
   bindPropInput('p-text', v => { ann.text = v; });
+  bindFontControls(ann, { size: 13, italic: true });
   bindPropInput('p-x', v => { ann.x = +v || 0; }, true);
   bindPropInput('p-y', v => { ann.y = +v || 0; }, true);
 }
@@ -1041,6 +1067,50 @@ function bindPropInput(id, setter, isNumber) {
   if (!el) return;
   el.addEventListener('input', () => { setter(el.value); render(); });
   el.addEventListener('change', () => pushHistory());
+}
+
+/** Generate HTML for font control row (size select + B/I/U buttons). */
+function fontControlsHtml(item, defaults = {}) {
+  const curSize = item.fontSize !== undefined ? item.fontSize : (defaults.size || 13);
+  const bold    = item.fontBold    !== undefined ? item.fontBold    : (defaults.bold    || false);
+  const italic  = item.fontItalic  !== undefined ? item.fontItalic  : (defaults.italic  || false);
+  const under   = item.fontUnderline !== undefined ? item.fontUnderline : (defaults.underline || false);
+
+  const sizes = [8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 24, 28, 32];
+  const sizeOpts = sizes.map(s => `<option value="${s}"${s === curSize ? ' selected' : ''}>${s}</option>`).join('');
+
+  return `<div class="font-controls">
+    <select class="font-size-select" id="p-fontsize">${sizeOpts}</select>
+    <button class="font-btn${bold   ? ' active' : ''}" id="p-bold"      title="Bold"><b>B</b></button>
+    <button class="font-btn${italic ? ' active' : ''}" id="p-italic"    title="Italic"><i>I</i></button>
+    <button class="font-btn${under  ? ' active' : ''}" id="p-underline" title="Underline"><u>U</u></button>
+  </div>`;
+}
+
+/** Wire up font control inputs, calling setter(field, value) on change. */
+function bindFontControls(item, defaults = {}) {
+  const sizeEl  = document.getElementById('p-fontsize');
+  const boldEl  = document.getElementById('p-bold');
+  const italEl  = document.getElementById('p-italic');
+  const underEl = document.getElementById('p-underline');
+  if (!sizeEl) return;
+
+  sizeEl.addEventListener('change', () => {
+    item.fontSize = parseInt(sizeEl.value, 10);
+    pushHistory(); render();
+  });
+
+  const toggle = (el, field, defVal) => {
+    el.addEventListener('click', () => {
+      const cur = item[field] !== undefined ? item[field] : (defVal || false);
+      item[field] = !cur;
+      el.classList.toggle('active', item[field]);
+      pushHistory(); render();
+    });
+  };
+  toggle(boldEl,  'fontBold',      defaults.bold      || false);
+  toggle(italEl,  'fontItalic',    defaults.italic    || false);
+  toggle(underEl, 'fontUnderline', defaults.underline || false);
 }
 
 function esc(str) {

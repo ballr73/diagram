@@ -137,7 +137,6 @@ html, body, #app {
 }
 
 .node-label {
-  font-size: 13px;
   fill: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   pointer-events: none;
@@ -165,7 +164,6 @@ html, body, #app {
 }
 
 .edge-label {
-  font-size: 11px;
   fill: #475569;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   pointer-events: none;
@@ -186,16 +184,13 @@ html, body, #app {
    SVG — Annotations
    ============================================================ */
 .annotation-text {
-  font-size: 13px;
   fill: #7c3aed;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   cursor: move;
-  font-style: italic;
 }
 
 .annotation-text.selected {
   fill: #2563eb;
-  text-decoration: underline;
 }
 
 /* ============================================================
@@ -471,3 +466,58 @@ kbd {
 }
 
 .color-reset:hover { border-color: #94a3b8; color: #475569; }
+
+/* ============================================================
+   Font controls (size select + B/I/U toggles)
+   ============================================================ */
+.font-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.font-size-select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  cursor: pointer;
+}
+
+.font-size-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+.font-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: serif;
+  flex-shrink: 0;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+  user-select: none;
+}
+
+.font-btn:hover { border-color: #94a3b8; background: #f1f5f9; }
+
+.font-btn.active {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #fff;
+}
