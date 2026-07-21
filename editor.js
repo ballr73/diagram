@@ -15,6 +15,9 @@ const state = {
   historyIndex: -1,
   clipboard: { nodes: [], edges: [], annotations: [] },
   pasteOffset: 0,
+  zoom: 1.0,
+  viewCenterX: 0,
+  viewCenterY: 0,
 };
 
 function genId() {
@@ -657,8 +660,10 @@ function renderAnnotations() {
 let drag = null; // Active drag descriptor
 
 function svgCoords(e) {
-  const rect = svg.getBoundingClientRect();
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
 }
 
 /**
@@ -1117,6 +1122,12 @@ function onKeyDown(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 'x') { e.preventDefault(); cutSelected(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); pasteClipboard(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); duplicateSelected(); return; }
+
+  // Zoom shortcuts
+  if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); zoomIn(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); zoomOut(); return; }
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === '0') { e.preventDefault(); setZoom(1.0); return; }
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '0') { e.preventDefault(); fitWindow(); return; }
 
   if (e.key === 'Delete' || e.key === 'Backspace') {
     if (state.selected.size === 0) return;
@@ -1645,6 +1656,116 @@ function updateToolbarStatus() {
   el.textContent = `${n} box${n !== 1 ? 'es' : ''}  ·  ${e} connector${e !== 1 ? 's' : ''}  ·  ${a} annotation${a !== 1 ? 's' : ''}`;
 }
 
+// ============================================================
+// Zoom
+// ============================================================
+const ZOOM_MIN = 0.1;
+const ZOOM_MAX = 4.0;
+const ZOOM_PRESETS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+
+function getCanvasSize() {
+  const container = document.getElementById('canvas-container');
+  return { w: container.clientWidth, h: container.clientHeight };
+}
+
+function updateViewBox() {
+  const { w, h } = getCanvasSize();
+  const vw = w / state.zoom;
+  const vh = h / state.zoom;
+  const vx = state.viewCenterX - vw / 2;
+  const vy = state.viewCenterY - vh / 2;
+  svg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+}
+
+function setZoom(z) {
+  state.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+  updateViewBox();
+  syncZoomSelect();
+}
+
+function syncZoomSelect() {
+  const sel = document.getElementById('zoom-select');
+  if (!sel) return;
+  const pct = Math.round(state.zoom * 100);
+  // Try to match a preset option value
+  const match = [...sel.options].find(o => o.value !== 'fit' && Math.round(parseFloat(o.value) * 100) === pct);
+  if (match) {
+    sel.value = match.value;
+  } else {
+    // No preset match — show custom percentage via a temporary option or just deselect
+    let custom = sel.querySelector('option.zoom-custom');
+    if (!custom) {
+      custom = document.createElement('option');
+      custom.className = 'zoom-custom';
+      sel.insertBefore(custom, sel.firstChild);
+    }
+    custom.value = state.zoom;
+    custom.textContent = `${pct}%`;
+    sel.value = custom.value;
+  }
+}
+
+function zoomIn() {
+  // Snap to next 10% step above current
+  const next = Math.round((state.zoom + 0.1) * 10) / 10;
+  setZoom(next);
+}
+
+function zoomOut() {
+  const next = Math.round((state.zoom - 0.1) * 10) / 10;
+  setZoom(next);
+}
+
+function fitWindow() {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of state.nodes.values()) {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + n.width);
+    maxY = Math.max(maxY, n.y + n.height);
+  }
+  for (const a of state.annotations.values()) {
+    minX = Math.min(minX, a.x);
+    minY = Math.min(minY, a.y - 16);
+    maxX = Math.max(maxX, a.x + 200);
+    maxY = Math.max(maxY, a.y + 10);
+  }
+
+  const { w, h } = getCanvasSize();
+
+  if (!isFinite(minX)) {
+    // Empty canvas — reset to 100%
+    state.viewCenterX = w / 2;
+    state.viewCenterY = h / 2;
+    state.zoom = 1.0;
+    updateViewBox();
+    syncZoomSelect();
+    return;
+  }
+
+  const PADDING = 40;
+  const contentW = maxX - minX + PADDING * 2;
+  const contentH = maxY - minY + PADDING * 2;
+  const zoomX = w / contentW;
+  const zoomY = h / contentH;
+  state.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.min(zoomX, zoomY)));
+  state.viewCenterX = (minX + maxX) / 2;
+  state.viewCenterY = (minY + maxY) / 2;
+  updateViewBox();
+  syncZoomSelect();
+}
+
+function initZoom() {
+  const { w, h } = getCanvasSize();
+  state.viewCenterX = w / 2;
+  state.viewCenterY = h / 2;
+  updateViewBox();
+
+  // Re-apply viewBox on container resize
+  const ro = new ResizeObserver(() => updateViewBox());
+  ro.observe(document.getElementById('canvas-container'));
+}
+
 function updateEditButtons() {
   const hasSel = state.selected.size > 0;
   const hasCb  = state.clipboard.nodes.length > 0 ||
@@ -1737,6 +1858,23 @@ function init() {
     }
   });
 
+  // Zoom
+  document.getElementById('btn-zoom-in').addEventListener('click', zoomIn);
+  document.getElementById('btn-zoom-out').addEventListener('click', zoomOut);
+  document.getElementById('zoom-select').addEventListener('change', e => {
+    const val = e.target.value;
+    if (val === 'fit') {
+      fitWindow();
+    } else {
+      const z = parseFloat(val);
+      if (!isNaN(z)) {
+        state.zoom = z;
+        updateViewBox();
+        syncZoomSelect();
+      }
+    }
+  });
+
   // Canvas events
   svg.addEventListener('mousedown', onMouseDown);
   svg.addEventListener('mousemove', onMouseMove);
@@ -1744,11 +1882,35 @@ function init() {
   svg.addEventListener('dblclick', onDblClick);
   svg.addEventListener('mouseleave', () => { if (drag) { dragEnd({ x: 0, y: 0 }); } });
 
+  // Wheel zoom: Ctrl+scroll zooms in/out centred on pointer
+  svg.addEventListener('wheel', e => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const pt = svgCoords(e); // diagram coords under pointer before zoom
+    const delta = e.deltaY < 0 ? 0.1 : -0.1;
+    const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((state.zoom + delta) * 10) / 10));
+    if (newZoom === state.zoom) return;
+    // Adjust viewCenter so the pointer stays over the same diagram point
+    const { w, h } = getCanvasSize();
+    const fracX = (e.clientX - svg.getBoundingClientRect().left) / w;
+    const fracY = (e.clientY - svg.getBoundingClientRect().top) / h;
+    const vwOld = w / state.zoom, vhOld = h / state.zoom;
+    const vwNew = w / newZoom,  vhNew = h / newZoom;
+    state.viewCenterX += (vwOld - vwNew) * (fracX - 0.5);
+    state.viewCenterY += (vhOld - vhNew) * (fracY - 0.5);
+    state.zoom = newZoom;
+    updateViewBox();
+    syncZoomSelect();
+  }, { passive: false });
+
   // Keyboard
   document.addEventListener('keydown', onKeyDown);
 
   // Set initial tool
   setTool('select');
+
+  // Initialise zoom (sets viewBox and wires ResizeObserver)
+  initZoom();
 
   // Restore last diagram from localStorage (before seeding history)
   loadFromLocalStorage();

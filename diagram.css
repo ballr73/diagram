@@ -444,6 +444,27 @@ kbd {
   white-space: nowrap;
 }
 
+
+/* ============================================================
+   Zoom controls
+   ============================================================ */
+#zoom-select {
+  padding: 5px 6px;
+  background: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: background 0.1s, border-color 0.1s;
+  min-width: 62px;
+}
+
+#zoom-select:hover { background: #475569; border-color: #64748b; }
+#zoom-select:focus { border-color: #3b82f6; }
+
 /* ============================================================
    Shape picker
    ============================================================ */

@@ -175,6 +175,23 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 
 ---
 
+## Zoom
+
+| Control | Action |
+|---------|--------|
+| **🔍−** button | Zoom out 10% |
+| **Dropdown** | Jump to a preset level: 25%, 50%, 75%, 100%, 125%, 150%, 200%, or Fit |
+| **🔍+** button | Zoom in 10% |
+| `Ctrl+=` / `Ctrl++` | Zoom in 10% |
+| `Ctrl+-` | Zoom out 10% |
+| `Ctrl+0` | Reset to 100% |
+| `Ctrl+Shift+0` | Fit diagram to window |
+| `Ctrl+Scroll` | Zoom centred on pointer |
+
+Zoom range: 10%–400%.
+
+---
+
 ## Export & Import
 
 | Button | Description |
@@ -213,6 +230,11 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Ctrl+X` | Cut selected |
 | `Ctrl+V` | Paste clipboard |
 | `Ctrl+D` | Duplicate selected |
+| `Ctrl+=` / `Ctrl++` | Zoom in 10% |
+| `Ctrl+-` | Zoom out 10% |
+| `Ctrl+0` | Reset zoom to 100% |
+| `Ctrl+Shift+0` | Fit diagram to window |
+| `Ctrl+Scroll` | Zoom in/out centred on pointer |
 | `Dbl-click` | Edit label inline |
 
 ---
@@ -221,8 +243,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~1700 lines)
-diagram.css                       — UI and SVG styling (~640 lines)
+editor.js                         — All editor logic (~1800 lines)
+diagram.css                       — UI and SVG styling (~660 lines)
 README.md                         — This file
 .github/workflows/release.yml     — GitHub Actions release workflow
 ```
