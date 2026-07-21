@@ -116,6 +116,144 @@ function importDiagram(file) {
 }
 
 // ============================================================
+// SVG / PNG Export helpers
+// ============================================================
+
+/** CSS rules to embed inside an exported standalone SVG file. */
+function getSVGEmbedStyles() {
+  return `
+    .node-shape { fill: var(--node-fill, #ffffff); stroke: var(--node-stroke, #475569); stroke-width: 1.5; }
+    .node-label  { fill: #1e293b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .edge-hit    { display: none; }
+    .edge-line   { stroke-width: 1.5; fill: none; }
+    .edge-label  { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .edge-label-bg  { fill: #f8fafc; stroke: none; }
+    .annotation-text { fill: #7c3aed; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .arrow-fill     { fill: currentColor; }
+    .arrow-fill-sel { fill: currentColor; }
+  `;
+}
+
+/**
+ * Build a clean, self-contained SVG string for export.
+ * Selection state is stripped; resize handles and UI layer are removed.
+ */
+function buildExportSVG() {
+  const PADDING = 40;
+
+  // Compute content bounding box
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of state.nodes.values()) {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + n.width);
+    maxY = Math.max(maxY, n.y + n.height);
+  }
+  for (const a of state.annotations.values()) {
+    minX = Math.min(minX, a.x);
+    minY = Math.min(minY, a.y - 16); // approx text ascent
+    maxX = Math.max(maxX, a.x + 300); // approx text width
+    maxY = Math.max(maxY, a.y + 10);
+  }
+  if (!isFinite(minX)) { minX = 0; minY = 0; maxX = 500; maxY = 400; }
+
+  const viewX = minX - PADDING;
+  const viewY = minY - PADDING;
+  const viewW = (maxX - minX) + PADDING * 2;
+  const viewH = (maxY - minY) + PADDING * 2;
+
+  // Render without selection so the DOM clone has clean styling
+  const savedSelected = new Set(state.selected);
+  state.selected.clear();
+  render();
+
+  // Clone the live SVG
+  const srcSvg = document.getElementById('canvas');
+  const clone = srcSvg.cloneNode(true);
+
+  // Restore selection and re-render
+  state.selected = savedSelected;
+  render();
+
+  // Strip interactive-only content from clone
+  const uiLayer = clone.querySelector('#ui-layer');
+  if (uiLayer) uiLayer.innerHTML = '';
+  clone.querySelectorAll('.resize-handle').forEach(el => el.remove());
+
+  // Set dimensions and viewBox
+  clone.setAttribute('width', String(viewW));
+  clone.setAttribute('height', String(viewH));
+  clone.setAttribute('viewBox', `${viewX} ${viewY} ${viewW} ${viewH}`);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.removeAttribute('style'); // remove 100%/100% sizing
+
+  // White background rect (inserted before the first layer group)
+  const ns = 'http://www.w3.org/2000/svg';
+  const bg = document.createElementNS(ns, 'rect');
+  bg.setAttribute('x', String(viewX));
+  bg.setAttribute('y', String(viewY));
+  bg.setAttribute('width', String(viewW));
+  bg.setAttribute('height', String(viewH));
+  bg.setAttribute('fill', '#ffffff');
+  const defs = clone.querySelector('defs');
+  // Embed CSS inside defs
+  const styleEl = document.createElementNS(ns, 'style');
+  styleEl.textContent = getSVGEmbedStyles();
+  defs.appendChild(styleEl);
+  // Insert background after defs
+  defs.insertAdjacentElement('afterend', bg);
+
+  return new XMLSerializer().serializeToString(clone);
+}
+
+function exportSVG() {
+  const svgString = buildExportSVG();
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'diagram.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportPNG() {
+  const svgString = buildExportSVG();
+
+  // Parse width/height from the SVG for canvas sizing
+  const match = svgString.match(/width="([^"]+)"\s+height="([^"]+)"/);
+  const scale = window.devicePixelRatio || 1;
+  const w = match ? parseFloat(match[1]) : 800;
+  const h = match ? parseFloat(match[2]) : 600;
+
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width  = w * scale;
+    canvas.height = h * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(pngBlob => {
+      const pngUrl = URL.createObjectURL(pngBlob);
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = 'diagram.png';
+      a.click();
+      URL.revokeObjectURL(pngUrl);
+    }, 'image/png');
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    alert('PNG export failed. Try SVG export instead.');
+  };
+  img.src = url;
+}
+
+// ============================================================
 // Geometry
 // ============================================================
 function nodeCenter(node) {
@@ -1277,6 +1415,8 @@ function init() {
 
   // Export / Import
   document.getElementById('btn-export').addEventListener('click', exportDiagram);
+  document.getElementById('btn-export-svg').addEventListener('click', exportSVG);
+  document.getElementById('btn-export-png').addEventListener('click', exportPNG);
   document.getElementById('btn-import').addEventListener('click', () => {
     document.getElementById('file-input').click();
   });
