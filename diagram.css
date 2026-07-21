@@ -412,6 +412,20 @@ html, body, #app {
 .arrow-fill-sel { fill: currentColor; }
 
 /* ============================================================
+   SVG — Waypoint handles
+   ============================================================ */
+.waypoint-handle {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  cursor: move;
+}
+
+.waypoint-handle:hover {
+  fill: #dbeafe;
+}
+
+/* ============================================================
    SVG — Annotations
    ============================================================ */
 .annotation-text {

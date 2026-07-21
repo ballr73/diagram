@@ -96,6 +96,18 @@ Connector direction and line style can be changed in the Properties panel.
 | ↔ Both | Arrows at both ends |
 | — None | Plain line, no arrows |
 
+### Connector waypoints (corners)
+
+Connectors can be bent into any shape using waypoints:
+
+1. Select the **Select** tool
+2. **Double-click** anywhere on an existing connector — a waypoint handle appears at that point
+3. **Drag the handle** to pull the connector into a corner or angle
+4. Add as many waypoints as needed; each creates a new segment
+5. **Click a waypoint handle** to focus it, then press **Delete** / **Backspace** to remove it
+
+Waypoints are preserved through undo/redo, copy/paste, and JSON export/import.
+
 ### Text Annotations
 
 Free-floating text labels not attached to any shape. Place them by clicking on an empty area of the canvas with the **Text** tool.
@@ -168,10 +180,13 @@ Select an element with the **Select** tool and drag it.
 Select a shape — eight resize handles appear around it. Drag any handle to resize.
 
 ### Editing Labels
-**Double-click** any shape, connector, annotation, or icon to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
+**Double-click** any shape, annotation, or icon to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
+
+> **Note:** Double-clicking a connector inserts a waypoint corner — use the Properties panel to edit a connector's label.
 
 ### Deleting
-Select one or more elements and press `Delete` or `Backspace`.
+- Select one or more elements and press `Delete` or `Backspace` to delete them.
+- To remove a connector waypoint: click its handle to focus it, then press `Delete` / `Backspace`.
 
 ### Selecting Multiple Elements
 Hold `Shift` and click to add to the selection, or drag a selection box over multiple elements on an empty area of the canvas.
@@ -300,7 +315,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `C` | Connector tool |
 | `T` | Text tool |
 | `I` | Toggle icon library panel |
-| `Delete` / `Backspace` | Delete selected elements |
+| `Delete` / `Backspace` | Delete selected elements (or remove focused waypoint) |
 | `Escape` | Cancel current operation / deselect |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
@@ -314,7 +329,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Ctrl+Shift+0` | Fit diagram to window |
 | `Ctrl+Scroll` | Zoom in/out centred on pointer |
 | `Right-click drag` | Pan canvas |
-| `Dbl-click` | Edit label inline |
+| `Dbl-click` shape/icon | Edit label inline |
+| `Dbl-click` connector | Add waypoint corner at click point |
 
 ---
 
@@ -322,8 +338,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~2,300 lines)
-diagram.css                       — UI and SVG styling (~800 lines)
+editor.js                         — All editor logic (~2,400 lines)
+diagram.css                       — UI and SVG styling (~820 lines)
 README.md                         — This file
 icons/                            — SVG icon library (1,241 icons total)
   AWS/                            — 26 AWS service categories

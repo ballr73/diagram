@@ -5,9 +5,10 @@
 // ============================================================
 const state = {
   nodes: new Map(),       // id → {id, x, y, width, height, label, shape}
-  edges: new Map(),       // id → {id, from, to, label}
+  edges: new Map(),       // id → {id, from, to, label, waypoints:[{id,x,y}]}
   annotations: new Map(), // id → {id, x, y, text}
   selected: new Set(),
+  selectedWaypoint: null, // {edgeId, waypointId} — waypoint focused for deletion
   tool: 'select',
   currentShape: 'box',
   nextId: 1,
@@ -30,7 +31,10 @@ function genId() {
 function snapshot() {
   return {
     nodes: new Map([...state.nodes].map(([k, v]) => [k, { ...v }])),
-    edges: new Map([...state.edges].map(([k, v]) => [k, { ...v }])),
+    edges: new Map([...state.edges].map(([k, v]) => [k, {
+      ...v,
+      waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
+    }])),
     annotations: new Map([...state.annotations].map(([k, v]) => [k, { ...v }])),
     nextId: state.nextId,
   };
@@ -101,7 +105,10 @@ function redo() {
 
 function restoreSnapshot(snap) {
   state.nodes = new Map([...snap.nodes].map(([k, v]) => [k, { ...v }]));
-  state.edges = new Map([...snap.edges].map(([k, v]) => [k, { ...v }]));
+  state.edges = new Map([...snap.edges].map(([k, v]) => [k, {
+    ...v,
+    waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
+  }]));
   state.annotations = new Map([...snap.annotations].map(([k, v]) => [k, { ...v }]));
   state.nextId = snap.nextId;
   state.selected.clear();
@@ -172,6 +179,7 @@ function getSVGEmbedStyles() {
     .edge-line   { stroke-width: 1.5; fill: none; }
     .edge-label  { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .edge-label-bg  { fill: #f8fafc; stroke: none; }
+    .waypoint-handle { display: none; }
     .annotation-text { fill: #7c3aed; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .arrow-fill     { fill: currentColor; }
     .arrow-fill-sel { fill: currentColor; }
@@ -439,16 +447,49 @@ function getAnnotationAt(x, y) {
 
 function getEdgeAt(x, y, threshold = 8) {
   for (const edge of state.edges.values()) {
-    const from = state.nodes.get(edge.from);
-    const to = state.nodes.get(edge.to);
-    if (!from || !to) continue;
-    const tc = nodeCenter(to);
-    const fc = nodeCenter(from);
-    const p1 = borderIntersect(from, tc);
-    const p2 = borderIntersect(to, fc);
-    if (segmentDist(x, y, p1.x, p1.y, p2.x, p2.y) < threshold) return edge;
+    const pts = edgePoints(edge);
+    if (!pts) continue;
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (segmentDist(x, y, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y) < threshold) return edge;
+    }
   }
   return null;
+}
+
+/** Returns the ordered list of points for an edge: [p1, ...waypoints, p2] */
+function edgePoints(edge) {
+  const from = state.nodes.get(edge.from);
+  const to   = state.nodes.get(edge.to);
+  if (!from || !to) return null;
+  const wps = edge.waypoints || [];
+  const firstTarget = wps.length > 0 ? wps[0]             : nodeCenter(to);
+  const lastSource  = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(from);
+  const p1 = borderIntersect(from, firstTarget);
+  const p2 = borderIntersect(to,   lastSource);
+  return [p1, ...wps, p2];
+}
+
+/** Returns the point at 50% of the total arc length of a polyline. */
+function pathMidpoint(pts) {
+  let total = 0;
+  const segs = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const d = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+    segs.push(d);
+    total += d;
+  }
+  let rem = total / 2;
+  for (let i = 0; i < segs.length; i++) {
+    if (rem <= segs[i] || i === segs.length - 1) {
+      const t = segs[i] > 0 ? rem / segs[i] : 0;
+      return {
+        x: pts[i].x + t * (pts[i + 1].x - pts[i].x),
+        y: pts[i].y + t * (pts[i + 1].y - pts[i].y),
+      };
+    }
+    rem -= segs[i];
+  }
+  return pts[Math.floor(pts.length / 2)];
 }
 
 function segmentDist(px, py, x1, y1, x2, y2) {
@@ -654,22 +695,18 @@ function renderNodes() {
 function renderEdges() {
   edgesLayer.innerHTML = '';
   for (const edge of state.edges.values()) {
-    const from = state.nodes.get(edge.from);
-    const to = state.nodes.get(edge.to);
-    if (!from || !to) continue;
+    const pts = edgePoints(edge);
+    if (!pts) continue;
     const sel = state.selected.has(edge.id);
     const dir = edge.direction || 'forward';
 
-    const tc = nodeCenter(to);
-    const fc = nodeCenter(from);
-    const p1 = borderIntersect(from, tc);
-    const p2 = borderIntersect(to, fc);
+    const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
 
     const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
 
     // Wide invisible hit area
-    g.appendChild(svgEl('line', {
-      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+    g.appendChild(svgEl('polyline', {
+      points: pointsStr,
       class: 'edge-hit',
     }));
 
@@ -683,14 +720,13 @@ function renderEdges() {
     const endUrl   = sel ? 'url(#arrowhead-sel)'       : 'url(#arrowhead)';
     const startUrl = sel ? 'url(#arrowhead-start-sel)' : 'url(#arrowhead-start)';
     const lineAttrs = {
-      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+      points: pointsStr,
       class: 'edge-line' + (sel ? ' selected' : ''),
     };
     if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
     if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
 
-    const lineEl = svgEl('line', lineAttrs);
-    // Inline stroke + color (color drives arrowhead fill via currentColor)
+    const lineEl = svgEl('polyline', lineAttrs);
     lineEl.style.stroke      = strokeColor;
     lineEl.style.strokeWidth = strokeWidth;
     lineEl.style.color       = strokeColor;
@@ -698,15 +734,25 @@ function renderEdges() {
     g.appendChild(lineEl);
 
     if (edge.label) {
-      const mx = (p1.x + p2.x) / 2;
-      const my = (p1.y + p2.y) / 2;
+      const mid = pathMidpoint(pts);
       const lblEl = svgEl('text', {
-        x: mx, y: my - 5,
+        x: mid.x, y: mid.y - 5,
         'text-anchor': 'middle',
         class: 'edge-label',
       }, edge.label);
       applyFontStyle(lblEl, edge, { size: 11 });
       g.appendChild(lblEl);
+    }
+
+    // Waypoint handles — shown when edge is selected
+    if (sel && edge.waypoints && edge.waypoints.length > 0) {
+      for (const wp of edge.waypoints) {
+        g.appendChild(svgEl('circle', {
+          cx: wp.x, cy: wp.y, r: 5,
+          class: 'waypoint-handle',
+          'data-wp-id': wp.id,
+        }));
+      }
     }
 
     edgesLayer.appendChild(g);
@@ -744,6 +790,7 @@ function svgCoords(e) {
 /**
  * Hit-test at (x, y). Returns:
  *   {type:'resize', handle, nodeId, node}
+ *   {type:'waypoint', edgeId, waypointId}
  *   {type:'node', id, node}
  *   {type:'edge', id, edge}
  *   {type:'annotation', id, ann}
@@ -755,6 +802,16 @@ function hitTest(x, y) {
       if (!state.selected.has(node.id)) continue;
       const h = getResizeHandle(node, x, y);
       if (h) return { type: 'resize', handle: h, nodeId: node.id, node };
+    }
+    // Waypoint handles on selected edges
+    for (const edgeId of state.selected) {
+      const edge = state.edges.get(edgeId);
+      if (!edge || !edge.waypoints) continue;
+      for (const wp of edge.waypoints) {
+        if (Math.hypot(x - wp.x, y - wp.y) <= 7) {
+          return { type: 'waypoint', edgeId, waypointId: wp.id };
+        }
+      }
     }
   }
   const node = getNodeAt(x, y);
@@ -838,7 +895,14 @@ function selectMouseDown(p, hit, e) {
     return;
   }
 
+  if (hit.type === 'waypoint') {
+    state.selectedWaypoint = { edgeId: hit.edgeId, waypointId: hit.waypointId };
+    drag = { type: 'move-waypoint', edgeId: hit.edgeId, waypointId: hit.waypointId, moved: false };
+    return;
+  }
+
   if (hit.type === 'node') {
+    state.selectedWaypoint = null;
     if (e.shiftKey) {
       state.selected.add(hit.id);
     } else if (!state.selected.has(hit.id)) {
@@ -852,6 +916,7 @@ function selectMouseDown(p, hit, e) {
   }
 
   if (hit.type === 'edge') {
+    state.selectedWaypoint = null;
     if (!e.shiftKey) state.selected.clear();
     state.selected.add(hit.id);
     render();
@@ -860,6 +925,7 @@ function selectMouseDown(p, hit, e) {
   }
 
   if (hit.type === 'annotation') {
+    state.selectedWaypoint = null;
     if (e.shiftKey) {
       state.selected.add(hit.id);
     } else if (!state.selected.has(hit.id)) {
@@ -873,6 +939,7 @@ function selectMouseDown(p, hit, e) {
   }
 
   // Canvas: start rubber-band selection
+  state.selectedWaypoint = null;
   if (!e.shiftKey) { state.selected.clear(); render(); updatePropertiesPanel(); }
   drag = { type: 'rubber', startX: p.x, startY: p.y };
 }
@@ -959,6 +1026,15 @@ function dragMove(p) {
     return;
   }
 
+  if (drag.type === 'move-waypoint') {
+    const edge = state.edges.get(drag.edgeId);
+    if (edge && edge.waypoints) {
+      const wp = edge.waypoints.find(w => w.id === drag.waypointId);
+      if (wp) { wp.x = p.x; wp.y = p.y; drag.moved = true; render(); }
+    }
+    return;
+  }
+
   if (drag.type === 'move-node') {
     const dx = p.x - drag.startX, dy = p.y - drag.startY;
     const node = state.nodes.get(drag.nodeId);
@@ -1025,6 +1101,11 @@ function dragMove(p) {
 function dragEnd(p) {
   const d = drag;
   drag = null;
+
+  if (d.type === 'move-waypoint') {
+    if (d.moved) pushHistory();
+    return;
+  }
 
   if (d.type === 'move-node' || d.type === 'move-ann' || d.type === 'move-multi') {
     if (d.moved) pushHistory();
@@ -1134,11 +1215,11 @@ function startInlineEdit(id, type) {
   } else if (type === 'edge') {
     item = state.edges.get(id);
     if (!item) return;
-    const from = state.nodes.get(item.from);
-    const to = state.nodes.get(item.to);
-    if (!from || !to) return;
-    cx = (nodeCenter(from).x + nodeCenter(to).x) / 2;
-    cy = (nodeCenter(from).y + nodeCenter(to).y) / 2;
+    const pts = edgePoints(item);
+    if (!pts) return;
+    const mid = pathMidpoint(pts);
+    cx = mid.x;
+    cy = mid.y;
     w = 140;
   } else if (type === 'annotation') {
     item = state.annotations.get(id);
@@ -1189,13 +1270,46 @@ function clearInlineEditor() {
 }
 
 // ============================================================
-// Double-click → inline edit
+// Double-click → insert waypoint on edge, or inline edit for nodes/annotations
 // ============================================================
 function onDblClick(e) {
   e.preventDefault();
   const p = svgCoords(e);
   const hit = hitTest(p.x, p.y);
-  if (hit.type === 'node' || hit.type === 'edge' || hit.type === 'annotation') {
+
+  if (hit.type === 'edge') {
+    // Insert a waypoint at the projected point on the nearest segment
+    const edge = state.edges.get(hit.id);
+    const pts  = edgePoints(edge);
+    if (!pts) return;
+
+    let bestSeg = 0, bestDist = Infinity, bestPt = { x: p.x, y: p.y };
+    for (let i = 0; i < pts.length - 1; i++) {
+      const dx = pts[i + 1].x - pts[i].x, dy = pts[i + 1].y - pts[i].y;
+      const lenSq = dx * dx + dy * dy;
+      const t = lenSq > 0
+        ? Math.max(0, Math.min(1, ((p.x - pts[i].x) * dx + (p.y - pts[i].y) * dy) / lenSq))
+        : 0;
+      const proj = { x: pts[i].x + t * dx, y: pts[i].y + t * dy };
+      const d = Math.hypot(p.x - proj.x, p.y - proj.y);
+      if (d < bestDist) { bestDist = d; bestSeg = i; bestPt = proj; }
+    }
+
+    // pts = [p1, wps[0], ..., wps[n-1], p2]
+    // segment bestSeg sits between pts[bestSeg] and pts[bestSeg+1]
+    // inserting between them means splicing into waypoints at index bestSeg
+    if (!edge.waypoints) edge.waypoints = [];
+    edge.waypoints.splice(bestSeg, 0, { id: genId(), x: bestPt.x, y: bestPt.y });
+
+    state.selected.clear();
+    state.selected.add(edge.id);
+    pushHistory();
+    render();
+    updatePropertiesPanel();
+    return;
+  }
+
+  if (hit.type === 'node' || hit.type === 'annotation') {
     state.selected.clear();
     state.selected.add(hit.id);
     render();
@@ -1239,6 +1353,19 @@ function onKeyDown(e) {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '0') { e.preventDefault(); fitWindow(); return; }
 
   if (e.key === 'Delete' || e.key === 'Backspace') {
+    // Delete focused waypoint first, otherwise delete selected elements
+    if (state.selectedWaypoint) {
+      e.preventDefault();
+      const { edgeId, waypointId } = state.selectedWaypoint;
+      const edge = state.edges.get(edgeId);
+      if (edge && edge.waypoints) {
+        edge.waypoints = edge.waypoints.filter(wp => wp.id !== waypointId);
+        state.selectedWaypoint = null;
+        pushHistory();
+        render();
+      }
+      return;
+    }
     if (state.selected.size === 0) return;
     e.preventDefault();
     deleteSelected();
@@ -1268,6 +1395,7 @@ function deleteSelected() {
     }
   }
   state.selected.clear();
+  state.selectedWaypoint = null;
   pushHistory();
   render();
   updatePropertiesPanel();
@@ -1472,6 +1600,7 @@ function pasteClipboard() {
       id: newId,
       from: idMap.get(edge.from) || edge.from,
       to:   idMap.get(edge.to)   || edge.to,
+      waypoints: (edge.waypoints || []).map(wp => ({ ...wp, id: genId() })),
     });
     newIds.push(newId);
   }
@@ -1508,7 +1637,8 @@ const resizeCursors = {
 function updateCursor(p) {
   if (state.tool !== 'select') { svg.style.cursor = 'crosshair'; return; }
   const hit = hitTest(p.x, p.y);
-  if (hit.type === 'resize') svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
+  if (hit.type === 'resize')   svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
+  else if (hit.type === 'waypoint') svg.style.cursor = 'move';
   else if (hit.type === 'node' || hit.type === 'annotation') svg.style.cursor = 'move';
   else if (hit.type === 'edge') svg.style.cursor = 'pointer';
   else svg.style.cursor = 'default';
