@@ -429,3 +429,45 @@ kbd {
   background: #fff;
   box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }
+
+/* Colour input row */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-row input[type="color"] {
+  width: 36px;
+  height: 28px;
+  padding: 1px 2px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #f8fafc;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.color-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+.color-hex {
+  font-size: 12px;
+  font-family: monospace;
+  color: #475569;
+  flex: 1;
+}
+
+.color-reset {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-family: inherit;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.color-reset:hover { border-color: #94a3b8; color: #475569; }

@@ -286,27 +286,32 @@ function createShapeEl(node, sel) {
   const { x, y, width: w, height: h } = node;
   const cx = x + w / 2, cy = y + h / 2;
   const cls = 'node-shape' + (sel ? ' selected' : '');
+  let el;
   switch (node.shape || 'box') {
     case 'circle':
-      return svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls });
+      el = svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls }); break;
     case 'oval':
-      return svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls });
+      el = svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls }); break;
     case 'diamond': {
       const pts = `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`;
-      return svgEl('polygon', { points: pts, class: cls });
+      el = svgEl('polygon', { points: pts, class: cls }); break;
     }
     case 'triangle': {
       const pts = `${cx},${y} ${x + w},${y + h} ${x},${y + h}`;
-      return svgEl('polygon', { points: pts, class: cls });
+      el = svgEl('polygon', { points: pts, class: cls }); break;
     }
     case 'parallelogram': {
       const sk = w * 0.2;
       const pts = `${x + sk},${y} ${x + w},${y} ${x + w - sk},${y + h} ${x},${y + h}`;
-      return svgEl('polygon', { points: pts, class: cls });
+      el = svgEl('polygon', { points: pts, class: cls }); break;
     }
     default: // box
-      return svgEl('rect', { x, y, width: w, height: h, rx: 4, ry: 4, class: cls });
+      el = svgEl('rect', { x, y, width: w, height: h, rx: 4, ry: 4, class: cls }); break;
   }
+  // Apply custom colours via CSS custom properties (overridden by !important on selected state)
+  if (node.fill)   el.style.setProperty('--node-fill',   node.fill);
+  if (node.stroke) el.style.setProperty('--node-stroke', node.stroke);
+  return el;
 }
 
 function renderNodes() {
@@ -374,6 +379,12 @@ function renderEdges() {
       class: 'edge-hit',
     }));
 
+    // Resolve stroke colour: use selection colour when selected, custom or default otherwise
+    const defaultStroke = '#64748b';
+    const selStroke     = '#2563eb';
+    const strokeColor   = sel ? selStroke : (edge.stroke || defaultStroke);
+    const strokeWidth   = sel ? '2' : '1.5';
+
     // Resolve marker URLs based on direction
     const endUrl   = sel ? 'url(#arrowhead-sel)'       : 'url(#arrowhead)';
     const startUrl = sel ? 'url(#arrowhead-start-sel)' : 'url(#arrowhead-start)';
@@ -384,7 +395,12 @@ function renderEdges() {
     if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
     if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
 
-    g.appendChild(svgEl('line', lineAttrs));
+    const lineEl = svgEl('line', lineAttrs);
+    // Inline stroke + color (color drives arrowhead fill via currentColor)
+    lineEl.style.stroke      = strokeColor;
+    lineEl.style.strokeWidth = strokeWidth;
+    lineEl.style.color       = strokeColor;
+    g.appendChild(lineEl);
 
     if (edge.label) {
       const mx = (p1.x + p2.x) / 2;
@@ -923,6 +939,37 @@ function updatePropertiesPanel() {
   }
 }
 
+/** Helper: render a colour picker row and bind it to an object property. */
+function colorRow(id, currentValue, defaultValue) {
+  const val = currentValue || defaultValue;
+  return `<div class="color-row">
+    <input type="color" id="${id}" value="${val}">
+    <span class="color-hex" id="${id}-hex">${val}</span>
+    <button class="color-reset" id="${id}-reset" title="Reset to default">Reset</button>
+  </div>`;
+}
+
+function bindColorInput(id, defaultValue, setter) {
+  const input  = document.getElementById(id);
+  const hex    = document.getElementById(`${id}-hex`);
+  const reset  = document.getElementById(`${id}-reset`);
+  if (!input) return;
+  input.addEventListener('input', () => {
+    hex.textContent = input.value;
+    setter(input.value);
+    render();
+  });
+  input.addEventListener('change', () => pushHistory());
+  reset.addEventListener('click', () => {
+    setter(null);
+    input.value = defaultValue;
+    hex.textContent = defaultValue;
+    pushHistory();
+    render();
+    updatePropertiesPanel();
+  });
+}
+
 function renderNodeProps(container, node) {
   const shapeOpts = ['box', 'circle', 'oval', 'diamond', 'triangle', 'parallelogram']
     .map(s => `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
@@ -930,17 +977,20 @@ function renderNodeProps(container, node) {
   container.innerHTML = `
     <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
+    <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', node.stroke, '#475569')}</div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
     <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
   `;
-  const shapeEl = document.getElementById('p-shape');
-  shapeEl.addEventListener('change', () => {
-    node.shape = shapeEl.value;
+  document.getElementById('p-shape').addEventListener('change', e => {
+    node.shape = e.target.value;
     pushHistory();
     render();
   });
+  bindColorInput('p-fill',   '#ffffff', v => { node.fill   = v || undefined; });
+  bindColorInput('p-stroke', '#475569', v => { node.stroke = v || undefined; });
   bindPropInput('p-label', v => { node.label = v; });
   bindPropInput('p-x', v => { node.x = +v || 0; }, true);
   bindPropInput('p-y', v => { node.y = +v || 0; }, true);
@@ -961,6 +1011,7 @@ function renderEdgeProps(container, edge) {
 
   container.innerHTML = `
     <div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
+    <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? (fromNode.label || fromNode.id) : edge.from)}</span></div>
     <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? (toNode.label || toNode.id) : edge.to)}</span></div>
@@ -970,6 +1021,7 @@ function renderEdgeProps(container, edge) {
     pushHistory();
     render();
   });
+  bindColorInput('p-stroke', '#64748b', v => { edge.stroke = v || undefined; });
   bindPropInput('p-label', v => { edge.label = v; });
 }
 
