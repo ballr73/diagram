@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Editor</title>
+  <link rel="stylesheet" href="diagram.css">
+</head>
+<body>
+  <div id="app">
+    <div id="toolbar">
+      <div class="tool-group">
+        <button class="tool-btn" data-tool="select" title="Select — click, drag to move/resize (S)">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2 L2 12 L5.5 9 L7.5 13.5 L9 12.8 L7 8.3 L11 8.3 Z" fill="currentColor"/></svg>
+          Select
+        </button>
+        <button class="tool-btn" data-tool="box" title="Box — click and drag to draw (B)">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          Box
+        </button>
+        <button class="tool-btn" data-tool="connector" title="Connector — drag from one box to another (C)">
+          <svg width="16" height="16" viewBox="0 0 16 16"><line x1="2" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.5"/><polygon points="11,5 15,8 11,11" fill="currentColor"/></svg>
+          Connector
+        </button>
+        <button class="tool-btn" data-tool="text" title="Text — click canvas for annotation, click element to edit (T)">
+          <svg width="16" height="16" viewBox="0 0 16 16"><text x="3" y="13" font-size="13" font-weight="bold" fill="currentColor">T</text></svg>
+          Text
+        </button>
+      </div>
+      <div class="tool-group toolbar-separator">
+        <button id="btn-undo" title="Undo (Ctrl+Z)">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8 A5 5 0 1 1 8 13" fill="none" stroke="currentColor" stroke-width="1.5"/><polyline points="3,4 3,8 7,8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Undo
+        </button>
+        <button id="btn-redo" title="Redo (Ctrl+Y)">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M13 8 A5 5 0 1 0 8 13" fill="none" stroke="currentColor" stroke-width="1.5"/><polyline points="13,4 13,8 9,8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Redo
+        </button>
+      </div>
+      <div class="tool-group toolbar-separator">
+        <button id="btn-export" title="Export diagram as JSON">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2 L8 10 M5 7 L8 10 L11 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 12 L3 14 L13 14 L13 12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          Export
+        </button>
+        <button id="btn-import" title="Import diagram from JSON">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 10 L8 2 M5 5 L8 2 L11 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 12 L3 14 L13 14 L13 12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          Import
+        </button>
+        <input type="file" id="file-input" accept=".json" style="display:none">
+      </div>
+      <div id="toolbar-status"></div>
+    </div>
+
+    <div id="main">
+      <div id="canvas-container">
+        <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                    refX="10" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M0,0 L10,3.5 L0,7 Z" class="arrow-fill"/>
+            </marker>
+            <marker id="arrowhead-sel" markerWidth="10" markerHeight="7"
+                    refX="10" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M0,0 L10,3.5 L0,7 Z" class="arrow-fill-sel"/>
+            </marker>
+          </defs>
+          <g id="edges-layer"></g>
+          <g id="nodes-layer"></g>
+          <g id="annotations-layer"></g>
+          <g id="ui-layer"></g>
+        </svg>
+      </div>
+
+      <div id="properties-panel">
+        <div id="properties-header">Properties</div>
+        <div id="properties-content">
+          <p class="no-selection">Nothing selected</p>
+        </div>
+        <div id="properties-hint">
+          <p>Keyboard shortcuts:</p>
+          <ul>
+            <li><kbd>S</kbd> Select tool</li>
+            <li><kbd>B</kbd> Box tool</li>
+            <li><kbd>C</kbd> Connector tool</li>
+            <li><kbd>T</kbd> Text tool</li>
+            <li><kbd>Del</kbd> Delete selected</li>
+            <li><kbd>Ctrl+Z</kbd> Undo</li>
+            <li><kbd>Ctrl+Y</kbd> Redo</li>
+            <li><kbd>Dbl-click</kbd> Edit label</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="editor.js"></script>
+</body>
+</html>

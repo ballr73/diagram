@@ -1,0 +1,376 @@
+/* ============================================================
+   Layout
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #app {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  background: #f0f2f5;
+  overflow: hidden;
+}
+
+#app { display: flex; flex-direction: column; }
+
+/* ============================================================
+   Toolbar
+   ============================================================ */
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: #1e293b;
+  border-bottom: 1px solid #0f172a;
+  color: #e2e8f0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.toolbar-separator {
+  margin-left: 6px;
+  padding-left: 10px;
+  border-left: 1px solid #334155;
+}
+
+#toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.1s, border-color 0.1s;
+  user-select: none;
+}
+
+#toolbar button:hover {
+  background: #475569;
+  border-color: #64748b;
+}
+
+#toolbar button:active {
+  background: #1e40af;
+}
+
+#toolbar .tool-btn.active {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+}
+
+#toolbar-status {
+  margin-left: auto;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ============================================================
+   Main area
+   ============================================================ */
+#main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ============================================================
+   Canvas
+   ============================================================ */
+#canvas-container {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background: #f8fafc;
+  /* Dot grid */
+  background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
+  overflow: hidden;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ============================================================
+   SVG — Nodes
+   ============================================================ */
+.node-rect {
+  fill: #ffffff;
+  stroke: #475569;
+  stroke-width: 1.5;
+  rx: 4;
+  ry: 4;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.10));
+  cursor: move;
+}
+
+.node-rect.selected {
+  stroke: #2563eb;
+  stroke-width: 2;
+  fill: #eff6ff;
+}
+
+.node-rect.connector-hover {
+  stroke: #16a34a;
+  stroke-width: 2;
+  stroke-dasharray: 4 2;
+}
+
+.node-rect.connector-target {
+  stroke: #16a34a;
+  stroke-width: 2;
+}
+
+.node-label {
+  font-size: 13px;
+  fill: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ============================================================
+   SVG — Edges
+   ============================================================ */
+.edge-hit {
+  stroke: transparent;
+  stroke-width: 12;
+  fill: none;
+  cursor: pointer;
+}
+
+.edge-line {
+  stroke: #64748b;
+  stroke-width: 1.5;
+  fill: none;
+  cursor: pointer;
+  marker-end: url(#arrowhead);
+}
+
+.edge-line.selected {
+  stroke: #2563eb;
+  stroke-width: 2;
+  marker-end: url(#arrowhead-sel);
+}
+
+.edge-label {
+  font-size: 11px;
+  fill: #475569;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  pointer-events: none;
+  user-select: none;
+  background: #f8fafc;
+}
+
+.edge-label-bg {
+  fill: #f8fafc;
+  stroke: none;
+}
+
+.arrow-fill { fill: #64748b; }
+.arrow-fill-sel { fill: #2563eb; }
+
+/* ============================================================
+   SVG — Annotations
+   ============================================================ */
+.annotation-text {
+  font-size: 13px;
+  fill: #7c3aed;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: move;
+  font-style: italic;
+}
+
+.annotation-text.selected {
+  fill: #2563eb;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   SVG — Resize handles
+   ============================================================ */
+.resize-handle {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  cursor: pointer;
+}
+
+/* ============================================================
+   SVG — Temporary drawing shapes
+   ============================================================ */
+.temp-shape {
+  fill: rgba(37,99,235,0.05);
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  pointer-events: none;
+}
+
+.temp-connector {
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 3;
+  fill: none;
+  marker-end: url(#arrowhead-sel);
+  pointer-events: none;
+}
+
+.selection-box {
+  fill: rgba(37,99,235,0.06);
+  stroke: #2563eb;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+/* ============================================================
+   SVG — Inline editor (foreignObject input)
+   ============================================================ */
+.inline-input {
+  box-sizing: border-box;
+  border: 1.5px solid #2563eb;
+  border-radius: 3px;
+  background: #fff;
+  color: #1e293b;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 2px 5px;
+  outline: none;
+  text-align: center;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+/* ============================================================
+   Properties panel
+   ============================================================ */
+#properties-panel {
+  width: 210px;
+  flex-shrink: 0;
+  background: #fff;
+  border-left: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+#properties-header {
+  padding: 10px 14px 8px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+#properties-content {
+  padding: 12px;
+  flex: 1;
+}
+
+.no-selection {
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.prop-group {
+  margin-bottom: 10px;
+}
+
+.prop-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+.prop-group input[type="text"],
+.prop-group input[type="number"] {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.1s;
+}
+
+.prop-group input:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+.prop-value {
+  font-size: 13px;
+  color: #475569;
+}
+
+#properties-hint {
+  padding: 12px 14px;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+#properties-hint p {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+#properties-hint ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#properties-hint li {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: monospace;
+  color: #475569;
+  white-space: nowrap;
+}
