@@ -26,30 +26,45 @@ for (const provider of providers) {
   manifest[provider]     = {};
   manifestData[provider] = {};
 
-  const categories = fs.readdirSync(providerPath, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .map(d => d.name)
-    .sort();
+  const entries = fs.readdirSync(providerPath, { withFileTypes: true });
+  const categories = entries.filter(d => d.isDirectory()).map(d => d.name).sort();
 
-  for (const category of categories) {
-    const categoryPath = path.join(providerPath, category);
-    const files = fs.readdirSync(categoryPath, { withFileTypes: true })
+  if (categories.length > 0) {
+    // Standard layout: provider/category/icon.svg
+    for (const category of categories) {
+      const categoryPath = path.join(providerPath, category);
+      const files = fs.readdirSync(categoryPath, { withFileTypes: true })
+        .filter(f => f.isFile() && f.name.toLowerCase().endsWith('.svg'))
+        .map(f => f.name)
+        .sort();
+
+      if (files.length === 0) continue;
+
+      manifest[provider][category] = files;
+      manifestData[provider][category] = files.map(filename => {
+        const filePath = path.join(categoryPath, filename);
+        const svgContent = fs.readFileSync(filePath, 'utf8');
+        const b64 = Buffer.from(svgContent).toString('base64');
+        return { name: filename, data: `data:image/svg+xml;base64,${b64}` };
+      });
+    }
+  } else {
+    // Flat layout: provider/icon.svg — group all icons under a single "General" category
+    const files = entries
       .filter(f => f.isFile() && f.name.toLowerCase().endsWith('.svg'))
       .map(f => f.name)
       .sort();
 
-    if (files.length === 0) continue;
-
-    manifest[provider][category] = files;
-    manifestData[provider][category] = files.map(filename => {
-      const filePath = path.join(categoryPath, filename);
-      const svgContent = fs.readFileSync(filePath, 'utf8');
-      const b64 = Buffer.from(svgContent).toString('base64');
-      return {
-        name: filename,
-        data: `data:image/svg+xml;base64,${b64}`,
-      };
-    });
+    if (files.length > 0) {
+      const category = 'General';
+      manifest[provider][category] = files;
+      manifestData[provider][category] = files.map(filename => {
+        const filePath = path.join(providerPath, filename);
+        const svgContent = fs.readFileSync(filePath, 'utf8');
+        const b64 = Buffer.from(svgContent).toString('base64');
+        return { name: filename, data: `data:image/svg+xml;base64,${b64}` };
+      });
+    }
   }
 }
 
