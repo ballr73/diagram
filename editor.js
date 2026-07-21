@@ -1059,6 +1059,113 @@ function deleteSelected() {
 }
 
 // ============================================================
+// Align & Distribute
+// ============================================================
+
+/** Bounding box of a node or annotation for alignment purposes. */
+function itemBounds(item) {
+  return { x: item.x, y: item.y, w: item.width || 0, h: item.height || 0 };
+}
+
+/**
+ * Returns the selected nodes and annotations as [{item, type}] pairs.
+ * Edges are excluded — they have no independent position.
+ */
+function getAlignItems() {
+  const items = [];
+  for (const id of state.selected) {
+    const node = state.nodes.get(id);
+    const ann  = state.annotations.get(id);
+    if (node) items.push({ item: node, type: 'node' });
+    else if (ann) items.push({ item: ann, type: 'annotation' });
+  }
+  return items;
+}
+
+function setItemPos(entry, x, y) {
+  entry.item.x = x;
+  entry.item.y = y;
+}
+
+function alignLeft() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const minX = Math.min(...items.map(e => e.item.x));
+  items.forEach(e => setItemPos(e, minX, e.item.y));
+  pushHistory(); render();
+}
+
+function alignRight() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const maxRight = Math.max(...items.map(e => e.item.x + (e.item.width || 0)));
+  items.forEach(e => setItemPos(e, maxRight - (e.item.width || 0), e.item.y));
+  pushHistory(); render();
+}
+
+function alignCenterH() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const meanCX = items.reduce((s, e) => s + e.item.x + (e.item.width || 0) / 2, 0) / items.length;
+  items.forEach(e => setItemPos(e, meanCX - (e.item.width || 0) / 2, e.item.y));
+  pushHistory(); render();
+}
+
+function alignTop() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const minY = Math.min(...items.map(e => e.item.y));
+  items.forEach(e => setItemPos(e, e.item.x, minY));
+  pushHistory(); render();
+}
+
+function alignBottom() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const maxBottom = Math.max(...items.map(e => e.item.y + (e.item.height || 0)));
+  items.forEach(e => setItemPos(e, e.item.x, maxBottom - (e.item.height || 0)));
+  pushHistory(); render();
+}
+
+function alignCenterV() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const meanCY = items.reduce((s, e) => s + e.item.y + (e.item.height || 0) / 2, 0) / items.length;
+  items.forEach(e => setItemPos(e, e.item.x, meanCY - (e.item.height || 0) / 2));
+  pushHistory(); render();
+}
+
+function distributeH() {
+  const items = getAlignItems();
+  if (items.length < 3) return;
+  items.sort((a, b) => a.item.x - b.item.x);
+  const totalSpan = (items[items.length - 1].item.x + (items[items.length - 1].item.width || 0)) - items[0].item.x;
+  const totalW    = items.reduce((s, e) => s + (e.item.width || 0), 0);
+  const gap       = (totalSpan - totalW) / (items.length - 1);
+  let cursor = items[0].item.x + (items[0].item.width || 0);
+  for (let i = 1; i < items.length - 1; i++) {
+    setItemPos(items[i], cursor + gap, items[i].item.y);
+    cursor = items[i].item.x + (items[i].item.width || 0);
+  }
+  pushHistory(); render();
+}
+
+function distributeV() {
+  const items = getAlignItems();
+  if (items.length < 3) return;
+  items.sort((a, b) => a.item.y - b.item.y);
+  const totalSpan = (items[items.length - 1].item.y + (items[items.length - 1].item.height || 0)) - items[0].item.y;
+  const totalH    = items.reduce((s, e) => s + (e.item.height || 0), 0);
+  const gap       = (totalSpan - totalH) / (items.length - 1);
+  let cursor = items[0].item.y + (items[0].item.height || 0);
+  for (let i = 1; i < items.length - 1; i++) {
+    setItemPos(items[i], items[i].item.x, cursor + gap);
+    cursor = items[i].item.y + (items[i].item.height || 0);
+  }
+  pushHistory(); render();
+}
+
+// ============================================================
 // Clipboard — Copy, Cut, Paste, Duplicate
 // ============================================================
 function copySelected() {
@@ -1382,6 +1489,20 @@ function updateEditButtons() {
   if (btnCopy)  btnCopy.disabled  = !hasSel;
   if (btnPaste) btnPaste.disabled = !hasCb;
   if (btnDupe)  btnDupe.disabled  = !hasSel;
+
+  // Align buttons require ≥2 positional items; distribute require ≥3
+  const alignCount = getAlignItems().length;
+  const canAlign = alignCount >= 2;
+  const canDist  = alignCount >= 3;
+  ['btn-align-left','btn-align-center-h','btn-align-right',
+   'btn-align-top','btn-align-center-v','btn-align-bottom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !canAlign;
+  });
+  ['btn-dist-h','btn-dist-v'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !canDist;
+  });
 }
 
 // ============================================================
@@ -1412,6 +1533,16 @@ function init() {
   document.getElementById('btn-copy').addEventListener('click', copySelected);
   document.getElementById('btn-paste').addEventListener('click', pasteClipboard);
   document.getElementById('btn-duplicate').addEventListener('click', duplicateSelected);
+
+  // Align / Distribute
+  document.getElementById('btn-align-left').addEventListener('click', alignLeft);
+  document.getElementById('btn-align-center-h').addEventListener('click', alignCenterH);
+  document.getElementById('btn-align-right').addEventListener('click', alignRight);
+  document.getElementById('btn-align-top').addEventListener('click', alignTop);
+  document.getElementById('btn-align-center-v').addEventListener('click', alignCenterV);
+  document.getElementById('btn-align-bottom').addEventListener('click', alignBottom);
+  document.getElementById('btn-dist-h').addEventListener('click', distributeH);
+  document.getElementById('btn-dist-v').addEventListener('click', distributeV);
 
   // Export / Import
   document.getElementById('btn-export').addEventListener('click', exportDiagram);
