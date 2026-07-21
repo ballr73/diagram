@@ -109,31 +109,29 @@ html, body, #app {
 }
 
 /* ============================================================
-   SVG — Nodes
+   SVG — Nodes (all shape types share .node-shape)
    ============================================================ */
-.node-rect {
+.node-shape {
   fill: #ffffff;
   stroke: #475569;
   stroke-width: 1.5;
-  rx: 4;
-  ry: 4;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.10));
   cursor: move;
 }
 
-.node-rect.selected {
+.node-shape.selected {
   stroke: #2563eb;
   stroke-width: 2;
   fill: #eff6ff;
 }
 
-.node-rect.connector-hover {
+.node-shape.connector-hover {
   stroke: #16a34a;
   stroke-width: 2;
   stroke-dasharray: 4 2;
 }
 
-.node-rect.connector-target {
+.node-shape.connector-target {
   stroke: #16a34a;
   stroke-width: 2;
 }
@@ -373,4 +371,64 @@ kbd {
   font-family: monospace;
   color: #475569;
   white-space: nowrap;
+}
+
+/* ============================================================
+   Shape picker
+   ============================================================ */
+#shape-picker {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.shape-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.shape-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.1s, border-color 0.1s;
+  user-select: none;
+}
+
+.shape-btn:hover { background: #475569; }
+.shape-btn.active {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+/* Shape select in properties panel */
+.prop-group select {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  cursor: pointer;
+}
+
+.prop-group select:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }

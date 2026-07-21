@@ -4,11 +4,12 @@
 // State
 // ============================================================
 const state = {
-  nodes: new Map(),       // id → {id, x, y, width, height, label}
+  nodes: new Map(),       // id → {id, x, y, width, height, label, shape}
   edges: new Map(),       // id → {id, from, to, label}
   annotations: new Map(), // id → {id, x, y, text}
   selected: new Set(),
   tool: 'select',
+  currentShape: 'box',
   nextId: 1,
   history: [],
   historyIndex: -1,
@@ -119,14 +120,66 @@ function nodeCenter(node) {
   return { x: node.x + node.width / 2, y: node.y + node.height / 2 };
 }
 
-/** Intersection of the line from node center toward point p with the node's bounding rect. */
+/** Vertices of polygonal shapes (diamond, triangle, parallelogram). Returns null for others. */
+function shapeVertices(node) {
+  const { x, y, width: w, height: h } = node;
+  const cx = x + w / 2, cy = y + h / 2;
+  switch (node.shape) {
+    case 'diamond':
+      return [{ x: cx, y }, { x: x + w, y: cy }, { x: cx, y: y + h }, { x, y: cy }];
+    case 'triangle':
+      return [{ x: cx, y }, { x: x + w, y: y + h }, { x, y: y + h }];
+    case 'parallelogram': {
+      const sk = w * 0.2;
+      return [{ x: x + sk, y }, { x: x + w, y }, { x: x + w - sk, y: y + h }, { x, y: y + h }];
+    }
+    default: return null;
+  }
+}
+
+/** Intersection of ray from (cx,cy) toward (px,py) with an ellipse of semi-axes (rx,ry). */
+function ellipseIntersect(cx, cy, rx, ry, px, py) {
+  const dx = px - cx, dy = py - cy;
+  if (dx === 0 && dy === 0) return { x: cx + rx, y: cy };
+  const t = 1 / Math.sqrt((dx / rx) ** 2 + (dy / ry) ** 2);
+  return { x: cx + dx * t, y: cy + dy * t };
+}
+
+/** Intersection of ray from (cx,cy) toward (px,py) with a polygon defined by vertices[]. */
+function rayPolygonIntersect(cx, cy, px, py, vertices) {
+  const dx = px - cx, dy = py - cy;
+  let bestT = Infinity;
+  const n = vertices.length;
+  for (let i = 0; i < n; i++) {
+    const v1 = vertices[i], v2 = vertices[(i + 1) % n];
+    const ex = v2.x - v1.x, ey = v2.y - v1.y;
+    const denom = dx * ey - dy * ex;
+    if (Math.abs(denom) < 1e-10) continue;
+    const fx = v1.x - cx, fy = v1.y - cy;
+    const t = (fx * ey - fy * ex) / denom;
+    const s = (fx * dy - fy * dx) / denom;
+    if (t > 1e-6 && s >= -1e-6 && s <= 1 + 1e-6 && t < bestT) bestT = t;
+  }
+  if (bestT === Infinity) return { x: px, y: py };
+  return { x: cx + dx * bestT, y: cy + dy * bestT };
+}
+
+/** Intersection of the line from node center toward point p with the node's actual shape boundary. */
 function borderIntersect(node, p) {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
-  const hw = node.width / 2;
-  const hh = node.height / 2;
-  const dx = p.x - cx;
-  const dy = p.y - cy;
+  const shape = node.shape || 'box';
+
+  if (shape === 'circle' || shape === 'oval') {
+    return ellipseIntersect(cx, cy, node.width / 2, node.height / 2, p.x, p.y);
+  }
+
+  const verts = shapeVertices(node);
+  if (verts) return rayPolygonIntersect(cx, cy, p.x, p.y, verts);
+
+  // Default: bounding-box rectangle (box shape)
+  const hw = node.width / 2, hh = node.height / 2;
+  const dx = p.x - cx, dy = p.y - cy;
   if (dx === 0 && dy === 0) return { x: cx, y: cy };
   const tx = dx !== 0 ? hw / Math.abs(dx) : Infinity;
   const ty = dy !== 0 ? hh / Math.abs(dy) : Infinity;
@@ -228,19 +281,42 @@ function render() {
   renderAnnotations();
 }
 
+/** Create the correct SVG shape element for a node. */
+function createShapeEl(node, sel) {
+  const { x, y, width: w, height: h } = node;
+  const cx = x + w / 2, cy = y + h / 2;
+  const cls = 'node-shape' + (sel ? ' selected' : '');
+  switch (node.shape || 'box') {
+    case 'circle':
+      return svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls });
+    case 'oval':
+      return svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls });
+    case 'diamond': {
+      const pts = `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`;
+      return svgEl('polygon', { points: pts, class: cls });
+    }
+    case 'triangle': {
+      const pts = `${cx},${y} ${x + w},${y + h} ${x},${y + h}`;
+      return svgEl('polygon', { points: pts, class: cls });
+    }
+    case 'parallelogram': {
+      const sk = w * 0.2;
+      const pts = `${x + sk},${y} ${x + w},${y} ${x + w - sk},${y + h} ${x},${y + h}`;
+      return svgEl('polygon', { points: pts, class: cls });
+    }
+    default: // box
+      return svgEl('rect', { x, y, width: w, height: h, rx: 4, ry: 4, class: cls });
+  }
+}
+
 function renderNodes() {
   nodesLayer.innerHTML = '';
   for (const node of state.nodes.values()) {
     const sel = state.selected.has(node.id);
     const g = svgEl('g', { 'data-id': node.id, 'data-type': 'node' });
 
-    g.appendChild(svgEl('rect', {
-      x: node.x, y: node.y, width: node.width, height: node.height,
-      rx: 4, ry: 4,
-      class: 'node-rect' + (sel ? ' selected' : ''),
-    }));
+    g.appendChild(createShapeEl(node, sel));
 
-    // Wrap long labels with a simple clip
     const lbl = svgEl('text', {
       x: node.x + node.width / 2,
       y: node.y + node.height / 2,
@@ -579,12 +655,16 @@ function dragEnd(p) {
     const h = Math.abs(p.y - d.startY);
     if (w < 20 || h < 10) return;
     const id = genId();
+    const shape = state.currentShape;
+    const defaultLabels = { box: 'Box', circle: 'Circle', oval: 'Oval',
+      diamond: 'Diamond', triangle: 'Triangle', parallelogram: 'Step' };
     state.nodes.set(id, {
       id,
       x: Math.min(p.x, d.startX),
       y: Math.min(p.y, d.startY),
       width: w, height: h,
-      label: 'Box',
+      label: defaultLabels[shape] || 'Shape',
+      shape,
     });
     state.selected.clear();
     state.selected.add(id);
@@ -647,7 +727,7 @@ function clearClass(cls) {
 }
 
 function addClassToNode(nodeId, cls) {
-  const el = nodesLayer.querySelector(`[data-id="${nodeId}"] .node-rect`);
+  const el = nodesLayer.querySelector(`[data-id="${nodeId}"] .node-shape`);
   if (el) el.classList.add(cls);
 }
 
@@ -837,13 +917,23 @@ function updatePropertiesPanel() {
 }
 
 function renderNodeProps(container, node) {
+  const shapeOpts = ['box', 'circle', 'oval', 'diamond', 'triangle', 'parallelogram']
+    .map(s => `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
+    .join('');
   container.innerHTML = `
+    <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
     <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
   `;
+  const shapeEl = document.getElementById('p-shape');
+  shapeEl.addEventListener('change', () => {
+    node.shape = shapeEl.value;
+    pushHistory();
+    render();
+  });
   bindPropInput('p-label', v => { node.label = v; });
   bindPropInput('p-x', v => { node.x = +v || 0; }, true);
   bindPropInput('p-y', v => { node.y = +v || 0; }, true);
@@ -897,8 +987,14 @@ function setTool(tool) {
     btn.classList.toggle('active', btn.dataset.tool === tool);
   });
   svg.style.cursor = tool === 'select' ? 'default' : 'crosshair';
-  // Re-render to show/hide resize handles
   render();
+}
+
+function setCurrentShape(shape) {
+  state.currentShape = shape;
+  document.querySelectorAll('.shape-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.shape === shape);
+  });
 }
 
 function updateToolbarStatus() {
@@ -916,6 +1012,14 @@ function init() {
   // Toolbar tool buttons
   document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => setTool(btn.dataset.tool));
+  });
+
+  // Shape picker buttons
+  document.querySelectorAll('.shape-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setCurrentShape(btn.dataset.shape);
+      setTool('box'); // auto-switch to shape tool
+    });
   });
 
   // Undo / Redo
@@ -952,21 +1056,29 @@ function init() {
 }
 
 function loadDemo() {
-  const n1 = { id: genId(), x: 80,  y: 160, width: 120, height: 60, label: 'Start' };
-  const n2 = { id: genId(), x: 280, y: 160, width: 140, height: 60, label: 'Process' };
-  const n3 = { id: genId(), x: 500, y: 160, width: 120, height: 60, label: 'End' };
-  const n4 = { id: genId(), x: 280, y: 300, width: 140, height: 60, label: 'Error handler' };
-  [n1, n2, n3, n4].forEach(n => state.nodes.set(n.id, n));
+  // Row 1: flow-like shapes
+  const n1 = { id: genId(), x: 60,  y: 170, width: 100, height: 60, label: 'Start',       shape: 'oval' };
+  const n2 = { id: genId(), x: 220, y: 170, width: 120, height: 60, label: 'Process',      shape: 'box' };
+  const n3 = { id: genId(), x: 400, y: 170, width: 100, height: 70, label: 'Decision',     shape: 'diamond' };
+  const n4 = { id: genId(), x: 570, y: 150, width: 100, height: 60, label: 'End',          shape: 'oval' };
+  const n5 = { id: genId(), x: 400, y: 310, width: 100, height: 60, label: 'Error',        shape: 'parallelogram' };
+  // Row 2: extra shapes
+  const n6 = { id: genId(), x: 100, y: 340, width: 80,  height: 80, label: 'Note',         shape: 'circle' };
+  const n7 = { id: genId(), x: 220, y: 330, width: 130, height: 55, label: 'Step',         shape: 'parallelogram' };
+  const n8 = { id: genId(), x: 570, y: 300, width: 100, height: 80, label: 'Warning',      shape: 'triangle' };
+
+  [n1, n2, n3, n4, n5, n6, n7, n8].forEach(n => state.nodes.set(n.id, n));
 
   const e1 = { id: genId(), from: n1.id, to: n2.id, label: '' };
-  const e2 = { id: genId(), from: n2.id, to: n3.id, label: 'success' };
-  const e3 = { id: genId(), from: n2.id, to: n4.id, label: 'error' };
-  [e1, e2, e3].forEach(e => state.edges.set(e.id, e));
+  const e2 = { id: genId(), from: n2.id, to: n3.id, label: '' };
+  const e3 = { id: genId(), from: n3.id, to: n4.id, label: 'yes' };
+  const e4 = { id: genId(), from: n3.id, to: n5.id, label: 'no' };
+  [e1, e2, e3, e4].forEach(e => state.edges.set(e.id, e));
 
-  const a1 = { id: genId(), x: 80, y: 110, text: 'Sample workflow diagram' };
+  const a1 = { id: genId(), x: 60, y: 120, text: 'Sample workflow — try drawing shapes with the toolbar' };
   state.annotations.set(a1.id, a1);
 
-  pushHistory(); // save demo as initial undoable state
+  pushHistory();
   render();
   updatePropertiesPanel();
   updateToolbarStatus();

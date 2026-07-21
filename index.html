@@ -14,9 +14,9 @@
           <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2 L2 12 L5.5 9 L7.5 13.5 L9 12.8 L7 8.3 L11 8.3 Z" fill="currentColor"/></svg>
           Select
         </button>
-        <button class="tool-btn" data-tool="box" title="Box — click and drag to draw (B)">
+        <button class="tool-btn" data-tool="box" title="Shape — click and drag to draw (B)">
           <svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-          Box
+          Shape
         </button>
         <button class="tool-btn" data-tool="connector" title="Connector — drag from one box to another (C)">
           <svg width="16" height="16" viewBox="0 0 16 16"><line x1="2" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.5"/><polygon points="11,5 15,8 11,11" fill="currentColor"/></svg>
@@ -48,6 +48,28 @@
         </button>
         <input type="file" id="file-input" accept=".json" style="display:none">
       </div>
+      <div class="tool-group toolbar-separator" id="shape-picker">
+        <span class="shape-label">Shape:</span>
+        <button class="shape-btn active" data-shape="box" title="Box">
+          <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/></svg>
+        </button>
+        <button class="shape-btn" data-shape="circle" title="Circle">
+          <svg width="16" height="16" viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="shape-btn" data-shape="oval" title="Oval">
+          <svg width="16" height="16" viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="7" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="shape-btn" data-shape="diamond" title="Diamond">
+          <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="shape-btn" data-shape="triangle" title="Triangle">
+          <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="8,1 15,14 1,14" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="shape-btn" data-shape="parallelogram" title="Parallelogram">
+          <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="4,3 15,3 12,13 1,13" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+      </div>
+
       <div id="toolbar-status"></div>
     </div>
 
