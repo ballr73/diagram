@@ -552,6 +552,31 @@ kbd {
 .color-reset:hover { border-color: #94a3b8; color: #475569; }
 
 /* ============================================================
+   Opacity control
+   ============================================================ */
+.opacity-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.opacity-row input[type="range"] {
+  flex: 1;
+  height: 4px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.opacity-row span {
+  font-size: 12px;
+  font-family: monospace;
+  color: #475569;
+  min-width: 34px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ============================================================
    Font controls (size select + B/I/U toggles)
    ============================================================ */
 .font-controls {

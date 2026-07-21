@@ -15,18 +15,20 @@ or drag `index.html` into a browser window. That's it.
 ## Interface Overview
 
 ```
-┌──────────────────────────────────────────────────────┐
-│  Top toolbar: Undo/Redo │ Clipboard │ Align │ Export │
-├────┬─────────────────────────────────────┬───────────┤
-│    │                                     │           │
-│ ◀  │           Canvas                    │Properties │
-│    │                                     │  Panel    │
-│    │                                     │           │
-└────┴─────────────────────────────────────┴───────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  Top toolbar: Undo/Redo │ Clipboard │ Order │ Align │ Export │
+├──────┬───────────────────────────────────────┬───────────────┤
+│      │                                       │               │
+│ ◀    │            Canvas                     │  Properties   │
+│ Tools│                                       │    Panel      │
+│ Shape│                                       │               │
+│ Pick │                                       │               │
+│ ver  │                                       │               │
+└──────┴───────────────────────────────────────┴───────────────┘
 ```
 
-- **Left toolbar** — drawing tool selector
-- **Top toolbar** — actions, alignment, export
+- **Left toolbar** — drawing tools, shape picker, version number
+- **Top toolbar** — undo/redo, clipboard, z-order, align/distribute, export/import
 - **Canvas** — the drawing surface with a dot-grid background
 - **Properties panel** — edit the selected element's properties
 
@@ -43,14 +45,16 @@ or drag `index.html` into a browser window. That's it.
 
 ### Shapes
 
-Pick a shape type from the **Shape:** picker in the top toolbar before drawing, or change an existing shape's type in the Properties panel. Available shapes:
+Pick a shape type from the shape picker in the **left toolbar** before drawing, or change an existing shape's type in the Properties panel. Available shapes:
 
-- Box (rectangle)
-- Circle
-- Oval
-- Diamond
-- Triangle
-- Parallelogram
+| Shape | Description |
+|-------|-------------|
+| Box | Rectangle |
+| Circle | Perfect circle (ellipse with equal axes) |
+| Oval | Horizontal ellipse |
+| Diamond | Rotated square |
+| Triangle | Upward-pointing triangle |
+| Parallelogram | Skewed rectangle |
 
 ### Connectors
 
@@ -58,11 +62,18 @@ Pick a shape type from the **Shape:** picker in the top toolbar before drawing, 
 2. Drag from the edge of a source shape to a target shape
 3. A connector with an arrowhead is created
 
-Connectors can also be **bidirectional** or have **no arrows** — change the direction in the Properties panel (→ Forward, ← Backward, ↔ Both, — None).
+Connector direction and line style can be changed in the Properties panel.
+
+| Direction option | Appearance |
+|-----------------|------------|
+| → Forward | Arrow pointing to target |
+| ← Backward | Arrow pointing to source |
+| ↔ Both | Arrows at both ends |
+| — None | Plain line, no arrows |
 
 ### Text Annotations
 
-Free-floating text labels that aren't attached to any shape. Place them by clicking with the **Text** tool.
+Free-floating text labels not attached to any shape. Place them by clicking on an empty area of the canvas with the **Text** tool.
 
 ---
 
@@ -89,30 +100,65 @@ Hold `Shift` and click to add to the selection, or drag a selection box over mul
 
 When one element is selected, the Properties panel on the right shows its editable attributes:
 
-| Element | Editable properties |
-|---------|-------------------|
-| Shape | Label, X/Y/W/H position, Shape type, Fill colour, Stroke colour, Font (size/bold/italic/underline) |
-| Connector | Label, Direction (→ ← ↔ —), Stroke colour, Font |
-| Annotation | Text, Font |
+### Shape properties
 
-Colour pickers support any hex colour. Click **Reset** to restore the default colour.
+| Property | Description |
+|----------|-------------|
+| Shape | Change the shape type |
+| Label | Text displayed inside the shape |
+| Font | Size, Bold, Italic, Underline |
+| Fill | Fill colour (colour picker + reset) |
+| Stroke | Border colour (colour picker + reset) |
+| Line style | Solid / Dashed / Dotted border |
+| Opacity | Fill opacity 0–100% (stroke and label stay fully opaque) |
+| X / Y | Position on canvas |
+| Width / Height | Size |
+
+### Connector properties
+
+| Property | Description |
+|----------|-------------|
+| Direction | → Forward / ← Backward / ↔ Both / — None |
+| Line style | Solid / Dashed / Dotted |
+| Stroke | Line colour |
+| Label | Text displayed along the connector |
+| Label Font | Size, Bold, Italic, Underline |
+
+### Annotation properties
+
+| Property | Description |
+|----------|-------------|
+| Text | The annotation text |
+| Font | Size, Bold, Italic, Underline |
+| X / Y | Position on canvas |
+
+---
+
+## Z-Order (Bring to Front / Send to Back)
+
+| Button | Action | Enabled when |
+|--------|--------|-------------|
+| **Front** | Move selected element(s) above all others in their layer | anything selected |
+| **Back** | Move selected element(s) behind all others in their layer | anything selected |
+
+Z-order operates within each layer (shapes compete with shapes, connectors with connectors, annotations with annotations).
 
 ---
 
 ## Align & Distribute (Top Toolbar)
 
-Available when **2 or more** shapes/annotations are selected. Edges are excluded.
+Available when **2 or more** shapes/annotations are selected. Connectors are excluded.
 
-| Button | Action |
-|--------|--------|
-| Align Left | Flush left edges to the leftmost element |
-| Align Center H | Center all on the same vertical axis |
-| Align Right | Flush right edges to the rightmost element |
-| Align Top | Flush top edges to the topmost element |
-| Align Center V | Center all on the same horizontal axis |
-| Align Bottom | Flush bottom edges to the bottommost element |
-| Distribute H | Equal horizontal gaps *(needs ≥ 3)* |
-| Distribute V | Equal vertical gaps *(needs ≥ 3)* |
+| Button | Action | Min. selection |
+|--------|--------|---------------|
+| Align Left | Flush left edges to the leftmost element | 2 |
+| Align Center H | Center all on the same vertical axis | 2 |
+| Align Right | Flush right edges to the rightmost element | 2 |
+| Align Top | Flush top edges to the topmost element | 2 |
+| Align Center V | Center all on the same horizontal axis | 2 |
+| Align Bottom | Flush bottom edges to the bottommost element | 2 |
+| Distribute H | Equal horizontal gaps | 3 |
+| Distribute V | Equal vertical gaps | 3 |
 
 ---
 
@@ -120,12 +166,12 @@ Available when **2 or more** shapes/annotations are selected. Edges are excluded
 
 | Action | Keyboard | Button |
 |--------|----------|--------|
-| Copy | `Ctrl+C` | Copy |
-| Cut | `Ctrl+X` | Cut |
-| Paste | `Ctrl+V` | Paste |
-| Duplicate | `Ctrl+D` | Dupe |
+| Copy | `Ctrl+C` | ⎘ |
+| Cut | `Ctrl+X` | ✂ |
+| Paste | `Ctrl+V` | 📋 |
+| Duplicate | `Ctrl+D` | ⧉ |
 
-Pasted elements appear offset by 20 px each time (resets on the next copy). When both ends of a connector are copied, the paste creates a new connector between the new copies.
+Pasted elements appear offset by 20 px each time (resets on the next copy). When both ends of a connector are copied, paste creates a new connector between the new copies.
 
 ---
 
@@ -147,7 +193,7 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 | Undo | `Ctrl+Z` | ↩ |
 | Redo | `Ctrl+Y` | ↪ |
 
-Up to 100 undo steps are retained. Every edit (draw, move, resize, label change, colour change, paste, align…) is undoable.
+Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, label changes, colour, opacity, line style, paste, align — is undoable.
 
 ---
 
@@ -174,9 +220,15 @@ Up to 100 undo steps are retained. Every edit (draw, move, resize, label change,
 ## Files
 
 ```
-index.html    — HTML shell and SVG canvas
-editor.js     — All editor logic (~1600 lines)
-diagram.css   — UI and SVG styling (~580 lines)
+index.html                        — HTML shell and SVG canvas
+editor.js                         — All editor logic (~1700 lines)
+diagram.css                       — UI and SVG styling (~640 lines)
+README.md                         — This file
+.github/workflows/release.yml     — GitHub Actions release workflow
 ```
 
 No build tool, no package manager, no server required.
+
+## Releases
+
+Pushing to `main` automatically creates a GitHub release tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-editor.zip` download containing all four app files.

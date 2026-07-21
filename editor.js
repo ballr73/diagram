@@ -436,6 +436,23 @@ function applyFontStyle(el, item, defaults = {}) {
   el.style.textDecoration = underline ? 'underline' : 'none';
 }
 
+/** Apply stroke-dasharray and stroke-linecap for a given strokeStyle. */
+function applyStrokeStyle(el, style) {
+  switch (style) {
+    case 'dashed':
+      el.style.strokeDasharray = '8 4';
+      el.style.strokeLinecap   = 'square';
+      break;
+    case 'dotted':
+      el.style.strokeDasharray = '2 4';
+      el.style.strokeLinecap   = 'round';
+      break;
+    default: // solid
+      el.style.strokeDasharray = 'none';
+      el.style.strokeLinecap   = 'square';
+  }
+}
+
 /** Create the correct SVG shape element for a node. */
 function createShapeEl(node, sel) {
   const { x, y, width: w, height: h } = node;
@@ -475,7 +492,10 @@ function renderNodes() {
     const sel = state.selected.has(node.id);
     const g = svgEl('g', { 'data-id': node.id, 'data-type': 'node' });
 
-    g.appendChild(createShapeEl(node, sel));
+    const shapeEl = createShapeEl(node, sel);
+    shapeEl.style.fillOpacity = (node.opacity ?? 100) / 100;
+    applyStrokeStyle(shapeEl, node.strokeStyle);
+    g.appendChild(shapeEl);
 
     const lbl = svgEl('text', {
       x: node.x + node.width / 2,
@@ -556,6 +576,7 @@ function renderEdges() {
     lineEl.style.stroke      = strokeColor;
     lineEl.style.strokeWidth = strokeWidth;
     lineEl.style.color       = strokeColor;
+    applyStrokeStyle(lineEl, edge.strokeStyle);
     g.appendChild(lineEl);
 
     if (edge.label) {
@@ -1363,12 +1384,23 @@ function renderNodeProps(container, node) {
   const shapeOpts = ['box', 'circle', 'oval', 'diamond', 'triangle', 'parallelogram']
     .map(s => `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
     .join('');
+  const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
+    .map(([v, l]) => `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
   container.innerHTML = `
     <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
     <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', node.stroke, '#475569')}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
+    <div class="prop-group">
+      <label>Opacity</label>
+      <div class="opacity-row">
+        <input type="range" id="p-opacity" min="0" max="100" step="1" value="${node.opacity ?? 100}">
+        <span id="p-opacity-val">${node.opacity ?? 100}%</span>
+      </div>
+    </div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
@@ -1379,9 +1411,23 @@ function renderNodeProps(container, node) {
     pushHistory();
     render();
   });
+  document.getElementById('p-stroke-style').addEventListener('change', e => {
+    node.strokeStyle = e.target.value;
+    pushHistory();
+    render();
+  });
   bindFontControls(node, { size: 13 });
   bindColorInput('p-fill',   '#ffffff', v => { node.fill   = v || undefined; });
   bindColorInput('p-stroke', '#475569', v => { node.stroke = v || undefined; });
+  // Opacity slider
+  const opacitySlider = document.getElementById('p-opacity');
+  const opacityVal    = document.getElementById('p-opacity-val');
+  opacitySlider.addEventListener('input', () => {
+    node.opacity = parseInt(opacitySlider.value, 10);
+    opacityVal.textContent = node.opacity + '%';
+    render();
+  });
+  opacitySlider.addEventListener('change', () => pushHistory());
   bindPropInput('p-label', v => { node.label = v; });
   bindPropInput('p-x', v => { node.x = +v || 0; }, true);
   bindPropInput('p-y', v => { node.y = +v || 0; }, true);
@@ -1399,9 +1445,13 @@ function renderEdgeProps(container, edge) {
     ['both',    '↔ Both'],
     ['none',    '— None'],
   ].map(([v, label]) => `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`).join('');
+  const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
+    .map(([v, l]) => `<option value="${v}"${(edge.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
 
   container.innerHTML = `
     <div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>
@@ -1410,6 +1460,11 @@ function renderEdgeProps(container, edge) {
   `;
   document.getElementById('p-dir').addEventListener('change', e => {
     edge.direction = e.target.value;
+    pushHistory();
+    render();
+  });
+  document.getElementById('p-stroke-style').addEventListener('change', e => {
+    edge.strokeStyle = e.target.value;
     pushHistory();
     render();
   });
