@@ -13,6 +13,8 @@ const state = {
   nextId: 1,
   history: [],
   historyIndex: -1,
+  clipboard: { nodes: [], edges: [], annotations: [] },
+  pasteOffset: 0,
 };
 
 function genId() {
@@ -877,6 +879,11 @@ function onKeyDown(e) {
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); return; }
   if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redo(); return; }
 
+  if ((e.ctrlKey || e.metaKey) && e.key === 'c') { e.preventDefault(); copySelected(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'x') { e.preventDefault(); cutSelected(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); pasteClipboard(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); duplicateSelected(); return; }
+
   if (e.key === 'Delete' || e.key === 'Backspace') {
     if (state.selected.size === 0) return;
     e.preventDefault();
@@ -914,6 +921,83 @@ function deleteSelected() {
 }
 
 // ============================================================
+// Clipboard — Copy, Cut, Paste, Duplicate
+// ============================================================
+function copySelected() {
+  if (state.selected.size === 0) return;
+  state.clipboard.nodes       = [];
+  state.clipboard.edges       = [];
+  state.clipboard.annotations = [];
+  state.pasteOffset = 0;
+
+  for (const id of state.selected) {
+    const node = state.nodes.get(id);
+    const edge = state.edges.get(id);
+    const ann  = state.annotations.get(id);
+    if (node) state.clipboard.nodes.push({ ...node });
+    if (edge) state.clipboard.edges.push({ ...edge });
+    if (ann)  state.clipboard.annotations.push({ ...ann });
+  }
+  updateEditButtons();
+}
+
+function cutSelected() {
+  if (state.selected.size === 0) return;
+  copySelected();
+  deleteSelected();
+}
+
+function pasteClipboard() {
+  const cb = state.clipboard;
+  if (!cb.nodes.length && !cb.edges.length && !cb.annotations.length) return;
+
+  state.pasteOffset += 20;
+  const off = state.pasteOffset;
+
+  // Build old→new ID map for nodes so edges can be reconnected
+  const idMap = new Map();
+  const newIds = [];
+
+  for (const node of cb.nodes) {
+    const newId = genId();
+    idMap.set(node.id, newId);
+    state.nodes.set(newId, { ...node, id: newId, x: node.x + off, y: node.y + off });
+    newIds.push(newId);
+  }
+
+  for (const edge of cb.edges) {
+    const newId = genId();
+    state.edges.set(newId, {
+      ...edge,
+      id: newId,
+      from: idMap.get(edge.from) || edge.from,
+      to:   idMap.get(edge.to)   || edge.to,
+    });
+    newIds.push(newId);
+  }
+
+  for (const ann of cb.annotations) {
+    const newId = genId();
+    state.annotations.set(newId, { ...ann, id: newId, x: ann.x + off, y: ann.y + off });
+    newIds.push(newId);
+  }
+
+  state.selected.clear();
+  newIds.forEach(id => state.selected.add(id));
+  pushHistory();
+  render();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+  updateEditButtons();
+}
+
+function duplicateSelected() {
+  if (state.selected.size === 0) return;
+  copySelected();
+  pasteClipboard();
+}
+
+// ============================================================
 // Cursor
 // ============================================================
 const resizeCursors = {
@@ -934,6 +1018,7 @@ function updateCursor(p) {
 // Properties Panel
 // ============================================================
 function updatePropertiesPanel() {
+  updateEditButtons(); // keep toolbar edit buttons in sync with selection
   const content = document.getElementById('properties-content');
 
   if (state.selected.size === 0) {
@@ -1146,6 +1231,21 @@ function updateToolbarStatus() {
   el.textContent = `${n} box${n !== 1 ? 'es' : ''}  ·  ${e} connector${e !== 1 ? 's' : ''}  ·  ${a} annotation${a !== 1 ? 's' : ''}`;
 }
 
+function updateEditButtons() {
+  const hasSel = state.selected.size > 0;
+  const hasCb  = state.clipboard.nodes.length > 0 ||
+                 state.clipboard.edges.length > 0 ||
+                 state.clipboard.annotations.length > 0;
+  const btnCut  = document.getElementById('btn-cut');
+  const btnCopy = document.getElementById('btn-copy');
+  const btnPaste = document.getElementById('btn-paste');
+  const btnDupe  = document.getElementById('btn-duplicate');
+  if (btnCut)   btnCut.disabled   = !hasSel;
+  if (btnCopy)  btnCopy.disabled  = !hasSel;
+  if (btnPaste) btnPaste.disabled = !hasCb;
+  if (btnDupe)  btnDupe.disabled  = !hasSel;
+}
+
 // ============================================================
 // Init
 // ============================================================
@@ -1168,6 +1268,12 @@ function init() {
   // Undo / Redo
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-redo').addEventListener('click', redo);
+
+  // Cut / Copy / Paste / Duplicate
+  document.getElementById('btn-cut').addEventListener('click', cutSelected);
+  document.getElementById('btn-copy').addEventListener('click', copySelected);
+  document.getElementById('btn-paste').addEventListener('click', pasteClipboard);
+  document.getElementById('btn-duplicate').addEventListener('click', duplicateSelected);
 
   // Export / Import
   document.getElementById('btn-export').addEventListener('click', exportDiagram);

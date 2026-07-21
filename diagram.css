@@ -73,6 +73,12 @@ html, body, #app {
   box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
 }
 
+#toolbar button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 #toolbar-status {
   margin-left: auto;
   font-size: 11px;
