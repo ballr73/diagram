@@ -39,6 +39,47 @@ function pushHistory() {
   state.history.push(snapshot());
   if (state.history.length > 100) state.history.shift();
   state.historyIndex = state.history.length - 1;
+  saveToLocalStorage();
+}
+
+// ============================================================
+// localStorage persistence
+// ============================================================
+const LS_KEY = 'diagram-editor';
+
+function saveToLocalStorage() {
+  try {
+    const data = {
+      version: 1,
+      nodes: [...state.nodes.values()],
+      edges: [...state.edges.values()],
+      annotations: [...state.annotations.values()],
+      nextId: state.nextId,
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  } catch (_) {
+    // Storage full or unavailable — silently ignore
+  }
+}
+
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (typeof data.version === 'undefined') return false;
+    state.nodes.clear();
+    state.edges.clear();
+    state.annotations.clear();
+    state.selected.clear();
+    (data.nodes || []).forEach(n => state.nodes.set(n.id, { ...n }));
+    (data.edges || []).forEach(e => state.edges.set(e.id, { ...e }));
+    (data.annotations || []).forEach(a => state.annotations.set(a.id, { ...a }));
+    if (data.nextId) state.nextId = data.nextId;
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 function undo() {
@@ -690,17 +731,15 @@ function selectMouseDown(p, hit, e) {
   }
 
   if (hit.type === 'node') {
-    if (!e.shiftKey) state.selected.clear();
-    state.selected.add(hit.id);
+    if (e.shiftKey) {
+      state.selected.add(hit.id);
+    } else if (!state.selected.has(hit.id)) {
+      state.selected.clear();
+      state.selected.add(hit.id);
+    }
     render();
     updatePropertiesPanel();
-    drag = {
-      type: 'move-node',
-      nodeId: hit.id,
-      startX: p.x, startY: p.y,
-      origX: hit.node.x, origY: hit.node.y,
-      moved: false,
-    };
+    drag = startMoveDrag(p);
     return;
   }
 
@@ -713,17 +752,15 @@ function selectMouseDown(p, hit, e) {
   }
 
   if (hit.type === 'annotation') {
-    if (!e.shiftKey) state.selected.clear();
-    state.selected.add(hit.id);
+    if (e.shiftKey) {
+      state.selected.add(hit.id);
+    } else if (!state.selected.has(hit.id)) {
+      state.selected.clear();
+      state.selected.add(hit.id);
+    }
     render();
     updatePropertiesPanel();
-    drag = {
-      type: 'move-ann',
-      annId: hit.id,
-      startX: p.x, startY: p.y,
-      origX: hit.ann.x, origY: hit.ann.y,
-      moved: false,
-    };
+    drag = startMoveDrag(p);
     return;
   }
 
@@ -774,8 +811,46 @@ function textMouseDown(p, hit) {
   pushHistory();
 }
 
+// Build the appropriate drag descriptor for a move operation.
+// If multiple movable items are selected, returns a move-multi drag.
+// Otherwise returns a single-item move-node or move-ann drag.
+function startMoveDrag(p) {
+  const movable = [...state.selected].filter(id =>
+    state.nodes.has(id) || state.annotations.has(id)
+  );
+
+  if (movable.length > 1) {
+    const origins = {};
+    for (const id of movable) {
+      const item = state.nodes.get(id) || state.annotations.get(id);
+      origins[id] = { x: item.x, y: item.y };
+    }
+    return { type: 'move-multi', startX: p.x, startY: p.y, origins, moved: false };
+  }
+
+  // Single item
+  const id = movable[0];
+  if (state.nodes.has(id)) {
+    const node = state.nodes.get(id);
+    return { type: 'move-node', nodeId: id, startX: p.x, startY: p.y, origX: node.x, origY: node.y, moved: false };
+  }
+  const ann = state.annotations.get(id);
+  return { type: 'move-ann', annId: id, startX: p.x, startY: p.y, origX: ann.x, origY: ann.y, moved: false };
+}
+
 // --- Drag move ---
 function dragMove(p) {
+  if (drag.type === 'move-multi') {
+    const dx = p.x - drag.startX, dy = p.y - drag.startY;
+    for (const [id, orig] of Object.entries(drag.origins)) {
+      const item = state.nodes.get(id) || state.annotations.get(id);
+      if (item) { item.x = orig.x + dx; item.y = orig.y + dy; }
+    }
+    drag.moved = true;
+    render();
+    return;
+  }
+
   if (drag.type === 'move-node') {
     const dx = p.x - drag.startX, dy = p.y - drag.startY;
     const node = state.nodes.get(drag.nodeId);
@@ -843,7 +918,7 @@ function dragEnd(p) {
   const d = drag;
   drag = null;
 
-  if (d.type === 'move-node' || d.type === 'move-ann') {
+  if (d.type === 'move-node' || d.type === 'move-ann' || d.type === 'move-multi') {
     if (d.moved) pushHistory();
     return;
   }
@@ -1672,37 +1747,14 @@ function init() {
   // Keyboard
   document.addEventListener('keydown', onKeyDown);
 
-  // Set initial tool + seed history
+  // Set initial tool
   setTool('select');
-  pushHistory(); // history[0] = empty state
 
-  loadDemo();
-}
+  // Restore last diagram from localStorage (before seeding history)
+  loadFromLocalStorage();
 
-function loadDemo() {
-  // Row 1: flow-like shapes
-  const n1 = { id: genId(), x: 60,  y: 170, width: 100, height: 60, label: 'Start',       shape: 'oval' };
-  const n2 = { id: genId(), x: 220, y: 170, width: 120, height: 60, label: 'Process',      shape: 'box' };
-  const n3 = { id: genId(), x: 400, y: 170, width: 100, height: 70, label: 'Decision',     shape: 'diamond' };
-  const n4 = { id: genId(), x: 570, y: 150, width: 100, height: 60, label: 'End',          shape: 'oval' };
-  const n5 = { id: genId(), x: 400, y: 310, width: 100, height: 60, label: 'Error',        shape: 'parallelogram' };
-  // Row 2: extra shapes
-  const n6 = { id: genId(), x: 100, y: 340, width: 80,  height: 80, label: 'Note',         shape: 'circle' };
-  const n7 = { id: genId(), x: 220, y: 330, width: 130, height: 55, label: 'Step',         shape: 'parallelogram' };
-  const n8 = { id: genId(), x: 570, y: 300, width: 100, height: 80, label: 'Warning',      shape: 'triangle' };
+  pushHistory(); // history[0] = initial/restored state
 
-  [n1, n2, n3, n4, n5, n6, n7, n8].forEach(n => state.nodes.set(n.id, n));
-
-  const e1 = { id: genId(), from: n1.id, to: n2.id, label: '' };
-  const e2 = { id: genId(), from: n2.id, to: n3.id, label: '' };
-  const e3 = { id: genId(), from: n3.id, to: n4.id, label: 'yes' };
-  const e4 = { id: genId(), from: n3.id, to: n5.id, label: 'no' };
-  [e1, e2, e3, e4].forEach(e => state.edges.set(e.id, e));
-
-  const a1 = { id: genId(), x: 60, y: 120, text: 'Sample workflow — try drawing shapes with the toolbar' };
-  state.annotations.set(a1.id, a1);
-
-  pushHistory();
   render();
   updatePropertiesPanel();
   updateToolbarStatus();
