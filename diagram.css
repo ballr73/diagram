@@ -112,28 +112,28 @@ html, body, #app {
    SVG — Nodes (all shape types share .node-shape)
    ============================================================ */
 .node-shape {
-  fill: #ffffff;
-  stroke: #475569;
+  fill: var(--node-fill, #ffffff);
+  stroke: var(--node-stroke, #475569);
   stroke-width: 1.5;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.10));
   cursor: move;
 }
 
 .node-shape.selected {
-  stroke: #2563eb;
-  stroke-width: 2;
-  fill: #eff6ff;
+  stroke: #2563eb !important;
+  stroke-width: 2 !important;
+  fill: #eff6ff !important;
 }
 
 .node-shape.connector-hover {
-  stroke: #16a34a;
-  stroke-width: 2;
-  stroke-dasharray: 4 2;
+  stroke: #16a34a !important;
+  stroke-width: 2 !important;
+  stroke-dasharray: 4 2 !important;
 }
 
 .node-shape.connector-target {
-  stroke: #16a34a;
-  stroke-width: 2;
+  stroke: #16a34a !important;
+  stroke-width: 2 !important;
 }
 
 .node-label {
@@ -155,14 +155,12 @@ html, body, #app {
 }
 
 .edge-line {
-  stroke: #64748b;
   stroke-width: 1.5;
   fill: none;
   cursor: pointer;
 }
 
 .edge-line.selected {
-  stroke: #2563eb;
   stroke-width: 2;
 }
 
@@ -180,8 +178,9 @@ html, body, #app {
   stroke: none;
 }
 
-.arrow-fill { fill: #64748b; }
-.arrow-fill-sel { fill: #2563eb; }
+/* Arrowheads inherit colour from the referencing line element via currentColor */
+.arrow-fill { fill: currentColor; }
+.arrow-fill-sel { fill: currentColor; }
 
 /* ============================================================
    SVG — Annotations
