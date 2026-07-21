@@ -28,7 +28,12 @@ jobs:
           sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
 
       - name: Package release files
-        run: zip diagram-editor.zip index.html editor.js diagram.css README.md
+        run: |
+          tar -czf diagram-editor.tar.gz \
+            index.html editor.js diagram.css README.md \
+            icons/manifest.js icons/manifest.json \
+            icons/AWS icons/Azure \
+            scripts/generate-manifest.js
 
       - name: Create GitHub release
         env:
@@ -37,4 +42,4 @@ jobs:
           gh release create "${{ steps.version.outputs.tag }}" \
             --title "Diagram Editor ${{ steps.version.outputs.tag }}" \
             --generate-notes \
-            diagram-editor.zip
+            diagram-editor.tar.gz
