@@ -434,8 +434,18 @@ html, body, #app {
   cursor: move;
 }
 
-.annotation-text.selected {
-  fill: #2563eb;
+.annotation-bg {
+  fill: none;
+  stroke: none;
+  pointer-events: none;
+}
+
+.annotation-selection {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -489,8 +499,17 @@ html, body, #app {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   padding: 2px 5px;
   outline: none;
-  text-align: center;
   box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+/* Single-line node/edge label inputs are centred; textarea annotation editors use their own text-align */
+input.inline-input { text-align: center; }
+
+.inline-textarea {
+  text-align: left;
+  resize: both;
+  overflow: auto;
+  line-height: 1.4;
 }
 
 /* ============================================================

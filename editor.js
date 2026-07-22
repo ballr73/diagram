@@ -184,6 +184,9 @@ function getSVGEmbedStyles() {
     .edge-label  { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .edge-label-bg  { fill: #f8fafc; stroke: none; }
     .waypoint-handle { display: none; }
+    .annotation-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .annotation-bg   { fill: none; stroke: none; }
+    .annotation-selection { display: none; }
     .annotation-text { fill: #7c3aed; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .arrow-fill     { fill: currentColor; }
     .arrow-fill-sel { fill: currentColor; }
@@ -437,16 +440,70 @@ function getNodeAt(x, y) {
 }
 
 function getAnnotationAt(x, y) {
-  // Approximate: within bounding box of text
   const entries = [...state.annotations.entries()];
   for (let i = entries.length - 1; i >= 0; i--) {
     const [, ann] = entries[i];
-    if (x >= ann.x - 4 && x <= ann.x + 200 &&
-        y >= ann.y - 16 && y <= ann.y + 4) {
+    const bb = annBBox(ann);
+    const pad = 4;
+    if (x >= bb.x - pad && x <= bb.x + bb.w + pad &&
+        y >= bb.y - pad && y <= bb.y + bb.h + pad) {
       return ann;
     }
   }
   return null;
+}
+
+const ANN_DEFAULT_MAX_WIDTH = 300;
+
+/**
+ * Word-wrap `text` into lines that fit within `maxWidth` pixels.
+ * Explicit \n line breaks are always honoured.
+ */
+function wrapTextToLines(text, maxWidth, fontSize) {
+  const charWidth = fontSize * 0.6;
+  const maxChars = Math.max(1, Math.floor(maxWidth / charWidth));
+  const rawLines = (text || '').split('\n');
+  const result = [];
+  for (const rawLine of rawLines) {
+    if (!rawLine) { result.push(''); continue; }
+    const words = rawLine.split(' ');
+    let current = '';
+    for (const word of words) {
+      const test = current ? current + ' ' + word : word;
+      if (test.length <= maxChars) {
+        current = test;
+      } else {
+        if (current) result.push(current);
+        // Word longer than max — push as-is rather than lose it
+        current = word;
+      }
+    }
+    if (current !== '') result.push(current);
+  }
+  return result.length ? result : [''];
+}
+
+/** Estimated (or explicit) bounding box for an annotation, accounting for wrapping and alignment. */
+function annBBox(ann) {
+  const fontSize = ann.fontSize || 13;
+  const lineHeight = fontSize * 1.4;
+  const charWidth  = fontSize * 0.6;
+
+  // Width: explicit > auto-from-text (capped at default max)
+  const rawLines = (ann.text || 'Text').split('\n');
+  const autoW = Math.max(40, Math.max(...rawLines.map(l => (l || '').length)) * charWidth);
+  const w = ann.width || Math.min(autoW, ANN_DEFAULT_MAX_WIDTH);
+
+  // Height: explicit > derived from wrapped line count
+  const wrappedLines = wrapTextToLines(ann.text || 'Text', w, fontSize);
+  const h = ann.height || wrappedLines.length * lineHeight;
+
+  const align = ann.align || 'left';
+  let x;
+  if (align === 'center')     x = ann.x - w / 2;
+  else if (align === 'right') x = ann.x - w;
+  else                        x = ann.x;
+  return { x, y: ann.y - fontSize, w, h };
 }
 
 function getEdgeAt(x, y, threshold = 8) {
@@ -515,6 +572,24 @@ function getResizeHandle(node, x, y, threshold = 6) {
     { name: 's',  x: node.x + node.width / 2,   y: node.y + node.height },
     { name: 'sw', x: node.x,                   y: node.y + node.height },
     { name: 'w',  x: node.x,                   y: node.y + node.height / 2 },
+  ];
+  for (const h of handles) {
+    if (Math.abs(x - h.x) <= threshold && Math.abs(y - h.y) <= threshold) return h.name;
+  }
+  return null;
+}
+
+function getAnnResizeHandle(ann, x, y, threshold = 6) {
+  const bb = annBBox(ann);
+  const handles = [
+    { name: 'nw', x: bb.x,            y: bb.y },
+    { name: 'n',  x: bb.x + bb.w / 2, y: bb.y },
+    { name: 'ne', x: bb.x + bb.w,     y: bb.y },
+    { name: 'e',  x: bb.x + bb.w,     y: bb.y + bb.h / 2 },
+    { name: 'se', x: bb.x + bb.w,     y: bb.y + bb.h },
+    { name: 's',  x: bb.x + bb.w / 2, y: bb.y + bb.h },
+    { name: 'sw', x: bb.x,            y: bb.y + bb.h },
+    { name: 'w',  x: bb.x,            y: bb.y + bb.h / 2 },
   ];
   for (const h of handles) {
     if (Math.abs(x - h.x) <= threshold && Math.abs(y - h.y) <= threshold) return h.name;
@@ -767,12 +842,76 @@ function renderAnnotations() {
   annotationsLayer.innerHTML = '';
   for (const ann of state.annotations.values()) {
     const sel = state.selected.has(ann.id);
+    const fontSize = ann.fontSize || 13;
+    const lineHeight = fontSize * 1.4;
+    const align = ann.align || 'left';
+    const textAnchor = align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start';
+    const pad = 6;
+    const bb = annBBox(ann);
+
     const g = svgEl('g', { 'data-id': ann.id, 'data-type': 'annotation' });
+
+    // Optional background fill / border rect
+    if (ann.fill || ann.stroke) {
+      const rect = svgEl('rect', {
+        x: bb.x - pad, y: bb.y - pad,
+        width: bb.w + pad * 2, height: bb.h + pad * 2,
+        rx: 3, ry: 3,
+        class: 'annotation-bg',
+      });
+      if (ann.fill)   rect.style.fill = ann.fill;
+      if (ann.stroke) {
+        rect.style.stroke = ann.stroke;
+        rect.style.strokeWidth = '1.5';
+        applyStrokeStyle(rect, ann.strokeStyle);
+      }
+      g.appendChild(rect);
+    }
+
+    // Selection indicator (dashed blue rect)
+    if (sel) {
+      g.appendChild(svgEl('rect', {
+        x: bb.x - pad, y: bb.y - pad,
+        width: bb.w + pad * 2, height: bb.h + pad * 2,
+        rx: 3, ry: 3,
+        class: 'annotation-selection',
+      }));
+
+      // Resize handles
+      const handles = [
+        { name: 'nw', x: bb.x - pad,            y: bb.y - pad },
+        { name: 'n',  x: bb.x + bb.w / 2,        y: bb.y - pad },
+        { name: 'ne', x: bb.x + bb.w + pad,       y: bb.y - pad },
+        { name: 'e',  x: bb.x + bb.w + pad,       y: bb.y + bb.h / 2 },
+        { name: 'se', x: bb.x + bb.w + pad,       y: bb.y + bb.h + pad },
+        { name: 's',  x: bb.x + bb.w / 2,         y: bb.y + bb.h + pad },
+        { name: 'sw', x: bb.x - pad,              y: bb.y + bb.h + pad },
+        { name: 'w',  x: bb.x - pad,              y: bb.y + bb.h / 2 },
+      ];
+      for (const h of handles) {
+        g.appendChild(svgEl('rect', {
+          x: h.x - 4, y: h.y - 4, width: 8, height: 8,
+          class: 'resize-handle',
+          'data-handle': h.name,
+        }));
+      }
+    }
+
+    // Text element with tspan per wrapped line
     const textEl = svgEl('text', {
       x: ann.x, y: ann.y,
-      class: 'annotation-text' + (sel ? ' selected' : ''),
-    }, ann.text || '');
+      'text-anchor': textAnchor,
+      class: 'annotation-text',
+    });
+    textEl.style.fill = ann.color || '#7c3aed';
     applyFontStyle(textEl, ann, { size: 13, italic: true });
+
+    const wrappedLines = wrapTextToLines(ann.text || '', bb.w, fontSize);
+    wrappedLines.forEach((line, i) => {
+      const tspan = svgEl('tspan', { x: ann.x, dy: i === 0 ? '0' : `${lineHeight}` }, line || '\u200b');
+      textEl.appendChild(tspan);
+    });
+
     g.appendChild(textEl);
     annotationsLayer.appendChild(g);
   }
@@ -794,6 +933,7 @@ function svgCoords(e) {
 /**
  * Hit-test at (x, y). Returns:
  *   {type:'resize', handle, nodeId, node}
+ *   {type:'ann-resize', handle, annId, ann}
  *   {type:'waypoint', edgeId, waypointId}
  *   {type:'node', id, node}
  *   {type:'edge', id, edge}
@@ -806,6 +946,13 @@ function hitTest(x, y) {
       if (!state.selected.has(node.id)) continue;
       const h = getResizeHandle(node, x, y);
       if (h) return { type: 'resize', handle: h, nodeId: node.id, node };
+    }
+    // Annotation resize handles (checked before waypoints / body hits)
+    for (const id of state.selected) {
+      const ann = state.annotations.get(id);
+      if (!ann) continue;
+      const h = getAnnResizeHandle(ann, x, y);
+      if (h) return { type: 'ann-resize', handle: h, annId: id, ann };
     }
     // Waypoint handles on selected edges
     for (const edgeId of state.selected) {
@@ -894,6 +1041,19 @@ function selectMouseDown(p, hit, e) {
       nodeId: hit.nodeId,
       startX: p.x, startY: p.y,
       orig: { x: node.x, y: node.y, w: node.width, h: node.height },
+      moved: false,
+    };
+    return;
+  }
+
+  if (hit.type === 'ann-resize') {
+    const bb = annBBox(hit.ann);
+    drag = {
+      type: 'resize-ann',
+      handle: hit.handle,
+      annId: hit.annId,
+      startX: p.x, startY: p.y,
+      orig: { x: bb.x, y: bb.y, w: bb.w, h: bb.h },
       moved: false,
     };
     return;
@@ -1059,6 +1219,13 @@ function dragMove(p) {
     return;
   }
 
+  if (drag.type === 'resize-ann') {
+    applyAnnResize(p);
+    drag.moved = true;
+    render();
+    return;
+  }
+
   if (drag.type === 'resize') {
     applyResize(p);
     drag.moved = true;
@@ -1118,6 +1285,11 @@ function dragEnd(p) {
 
   if (d.type === 'resize') {
     if (d.moved) pushHistory();
+    return;
+  }
+
+  if (d.type === 'resize-ann') {
+    if (d.moved) { pushHistory(); updatePropertiesPanel(); }
     return;
   }
 
@@ -1194,6 +1366,32 @@ function applyResize(p) {
   node.x = nx; node.y = ny; node.width = nw; node.height = nh;
 }
 
+function applyAnnResize(p) {
+  const ann = state.annotations.get(drag.annId);
+  if (!ann) return;
+  const { x, y, w, h } = drag.orig;
+  const dx = p.x - drag.startX, dy = p.y - drag.startY;
+  const handle = drag.handle;
+  const fontSize = ann.fontSize || 13;
+  const minW = 40, minH = fontSize * 1.4;
+
+  let nx = x, ny = y, nw = w, nh = h;
+  if (handle.includes('e')) nw = Math.max(minW, w + dx);
+  if (handle.includes('s')) nh = Math.max(minH, h + dy);
+  if (handle.includes('w')) { nx = x + dx; nw = Math.max(minW, w - dx); if (nw === minW) nx = x + w - minW; }
+  if (handle.includes('n')) { ny = y + dy; nh = Math.max(minH, h - dy); if (nh === minH) ny = y + h - minH; }
+
+  ann.width  = nw;
+  ann.height = nh;
+
+  // Recompute anchor point from new top-left (nx, ny) and alignment
+  const align = ann.align || 'left';
+  if (align === 'center')     ann.x = nx + nw / 2;
+  else if (align === 'right') ann.x = nx + nw;
+  else                        ann.x = nx;
+  ann.y = ny + fontSize; // baseline = top of box + one line height
+}
+
 function clearClass(cls) {
   svg.querySelectorAll('.' + cls).forEach(el => el.classList.remove(cls));
 }
@@ -1209,6 +1407,52 @@ function addClassToNode(nodeId, cls) {
 function startInlineEdit(id, type) {
   clearInlineEditor();
 
+  // Annotations use a resizable textarea to support multi-line text
+  if (type === 'annotation') {
+    const ann = state.annotations.get(id);
+    if (!ann) return;
+    const bb  = annBBox(ann);
+    const pad = 8;
+    const fw  = Math.max(160, bb.w + pad * 2);
+    const fh  = Math.max(60,  bb.h + pad * 2 + 10);
+    const fo  = svgEl('foreignObject', {
+      id: 'inline-editor',
+      x: bb.x - pad, y: bb.y - pad,
+      width: fw, height: fh,
+    });
+    const ta = document.createElement('textarea');
+    ta.className   = 'inline-input inline-textarea';
+    ta.value       = ann.text || '';
+    ta.style.cssText = `width:100%;height:100%;resize:both;box-sizing:border-box;font-size:${ann.fontSize || 13}px;text-align:${ann.align || 'left'};`;
+    fo.appendChild(ta);
+    uiLayer.appendChild(fo);
+    requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); });
+    const commit = () => {
+      const val = ta.value;
+      clearInlineEditor();
+      if (state.annotations.has(id)) state.annotations.get(id).text = val;
+      pushHistory();
+      render();
+      updatePropertiesPanel();
+    };
+    ta.addEventListener('blur', commit);
+    ta.addEventListener('keydown', e => {
+      // Ctrl+Enter commits; plain Enter inserts newline (default textarea behaviour)
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        ta.removeEventListener('blur', commit);
+        commit();
+      }
+      if (e.key === 'Escape') {
+        ta.removeEventListener('blur', commit);
+        clearInlineEditor();
+      }
+      e.stopPropagation();
+    });
+    return;
+  }
+
+  // Nodes and edges use a single-line input
   let item, cx, cy, w;
   if (type === 'node') {
     item = state.nodes.get(id);
@@ -1225,12 +1469,6 @@ function startInlineEdit(id, type) {
     cx = mid.x;
     cy = mid.y;
     w = 140;
-  } else if (type === 'annotation') {
-    item = state.annotations.get(id);
-    if (!item) return;
-    cx = item.x + 75;
-    cy = item.y - 8;
-    w = 160;
   }
 
   const fo = svgEl('foreignObject', {
@@ -1241,7 +1479,7 @@ function startInlineEdit(id, type) {
   const input = document.createElement('input');
   input.type = 'text';
   input.className = 'inline-input';
-  input.value = type === 'annotation' ? (item.text || '') : (item.label || '');
+  input.value = item.label || '';
   input.style.cssText = 'width:100%;height:100%;';
   fo.appendChild(input);
   uiLayer.appendChild(fo);
@@ -1252,18 +1490,15 @@ function startInlineEdit(id, type) {
     clearInlineEditor();
     if (type === 'node') { if (state.nodes.has(id)) state.nodes.get(id).label = val; }
     else if (type === 'edge') { if (state.edges.has(id)) state.edges.get(id).label = val; }
-    else if (type === 'annotation') { if (state.annotations.has(id)) state.annotations.get(id).text = val; }
     pushHistory();
     render();
     updatePropertiesPanel();
   };
 
-  const cancel = () => clearInlineEditor();
-
   input.addEventListener('blur', commit);
   input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
-    if (e.key === 'Escape') { input.removeEventListener('blur', commit); cancel(); }
+    if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { input.removeEventListener('blur', commit); clearInlineEditor(); }
     e.stopPropagation();
   });
 }
@@ -1641,10 +1876,11 @@ const resizeCursors = {
 function updateCursor(p) {
   if (state.tool !== 'select') { svg.style.cursor = 'crosshair'; return; }
   const hit = hitTest(p.x, p.y);
-  if (hit.type === 'resize')   svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
-  else if (hit.type === 'waypoint') svg.style.cursor = 'move';
+  if (hit.type === 'resize')      svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
+  else if (hit.type === 'ann-resize') svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
+  else if (hit.type === 'waypoint')   svg.style.cursor = 'move';
   else if (hit.type === 'node' || hit.type === 'annotation') svg.style.cursor = 'move';
-  else if (hit.type === 'edge') svg.style.cursor = 'pointer';
+  else if (hit.type === 'edge')   svg.style.cursor = 'pointer';
   else svg.style.cursor = 'default';
 }
 
@@ -1826,16 +2062,75 @@ function renderEdgeProps(container, edge) {
 }
 
 function renderAnnProps(container, ann) {
+  const align = ann.align || 'left';
+  const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
+    .map(([v, l]) => `<option value="${v}"${(ann.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
+
   container.innerHTML = `
-    <div class="prop-group"><label>Text</label><input type="text" id="p-text" value="${esc(ann.text || '')}"></div>
-    <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13, italic: true })}</div>
+    <div class="prop-group">
+      <label>Text</label>
+      <textarea id="p-text" rows="3" style="width:100%;resize:vertical;box-sizing:border-box;font-family:inherit;font-size:12px;padding:4px">${esc(ann.text || '')}</textarea>
+    </div>
+    <div class="prop-group">
+      <label>Align</label>
+      <div class="font-controls">
+        <button class="font-btn${align === 'left'   ? ' active' : ''}" id="p-align-left"   title="Left">⬅</button>
+        <button class="font-btn${align === 'center' ? ' active' : ''}" id="p-align-center" title="Centre">↔</button>
+        <button class="font-btn${align === 'right'  ? ' active' : ''}" id="p-align-right"  title="Right">➡</button>
+      </div>
+    </div>
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13 })}</div>
+    <div class="prop-group"><label>Color</label>${colorRow('p-color', ann.color, '#7c3aed')}</div>
+    <div class="prop-group"><label>Background</label>${colorRow('p-fill', ann.fill, '#ffffff')}</div>
+    <div class="prop-group"><label>Border</label>${colorRow('p-stroke', ann.stroke, '#475569')}</div>
+    <div class="prop-group"><label>Border style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(ann.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(ann.y)}"></div>
+    <div class="prop-group"><label>Width</label><input type="number" id="p-ann-w" value="${Math.round(ann.width  || annBBox(ann).w)}" min="40"></div>
+    <div class="prop-group"><label>Height</label><input type="number" id="p-ann-h" value="${Math.round(ann.height || annBBox(ann).h)}" min="10"></div>
   `;
+
+  // Text (textarea works with bindPropInput since it fires 'input' and 'change')
   bindPropInput('p-text', v => { ann.text = v; });
-  bindFontControls(ann, { size: 13, italic: true });
+
+  // Alignment buttons
+  ['left', 'center', 'right'].forEach(a => {
+    const btn = document.getElementById(`p-align-${a}`);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      ann.align = a;
+      pushHistory();
+      render();
+      updatePropertiesPanel();
+    });
+  });
+
+  bindFontControls(ann, { size: 13 });
+  bindColorInput('p-color',  '#7c3aed', v => { ann.color  = v || undefined; });
+  bindColorInput('p-fill',   '#ffffff', v => { ann.fill   = v || undefined; });
+  bindColorInput('p-stroke', '#475569', v => { ann.stroke = v || undefined; });
+
+  const strokeStyleEl = document.getElementById('p-stroke-style');
+  if (strokeStyleEl) strokeStyleEl.addEventListener('change', e => {
+    ann.strokeStyle = e.target.value;
+    pushHistory();
+    render();
+  });
+
   bindPropInput('p-x', v => { ann.x = +v || 0; }, true);
   bindPropInput('p-y', v => { ann.y = +v || 0; }, true);
+  bindPropInput('p-ann-w', v => {
+    const nw = Math.max(40, +v || 40);
+    const bb = annBBox(ann);
+    const nx = bb.x; // keep top-left fixed when typing into width field
+    ann.width = nw;
+    const align = ann.align || 'left';
+    if (align === 'center')     ann.x = nx + nw / 2;
+    else if (align === 'right') ann.x = nx + nw;
+    else                        ann.x = nx;
+  }, true);
+  bindPropInput('p-ann-h', v => { ann.height = Math.max(10, +v || 10); }, true);
 }
 
 function bindPropInput(id, setter, isNumber) {
