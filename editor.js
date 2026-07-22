@@ -2273,6 +2273,13 @@ function initIconLibrary() {
 // ============================================================
 // Init
 // ============================================================
+
+/** Wire a click handler to an element by ID — silently skips if the element doesn't exist. */
+function on(id, event, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(event, handler);
+}
+
 function init() {
   initSVG();
 
@@ -2291,37 +2298,35 @@ function init() {
   });
 
   // Undo / Redo
-  document.getElementById('btn-undo').addEventListener('click', undo);
-  document.getElementById('btn-redo').addEventListener('click', redo);
+  on('btn-undo',  'click', undo);
+  on('btn-redo',  'click', redo);
 
   // Cut / Copy / Paste / Duplicate
-  document.getElementById('btn-cut').addEventListener('click', cutSelected);
-  document.getElementById('btn-copy').addEventListener('click', copySelected);
-  document.getElementById('btn-paste').addEventListener('click', pasteClipboard);
-  document.getElementById('btn-duplicate').addEventListener('click', duplicateSelected);
+  on('btn-cut',       'click', cutSelected);
+  on('btn-copy',      'click', copySelected);
+  on('btn-paste',     'click', pasteClipboard);
+  on('btn-duplicate', 'click', duplicateSelected);
 
   // Align / Distribute
-  document.getElementById('btn-align-left').addEventListener('click', alignLeft);
-  document.getElementById('btn-align-center-h').addEventListener('click', alignCenterH);
-  document.getElementById('btn-align-right').addEventListener('click', alignRight);
-  document.getElementById('btn-align-top').addEventListener('click', alignTop);
-  document.getElementById('btn-align-center-v').addEventListener('click', alignCenterV);
-  document.getElementById('btn-align-bottom').addEventListener('click', alignBottom);
-  document.getElementById('btn-dist-h').addEventListener('click', distributeH);
-  document.getElementById('btn-dist-v').addEventListener('click', distributeV);
+  on('btn-align-left',     'click', alignLeft);
+  on('btn-align-center-h', 'click', alignCenterH);
+  on('btn-align-right',    'click', alignRight);
+  on('btn-align-top',      'click', alignTop);
+  on('btn-align-center-v', 'click', alignCenterV);
+  on('btn-align-bottom',   'click', alignBottom);
+  on('btn-dist-h',         'click', distributeH);
+  on('btn-dist-v',         'click', distributeV);
 
   // Z-order
-  document.getElementById('btn-bring-front').addEventListener('click', bringToFront);
-  document.getElementById('btn-send-back').addEventListener('click', sendToBack);
+  on('btn-bring-front', 'click', bringToFront);
+  on('btn-send-back',   'click', sendToBack);
 
   // Open / Save / Export
-  document.getElementById('btn-save').addEventListener('click', saveDiagram);
-  document.getElementById('btn-open').addEventListener('click', () => {
-    document.getElementById('file-input').click();
-  });
-  document.getElementById('btn-export-svg').addEventListener('click', exportSVG);
-  document.getElementById('btn-export-png').addEventListener('click', exportPNG);
-  document.getElementById('file-input').addEventListener('change', e => {
+  on('btn-save',       'click', saveDiagram);
+  on('btn-open',       'click', () => document.getElementById('file-input')?.click());
+  on('btn-export-svg', 'click', exportSVG);
+  on('btn-export-png', 'click', exportPNG);
+  on('file-input', 'change', e => {
     if (e.target.files[0]) {
       importDiagram(e.target.files[0]);
       e.target.value = '';
@@ -2329,9 +2334,9 @@ function init() {
   });
 
   // Zoom
-  document.getElementById('btn-zoom-in').addEventListener('click', zoomIn);
-  document.getElementById('btn-zoom-out').addEventListener('click', zoomOut);
-  document.getElementById('zoom-select').addEventListener('change', e => {
+  on('btn-zoom-in',  'click', zoomIn);
+  on('btn-zoom-out', 'click', zoomOut);
+  on('zoom-select', 'change', e => {
     const val = e.target.value;
     if (val === 'fit') {
       fitWindow();
