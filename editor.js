@@ -6,15 +6,16 @@
 const state = {
   nodes: new Map(),       // id → {id, x, y, width, height, label, shape}
   edges: new Map(),       // id → {id, from, to, label, waypoints:[{id,x,y}]}
+  lines: new Map(),       // id → {id, x1, y1, x2, y2, waypoints, label, stroke, ...}
   annotations: new Map(), // id → {id, x, y, text}
   selected: new Set(),
-  selectedWaypoint: null, // {edgeId, waypointId} — waypoint focused for deletion
+  selectedWaypoint: null, // {edgeId?, lineId?, waypointId} — waypoint focused for deletion
   tool: 'select',
   currentShape: 'box',
   nextId: 1,
   history: [],
   historyIndex: -1,
-  clipboard: { nodes: [], edges: [], annotations: [] },
+  clipboard: { nodes: [], edges: [], lines: [], annotations: [] },
   pasteOffset: 0,
   zoom: 1.0,
   viewCenterX: 0,
@@ -32,6 +33,10 @@ function snapshot() {
   return {
     nodes: new Map([...state.nodes].map(([k, v]) => [k, { ...v }])),
     edges: new Map([...state.edges].map(([k, v]) => [k, {
+      ...v,
+      waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
+    }])),
+    lines: new Map([...state.lines].map(([k, v]) => [k, {
       ...v,
       waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
     }])),
@@ -60,6 +65,7 @@ function saveToLocalStorage() {
       version: 1,
       nodes: [...state.nodes.values()],
       edges: [...state.edges.values()],
+      lines: [...state.lines.values()],
       annotations: [...state.annotations.values()],
       nextId: state.nextId,
     };
@@ -77,10 +83,12 @@ function loadFromLocalStorage() {
     if (typeof data.version === 'undefined') return false;
     state.nodes.clear();
     state.edges.clear();
+    state.lines.clear();
     state.annotations.clear();
     state.selected.clear();
     (data.nodes || []).forEach(n => state.nodes.set(n.id, { ...n }));
     (data.edges || []).forEach(e => state.edges.set(e.id, { ...e }));
+    (data.lines || []).forEach(l => state.lines.set(l.id, { ...l }));
     (data.annotations || []).forEach(a => state.annotations.set(a.id, { ...a }));
     if (data.nextId) state.nextId = data.nextId;
     return true;
@@ -109,6 +117,10 @@ function restoreSnapshot(snap) {
     ...v,
     waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
   }]));
+  state.lines = new Map([...(snap.lines || [])].map(([k, v]) => [k, {
+    ...v,
+    waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
+  }]));
   state.annotations = new Map([...snap.annotations].map(([k, v]) => [k, { ...v }]));
   state.nextId = snap.nextId;
   state.selected.clear();
@@ -128,6 +140,7 @@ function saveDiagram() {
     version: 1,
     nodes: [...state.nodes.values()],
     edges: [...state.edges.values()],
+    lines: [...state.lines.values()],
     annotations: [...state.annotations.values()],
   };
   const json = JSON.stringify(data, null, 2);
@@ -149,13 +162,15 @@ function importDiagram(file) {
       pushHistory();
       state.nodes.clear();
       state.edges.clear();
+      state.lines.clear();
       state.annotations.clear();
       state.selected.clear();
       (data.nodes || []).forEach(n => state.nodes.set(n.id, { ...n }));
       (data.edges || []).forEach(e => state.edges.set(e.id, { ...e }));
+      (data.lines || []).forEach(l => state.lines.set(l.id, { ...l }));
       (data.annotations || []).forEach(a => state.annotations.set(a.id, { ...a }));
       // Advance nextId past all imported ids
-      const allNums = [...state.nodes.keys(), ...state.edges.keys(), ...state.annotations.keys()]
+      const allNums = [...state.nodes.keys(), ...state.edges.keys(), ...state.lines.keys(), ...state.annotations.keys()]
         .map(id => parseInt(id.replace('id-', ''), 10))
         .filter(n => !isNaN(n));
       state.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
@@ -190,6 +205,9 @@ function getSVGEmbedStyles() {
     .annotation-text { fill: #7c3aed; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .arrow-fill     { fill: currentColor; }
     .arrow-fill-sel { fill: currentColor; }
+    .line-sym-fill     { fill: currentColor; }
+    .line-sym-fill-sel { fill: currentColor; }
+    .line-endpoint-handle { display: none; }
   `;
 }
 
@@ -241,6 +259,13 @@ async function buildExportSVG() {
     maxX = Math.max(maxX, a.x + 300); // approx text width
     maxY = Math.max(maxY, a.y + 10);
   }
+  for (const l of state.lines.values()) {
+    const pts = linePoints(l);
+    for (const pt of pts) {
+      minX = Math.min(minX, pt.x); minY = Math.min(minY, pt.y);
+      maxX = Math.max(maxX, pt.x); maxY = Math.max(maxY, pt.y);
+    }
+  }
   if (!isFinite(minX)) { minX = 0; minY = 0; maxX = 500; maxY = 400; }
 
   const viewX = minX - PADDING;
@@ -265,6 +290,7 @@ async function buildExportSVG() {
   const uiLayer = clone.querySelector('#ui-layer');
   if (uiLayer) uiLayer.innerHTML = '';
   clone.querySelectorAll('.resize-handle').forEach(el => el.remove());
+  clone.querySelectorAll('.line-endpoint-handle').forEach(el => el.remove());
 
   // Replace icon <image> hrefs with embedded data URIs
   clone.querySelectorAll('image').forEach(imgEl => {
@@ -600,10 +626,11 @@ function getAnnResizeHandle(ann, x, y, threshold = 6) {
 // ============================================================
 // Rendering
 // ============================================================
-let svg, edgesLayer, nodesLayer, annotationsLayer, uiLayer;
+let svg, linesLayer, edgesLayer, nodesLayer, annotationsLayer, uiLayer;
 
 function initSVG() {
   svg = document.getElementById('canvas');
+  linesLayer = document.getElementById('lines-layer');
   edgesLayer = document.getElementById('edges-layer');
   nodesLayer = document.getElementById('nodes-layer');
   annotationsLayer = document.getElementById('annotations-layer');
@@ -620,6 +647,7 @@ function svgEl(tag, attrs, text) {
 }
 
 function render() {
+  renderLines();
   renderEdges();
   renderNodes();
   renderAnnotations();
@@ -768,6 +796,97 @@ function renderNodes() {
     }
 
     nodesLayer.appendChild(g);
+  }
+}
+
+/** Returns polyline points for a line: [start, ...waypoints, end]. */
+function linePoints(line) {
+  const pts = [{ x: line.x1, y: line.y1 }];
+  if (line.waypoints) pts.push(...line.waypoints);
+  pts.push({ x: line.x2, y: line.y2 });
+  return pts;
+}
+
+function getLineAt(x, y, threshold = 8) {
+  for (const line of state.lines.values()) {
+    const pts = linePoints(line);
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (segmentDist(x, y, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y) < threshold) return line;
+    }
+  }
+  return null;
+}
+
+function renderLines() {
+  linesLayer.innerHTML = '';
+  for (const line of state.lines.values()) {
+    const sel = state.selected.has(line.id);
+    const pts = linePoints(line);
+    const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+    const defaultStroke = '#64748b';
+    const selStroke     = '#2563eb';
+    const strokeColor   = sel ? selStroke : (line.stroke || defaultStroke);
+    const strokeWidth   = sel ? '2' : '1.5';
+
+    const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
+
+    // Wide invisible hit area
+    g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
+
+    // Resolve symbol markers
+    const startSym = line.startSymbol || 'none';
+    const endSym   = line.endSymbol   || 'none';
+    const lineAttrs = {
+      points: pointsStr,
+      class: 'edge-line' + (sel ? ' selected' : ''),
+    };
+    if (startSym !== 'none') lineAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+    if (endSym   !== 'none') lineAttrs['marker-end']   = sel ? `url(#${endSym}-marker-sel)`   : `url(#${endSym}-marker)`;
+
+    const lineEl = svgEl('polyline', lineAttrs);
+    lineEl.style.stroke      = strokeColor;
+    lineEl.style.strokeWidth = strokeWidth;
+    lineEl.style.color       = strokeColor;
+    applyStrokeStyle(lineEl, line.strokeStyle);
+    g.appendChild(lineEl);
+
+    // Label at midpoint
+    if (line.label) {
+      const mid = pathMidpoint(pts);
+      const lblEl = svgEl('text', {
+        x: mid.x, y: mid.y - 5,
+        'text-anchor': 'middle',
+        class: 'edge-label',
+      }, line.label);
+      applyFontStyle(lblEl, line, { size: 11 });
+      g.appendChild(lblEl);
+    }
+
+    if (sel) {
+      // Waypoint handles
+      if (line.waypoints && line.waypoints.length > 0) {
+        for (const wp of line.waypoints) {
+          g.appendChild(svgEl('circle', {
+            cx: wp.x, cy: wp.y, r: 5,
+            class: 'waypoint-handle',
+            'data-wp-id': wp.id,
+          }));
+        }
+      }
+      // Endpoint handles
+      g.appendChild(svgEl('circle', {
+        cx: line.x1, cy: line.y1, r: 5,
+        class: 'line-endpoint-handle',
+        'data-which': 'start',
+      }));
+      g.appendChild(svgEl('circle', {
+        cx: line.x2, cy: line.y2, r: 5,
+        class: 'line-endpoint-handle',
+        'data-which': 'end',
+      }));
+    }
+
+    linesLayer.appendChild(g);
   }
 }
 
@@ -934,9 +1053,12 @@ function svgCoords(e) {
  * Hit-test at (x, y). Returns:
  *   {type:'resize', handle, nodeId, node}
  *   {type:'ann-resize', handle, annId, ann}
+ *   {type:'line-endpoint', which, lineId}
  *   {type:'waypoint', edgeId, waypointId}
+ *   {type:'line-waypoint', lineId, waypointId}
  *   {type:'node', id, node}
  *   {type:'edge', id, edge}
+ *   {type:'line', id, line}
  *   {type:'annotation', id, ann}
  *   {type:'canvas'}
  */
@@ -954,13 +1076,25 @@ function hitTest(x, y) {
       const h = getAnnResizeHandle(ann, x, y);
       if (h) return { type: 'ann-resize', handle: h, annId: id, ann };
     }
-    // Waypoint handles on selected edges
-    for (const edgeId of state.selected) {
-      const edge = state.edges.get(edgeId);
-      if (!edge || !edge.waypoints) continue;
-      for (const wp of edge.waypoints) {
-        if (Math.hypot(x - wp.x, y - wp.y) <= 7) {
-          return { type: 'waypoint', edgeId, waypointId: wp.id };
+    // Line endpoint handles (when line is selected)
+    for (const lineId of state.selected) {
+      const line = state.lines.get(lineId);
+      if (!line) continue;
+      if (Math.hypot(x - line.x1, y - line.y1) <= 7) return { type: 'line-endpoint', which: 'start', lineId };
+      if (Math.hypot(x - line.x2, y - line.y2) <= 7) return { type: 'line-endpoint', which: 'end',   lineId };
+    }
+    // Waypoint handles on selected edges and lines
+    for (const selId of state.selected) {
+      const edge = state.edges.get(selId);
+      if (edge && edge.waypoints) {
+        for (const wp of edge.waypoints) {
+          if (Math.hypot(x - wp.x, y - wp.y) <= 7) return { type: 'waypoint', edgeId: selId, waypointId: wp.id };
+        }
+      }
+      const line = state.lines.get(selId);
+      if (line && line.waypoints) {
+        for (const wp of line.waypoints) {
+          if (Math.hypot(x - wp.x, y - wp.y) <= 7) return { type: 'line-waypoint', lineId: selId, waypointId: wp.id };
         }
       }
     }
@@ -969,6 +1103,8 @@ function hitTest(x, y) {
   if (node) return { type: 'node', id: node.id, node };
   const edge = getEdgeAt(x, y);
   if (edge) return { type: 'edge', id: edge.id, edge };
+  const line = getLineAt(x, y);
+  if (line) return { type: 'line', id: line.id, line };
   const ann = getAnnotationAt(x, y);
   if (ann) return { type: 'annotation', id: ann.id, ann };
   return { type: 'canvas' };
@@ -997,6 +1133,7 @@ function onMouseDown(e) {
     case 'select':    selectMouseDown(p, hit, e); break;
     case 'box':       boxMouseDown(p); break;
     case 'connector': connectorMouseDown(p, hit); break;
+    case 'line':      lineMouseDown(p); break;
     case 'text':      textMouseDown(p, hit); break;
   }
 }
@@ -1065,6 +1202,18 @@ function selectMouseDown(p, hit, e) {
     return;
   }
 
+  if (hit.type === 'line-waypoint') {
+    state.selectedWaypoint = { lineId: hit.lineId, waypointId: hit.waypointId };
+    drag = { type: 'move-waypoint', lineId: hit.lineId, waypointId: hit.waypointId, moved: false };
+    return;
+  }
+
+  if (hit.type === 'line-endpoint') {
+    state.selectedWaypoint = null;
+    drag = { type: 'move-line-endpoint', lineId: hit.lineId, which: hit.which, moved: false };
+    return;
+  }
+
   if (hit.type === 'node') {
     state.selectedWaypoint = null;
     if (e.shiftKey) {
@@ -1086,6 +1235,29 @@ function selectMouseDown(p, hit, e) {
     render();
     updatePropertiesPanel();
     return; // edges aren't draggable
+  }
+
+  if (hit.type === 'line') {
+    state.selectedWaypoint = null;
+    if (e.shiftKey) {
+      state.selected.add(hit.id);
+    } else if (!state.selected.has(hit.id)) {
+      state.selected.clear();
+      state.selected.add(hit.id);
+    }
+    render();
+    updatePropertiesPanel();
+    const ln = hit.line;
+    drag = {
+      type: 'move-line',
+      lineId: hit.id,
+      startX: p.x, startY: p.y,
+      origX1: ln.x1, origY1: ln.y1,
+      origX2: ln.x2, origY2: ln.y2,
+      origWaypoints: (ln.waypoints || []).map(wp => ({ ...wp })),
+      moved: false,
+    };
+    return;
   }
 
   if (hit.type === 'annotation') {
@@ -1129,9 +1301,18 @@ function connectorMouseDown(p, hit) {
   }));
 }
 
+// --- Line tool ---
+function lineMouseDown(p) {
+  drag = { type: 'draw-line', startX: p.x, startY: p.y };
+  uiLayer.appendChild(svgEl('line', {
+    id: 'tmp', class: 'temp-connector',
+    x1: p.x, y1: p.y, x2: p.x, y2: p.y,
+  }));
+}
+
 // --- Text tool ---
 function textMouseDown(p, hit) {
-  if (hit.type === 'node' || hit.type === 'edge' || hit.type === 'annotation') {
+  if (hit.type === 'node' || hit.type === 'edge' || hit.type === 'line' || hit.type === 'annotation') {
     state.selected.clear();
     state.selected.add(hit.id);
     render();
@@ -1191,10 +1372,18 @@ function dragMove(p) {
   }
 
   if (drag.type === 'move-waypoint') {
-    const edge = state.edges.get(drag.edgeId);
-    if (edge && edge.waypoints) {
-      const wp = edge.waypoints.find(w => w.id === drag.waypointId);
-      if (wp) { wp.x = p.x; wp.y = p.y; drag.moved = true; render(); }
+    if (drag.edgeId) {
+      const edge = state.edges.get(drag.edgeId);
+      if (edge && edge.waypoints) {
+        const wp = edge.waypoints.find(w => w.id === drag.waypointId);
+        if (wp) { wp.x = p.x; wp.y = p.y; drag.moved = true; render(); }
+      }
+    } else if (drag.lineId) {
+      const line = state.lines.get(drag.lineId);
+      if (line && line.waypoints) {
+        const wp = line.waypoints.find(w => w.id === drag.waypointId);
+        if (wp) { wp.x = p.x; wp.y = p.y; drag.moved = true; render(); }
+      }
     }
     return;
   }
@@ -1206,6 +1395,41 @@ function dragMove(p) {
     node.y = drag.origY + dy;
     drag.moved = true;
     render();
+    return;
+  }
+
+  if (drag.type === 'move-line-endpoint') {
+    const line = state.lines.get(drag.lineId);
+    if (line) {
+      if (drag.which === 'start') { line.x1 = p.x; line.y1 = p.y; }
+      else                        { line.x2 = p.x; line.y2 = p.y; }
+      drag.moved = true;
+      render();
+    }
+    return;
+  }
+
+  if (drag.type === 'move-line') {
+    const dx = p.x - drag.startX, dy = p.y - drag.startY;
+    const line = state.lines.get(drag.lineId);
+    if (line) {
+      line.x1 = drag.origX1 + dx; line.y1 = drag.origY1 + dy;
+      line.x2 = drag.origX2 + dx; line.y2 = drag.origY2 + dy;
+      if (line.waypoints) {
+        line.waypoints.forEach((wp, i) => {
+          wp.x = drag.origWaypoints[i].x + dx;
+          wp.y = drag.origWaypoints[i].y + dy;
+        });
+      }
+      drag.moved = true;
+      render();
+    }
+    return;
+  }
+
+  if (drag.type === 'draw-line') {
+    const tmp = document.getElementById('tmp');
+    if (tmp) { tmp.setAttribute('x2', p.x); tmp.setAttribute('y2', p.y); }
     return;
   }
 
@@ -1283,6 +1507,11 @@ function dragEnd(p) {
     return;
   }
 
+  if (d.type === 'move-line' || d.type === 'move-line-endpoint') {
+    if (d.moved) pushHistory();
+    return;
+  }
+
   if (d.type === 'resize') {
     if (d.moved) pushHistory();
     return;
@@ -1326,6 +1555,28 @@ function dragEnd(p) {
     if (!target || target.id === d.fromId) return;
     const id = genId();
     state.edges.set(id, { id, from: d.fromId, to: target.id, label: '', direction: 'forward' });
+    state.selected.clear();
+    state.selected.add(id);
+    pushHistory();
+    render();
+    updatePropertiesPanel();
+    updateToolbarStatus();
+    return;
+  }
+
+  if (d.type === 'draw-line') {
+    uiLayer.innerHTML = '';
+    if (Math.hypot(p.x - d.startX, p.y - d.startY) < 5) return; // too short
+    const id = genId();
+    state.lines.set(id, {
+      id,
+      x1: d.startX, y1: d.startY,
+      x2: p.x,      y2: p.y,
+      waypoints:    [],
+      startSymbol:  'none',
+      endSymbol:    'none',
+      label:        '',
+    });
     state.selected.clear();
     state.selected.add(id);
     pushHistory();
@@ -1469,6 +1720,14 @@ function startInlineEdit(id, type) {
     cx = mid.x;
     cy = mid.y;
     w = 140;
+  } else if (type === 'line') {
+    item = state.lines.get(id);
+    if (!item) return;
+    const pts = linePoints(item);
+    const mid = pathMidpoint(pts);
+    cx = mid.x;
+    cy = mid.y;
+    w = 140;
   }
 
   const fo = svgEl('foreignObject', {
@@ -1490,6 +1749,7 @@ function startInlineEdit(id, type) {
     clearInlineEditor();
     if (type === 'node') { if (state.nodes.has(id)) state.nodes.get(id).label = val; }
     else if (type === 'edge') { if (state.edges.has(id)) state.edges.get(id).label = val; }
+    else if (type === 'line') { if (state.lines.has(id)) state.lines.get(id).label = val; }
     pushHistory();
     render();
     updatePropertiesPanel();
@@ -1534,14 +1794,38 @@ function onDblClick(e) {
       if (d < bestDist) { bestDist = d; bestSeg = i; bestPt = proj; }
     }
 
-    // pts = [p1, wps[0], ..., wps[n-1], p2]
-    // segment bestSeg sits between pts[bestSeg] and pts[bestSeg+1]
-    // inserting between them means splicing into waypoints at index bestSeg
     if (!edge.waypoints) edge.waypoints = [];
     edge.waypoints.splice(bestSeg, 0, { id: genId(), x: bestPt.x, y: bestPt.y });
 
     state.selected.clear();
     state.selected.add(edge.id);
+    pushHistory();
+    render();
+    updatePropertiesPanel();
+    return;
+  }
+
+  if (hit.type === 'line') {
+    const line = state.lines.get(hit.id);
+    const pts  = linePoints(line);
+
+    let bestSeg = 0, bestDist = Infinity, bestPt = { x: p.x, y: p.y };
+    for (let i = 0; i < pts.length - 1; i++) {
+      const dx = pts[i + 1].x - pts[i].x, dy = pts[i + 1].y - pts[i].y;
+      const lenSq = dx * dx + dy * dy;
+      const t = lenSq > 0
+        ? Math.max(0, Math.min(1, ((p.x - pts[i].x) * dx + (p.y - pts[i].y) * dy) / lenSq))
+        : 0;
+      const proj = { x: pts[i].x + t * dx, y: pts[i].y + t * dy };
+      const d = Math.hypot(p.x - proj.x, p.y - proj.y);
+      if (d < bestDist) { bestDist = d; bestSeg = i; bestPt = proj; }
+    }
+
+    if (!line.waypoints) line.waypoints = [];
+    line.waypoints.splice(bestSeg, 0, { id: genId(), x: bestPt.x, y: bestPt.y });
+
+    state.selected.clear();
+    state.selected.add(line.id);
     pushHistory();
     render();
     updatePropertiesPanel();
@@ -1565,7 +1849,7 @@ function onKeyDown(e) {
   if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
   // Tool shortcuts
-  const toolKeys = { s: 'select', b: 'box', c: 'connector', t: 'text' };
+  const toolKeys = { s: 'select', b: 'box', c: 'connector', l: 'line', t: 'text' };
   if (!e.ctrlKey && !e.metaKey && !e.altKey && toolKeys[e.key.toLowerCase()]) {
     setTool(toolKeys[e.key.toLowerCase()]);
     return;
@@ -1595,13 +1879,24 @@ function onKeyDown(e) {
     // Delete focused waypoint first, otherwise delete selected elements
     if (state.selectedWaypoint) {
       e.preventDefault();
-      const { edgeId, waypointId } = state.selectedWaypoint;
-      const edge = state.edges.get(edgeId);
-      if (edge && edge.waypoints) {
-        edge.waypoints = edge.waypoints.filter(wp => wp.id !== waypointId);
-        state.selectedWaypoint = null;
-        pushHistory();
-        render();
+      if (state.selectedWaypoint.edgeId) {
+        const { edgeId, waypointId } = state.selectedWaypoint;
+        const edge = state.edges.get(edgeId);
+        if (edge && edge.waypoints) {
+          edge.waypoints = edge.waypoints.filter(wp => wp.id !== waypointId);
+          state.selectedWaypoint = null;
+          pushHistory();
+          render();
+        }
+      } else if (state.selectedWaypoint.lineId) {
+        const { lineId, waypointId } = state.selectedWaypoint;
+        const line = state.lines.get(lineId);
+        if (line && line.waypoints) {
+          line.waypoints = line.waypoints.filter(wp => wp.id !== waypointId);
+          state.selectedWaypoint = null;
+          pushHistory();
+          render();
+        }
       }
       return;
     }
@@ -1627,6 +1922,7 @@ function deleteSelected() {
   for (const id of toDelete) {
     state.nodes.delete(id);
     state.edges.delete(id);
+    state.lines.delete(id);
     state.annotations.delete(id);
     // Cascade: remove edges whose endpoints were deleted
     for (const [eid, edge] of state.edges) {
@@ -1755,6 +2051,7 @@ function distributeV() {
 function mapForId(id) {
   if (state.nodes.has(id))       return state.nodes;
   if (state.edges.has(id))       return state.edges;
+  if (state.lines.has(id))       return state.lines;
   if (state.annotations.has(id)) return state.annotations;
   return null;
 }
@@ -1794,15 +2091,18 @@ function copySelected() {
   if (state.selected.size === 0) return;
   state.clipboard.nodes       = [];
   state.clipboard.edges       = [];
+  state.clipboard.lines       = [];
   state.clipboard.annotations = [];
   state.pasteOffset = 0;
 
   for (const id of state.selected) {
     const node = state.nodes.get(id);
     const edge = state.edges.get(id);
+    const line = state.lines.get(id);
     const ann  = state.annotations.get(id);
     if (node) state.clipboard.nodes.push({ ...node });
     if (edge) state.clipboard.edges.push({ ...edge });
+    if (line) state.clipboard.lines.push({ ...line, waypoints: (line.waypoints || []).map(wp => ({ ...wp })) });
     if (ann)  state.clipboard.annotations.push({ ...ann });
   }
   updateEditButtons();
@@ -1816,7 +2116,7 @@ function cutSelected() {
 
 function pasteClipboard() {
   const cb = state.clipboard;
-  if (!cb.nodes.length && !cb.edges.length && !cb.annotations.length) return;
+  if (!cb.nodes.length && !cb.edges.length && !cb.lines.length && !cb.annotations.length) return;
 
   state.pasteOffset += 20;
   const off = state.pasteOffset;
@@ -1840,6 +2140,18 @@ function pasteClipboard() {
       from: idMap.get(edge.from) || edge.from,
       to:   idMap.get(edge.to)   || edge.to,
       waypoints: (edge.waypoints || []).map(wp => ({ ...wp, id: genId() })),
+    });
+    newIds.push(newId);
+  }
+
+  for (const line of cb.lines) {
+    const newId = genId();
+    state.lines.set(newId, {
+      ...line,
+      id: newId,
+      x1: line.x1 + off, y1: line.y1 + off,
+      x2: line.x2 + off, y2: line.y2 + off,
+      waypoints: (line.waypoints || []).map(wp => ({ ...wp, id: genId(), x: wp.x + off, y: wp.y + off })),
     });
     newIds.push(newId);
   }
@@ -1876,10 +2188,11 @@ const resizeCursors = {
 function updateCursor(p) {
   if (state.tool !== 'select') { svg.style.cursor = 'crosshair'; return; }
   const hit = hitTest(p.x, p.y);
-  if (hit.type === 'resize')      svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
+  if (hit.type === 'resize')          svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
   else if (hit.type === 'ann-resize') svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
-  else if (hit.type === 'waypoint')   svg.style.cursor = 'move';
-  else if (hit.type === 'node' || hit.type === 'annotation') svg.style.cursor = 'move';
+  else if (hit.type === 'line-endpoint') svg.style.cursor = 'move';
+  else if (hit.type === 'waypoint' || hit.type === 'line-waypoint') svg.style.cursor = 'move';
+  else if (hit.type === 'node' || hit.type === 'annotation' || hit.type === 'line') svg.style.cursor = 'move';
   else if (hit.type === 'edge')   svg.style.cursor = 'pointer';
   else svg.style.cursor = 'default';
 }
@@ -1903,6 +2216,7 @@ function updatePropertiesPanel() {
   const id = [...state.selected][0];
   const node = state.nodes.get(id);
   const edge = state.edges.get(id);
+  const line = state.lines.get(id);
   const ann = state.annotations.get(id);
 
   if (node) {
@@ -1913,6 +2227,8 @@ function updatePropertiesPanel() {
     }
   } else if (edge) {
     renderEdgeProps(content, edge);
+  } else if (line) {
+    renderLineProps(content, line);
   } else if (ann) {
     renderAnnProps(content, ann);
   }
@@ -2059,6 +2375,36 @@ function renderEdgeProps(container, edge) {
   bindColorInput('p-stroke', '#64748b', v => { edge.stroke = v || undefined; });
   bindPropInput('p-label', v => { edge.label = v; });
   bindFontControls(edge, { size: 11 });
+}
+
+function renderLineProps(container, line) {
+  const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
+    .map(([v, l]) => `<option value="${v}"${(line.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
+  const symOpts = field => [['none','None'],['dot','Dot'],['square','Square']]
+    .map(([v, l]) => `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
+
+  container.innerHTML = `
+    <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', line.stroke, '#64748b')}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
+    <div class="prop-group"><label>Start</label><select id="p-start-sym">${symOpts('startSymbol')}</select></div>
+    <div class="prop-group"><label>End</label><select id="p-end-sym">${symOpts('endSymbol')}</select></div>
+    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>
+    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>
+  `;
+  document.getElementById('p-stroke-style').addEventListener('change', e => {
+    line.strokeStyle = e.target.value; pushHistory(); render();
+  });
+  document.getElementById('p-start-sym').addEventListener('change', e => {
+    line.startSymbol = e.target.value; pushHistory(); render();
+  });
+  document.getElementById('p-end-sym').addEventListener('change', e => {
+    line.endSymbol = e.target.value; pushHistory(); render();
+  });
+  bindColorInput('p-stroke', '#64748b', v => { line.stroke = v || undefined; });
+  bindPropInput('p-label', v => { line.label = v; });
+  bindFontControls(line, { size: 11 });
 }
 
 function renderAnnProps(container, ann) {
@@ -2291,6 +2637,13 @@ function fitWindow() {
     maxX = Math.max(maxX, a.x + 200);
     maxY = Math.max(maxY, a.y + 10);
   }
+  for (const l of state.lines.values()) {
+    const pts = linePoints(l);
+    for (const pt of pts) {
+      minX = Math.min(minX, pt.x); minY = Math.min(minY, pt.y);
+      maxX = Math.max(maxX, pt.x); maxY = Math.max(maxY, pt.y);
+    }
+  }
 
   const { w, h } = getCanvasSize();
 
@@ -2331,6 +2684,7 @@ function updateEditButtons() {
   const hasSel = state.selected.size > 0;
   const hasCb  = state.clipboard.nodes.length > 0 ||
                  state.clipboard.edges.length > 0 ||
+                 state.clipboard.lines.length > 0 ||
                  state.clipboard.annotations.length > 0;
   const btnCut  = document.getElementById('btn-cut');
   const btnCopy = document.getElementById('btn-copy');

@@ -184,6 +184,10 @@
           <svg width="20" height="20" viewBox="0 0 16 16"><line x1="2" y1="8" x2="11" y2="8" stroke="currentColor" stroke-width="1.5"/><polygon points="11,5 15,8 11,11" fill="currentColor"/></svg>
           <span>Connect</span>
         </button>
+        <button class="tool-btn" data-tool="line" title="Line — click and drag to draw a free line (L)">
+          <svg width="20" height="20" viewBox="0 0 16 16"><line x1="2" y1="14" x2="14" y2="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="2" cy="14" r="2" fill="currentColor"/><circle cx="14" cy="2" r="2" fill="currentColor"/></svg>
+          <span>Line</span>
+        </button>
         <button class="tool-btn" data-tool="text" title="Text — click canvas for annotation, click element to edit (T)">
           <svg width="20" height="20" viewBox="0 0 16 16"><text x="3" y="13" font-size="13" font-weight="bold" fill="currentColor">T</text></svg>
           <span>Text</span>
@@ -244,7 +248,21 @@
                     refX="10" refY="3.5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
               <path d="M0,0 L10,3.5 L0,7 Z" class="arrow-fill-sel"/>
             </marker>
+            <!-- Line end symbols: dot and square, normal + selected -->
+            <marker id="dot-marker" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+              <circle cx="4" cy="4" r="3" class="line-sym-fill"/>
+            </marker>
+            <marker id="dot-marker-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+              <circle cx="4" cy="4" r="3" class="line-sym-fill-sel"/>
+            </marker>
+            <marker id="square-marker" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+              <rect x="1" y="1" width="6" height="6" class="line-sym-fill"/>
+            </marker>
+            <marker id="square-marker-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+              <rect x="1" y="1" width="6" height="6" class="line-sym-fill-sel"/>
+            </marker>
           </defs>
+          <g id="lines-layer"></g>
           <g id="edges-layer"></g>
           <g id="nodes-layer"></g>
           <g id="annotations-layer"></g>
@@ -263,6 +281,7 @@
             <li><kbd>S</kbd> Select tool</li>
             <li><kbd>B</kbd> Box tool</li>
             <li><kbd>C</kbd> Connector tool</li>
+            <li><kbd>L</kbd> Line tool</li>
             <li><kbd>T</kbd> Text tool</li>
             <li><kbd>Del</kbd> Delete selected</li>
             <li><kbd>Ctrl+Z</kbd> Undo</li>

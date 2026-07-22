@@ -411,6 +411,25 @@ html, body, #app {
 .arrow-fill { fill: currentColor; }
 .arrow-fill-sel { fill: currentColor; }
 
+/* Line endpoint symbols (dot / square) */
+.line-sym-fill     { fill: currentColor; stroke: none; }
+.line-sym-fill-sel { fill: currentColor; stroke: none; }
+
+/* ============================================================
+   SVG — Line endpoint handles
+   ============================================================ */
+.line-endpoint-handle {
+  fill: #ffffff;
+  stroke: #64748b;
+  stroke-width: 1.5;
+  cursor: move;
+}
+
+.line-endpoint-handle:hover {
+  fill: #f1f5f9;
+  stroke: #2563eb;
+}
+
 /* ============================================================
    SVG — Waypoint handles
    ============================================================ */
