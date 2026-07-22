@@ -44,9 +44,10 @@ open index.html
 │Select│ ▶ AWS    │                               │  Properties   │
 │Shape │   ▶Comp  │         Canvas                │    Panel      │
 │Conn. │   ▶Stor  │                               │               │
-│Text  │ ▶ Azure  │                               │               │
-│Icons │   ▶...   │                               │               │
-│Shapes│ ▶ GCP    │                               │               │
+│Line  │ ▶ Azure  │                               │               │
+│Text  │   ▶...   │                               │               │
+│Icons │ ▶ GCP    │                               │               │
+│Shapes│   ▶...   │                               │               │
 └──────┴──────────┴───────────────────────────────┴───────────────┘
 ```
 
@@ -65,6 +66,7 @@ open index.html
 | **Select** | `S` | Select, move, and resize elements |
 | **Shape** | `B` | Click and drag to draw a new shape |
 | **Connect** | `C` | Drag from one shape to another to draw a connector |
+| **Line** | `L` | Click and drag to draw a free-floating line |
 | **Text** | `T` | Click on the canvas to place a standalone text annotation |
 | **Icons** | `I` | Toggle the icon library panel |
 
@@ -108,9 +110,38 @@ Connectors can be bent into any shape using waypoints:
 
 Waypoints are preserved through undo/redo, copy/paste, and open/save.
 
+### Lines
+
+Free-floating lines not attached to any shape. Unlike connectors, lines have no direction or arrowhead — they are purely decorative or structural.
+
+1. Select the **Line** tool (`L`)
+2. Click and drag anywhere on the canvas to draw the line
+
+**End symbols** (set in Properties panel): each end can independently show **None**, **Dot**, or **Square**.
+
+Lines support all the same editing actions as connectors:
+
+| Feature | How |
+|---------|-----|
+| Move line | Select it and drag |
+| Reposition an endpoint | Select the line — endpoint handles appear at each end; drag to move |
+| Add a corner/waypoint | **Double-click** anywhere on a selected line |
+| Remove a waypoint | Click the waypoint handle to focus it, then press **Delete** |
+| Line style | Solid / Dashed / Dotted (Properties panel) |
+| Stroke colour | Colour picker (Properties panel) |
+| Label | Text along the midpoint (Properties panel) |
+
+Lines are included in undo/redo, copy/paste, SVG/PNG export, and JSON save/open.
+
 ### Text Annotations
 
 Free-floating text labels not attached to any shape. Place them by clicking on an empty area of the canvas with the **Text** tool.
+
+- **Multi-line**: press Enter in the inline editor for a new line (Ctrl+Enter to confirm)
+- **Word wrap**: long text wraps automatically within the text box width (default max 300 px)
+- **Resize**: select a text annotation — eight resize handles appear; drag to change width/height
+- **Alignment**: left / centre / right (Properties panel)
+- **Formatting**: font size, bold, italic, underline, text colour, background fill, border colour and style (Properties panel)
 
 ---
 
@@ -182,11 +213,11 @@ Select a shape — eight resize handles appear around it. Drag any handle to res
 ### Editing Labels
 **Double-click** any shape, annotation, or icon to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
 
-> **Note:** Double-clicking a connector inserts a waypoint corner — use the Properties panel to edit a connector's label.
+> **Note:** Double-clicking a **connector** or **line** inserts a waypoint corner — use the Properties panel to edit their labels.
 
 ### Deleting
 - Select one or more elements and press `Delete` or `Backspace` to delete them.
-- To remove a connector waypoint: click its handle to focus it, then press `Delete` / `Backspace`.
+- To remove a connector or line waypoint: click its handle to focus it, then press `Delete` / `Backspace`.
 
 ### Selecting Multiple Elements
 Hold `Shift` and click to add to the selection, or drag a selection box over multiple elements on an empty area of the canvas.
@@ -231,13 +262,29 @@ When one element is selected, the Properties panel on the right shows its editab
 | Label | Text displayed along the connector |
 | Label Font | Size, Bold, Italic, Underline |
 
+### Line properties
+
+| Property | Description |
+|----------|-------------|
+| Stroke | Line colour |
+| Line style | Solid / Dashed / Dotted |
+| Start | End symbol at start point: None / Dot / Square |
+| End | End symbol at end point: None / Dot / Square |
+| Label | Text displayed at the midpoint |
+| Label Font | Size, Bold, Italic, Underline |
+
 ### Annotation properties
 
 | Property | Description |
 |----------|-------------|
-| Text | The annotation text |
+| Text | The annotation text (multi-line; Enter = newline, Ctrl+Enter = confirm) |
+| Align | Left / Centre / Right text alignment |
 | Font | Size, Bold, Italic, Underline |
-| X / Y | Position on canvas |
+| Color | Text colour |
+| Background | Fill colour (shown behind text) |
+| Border | Stroke colour and style (Solid/Dashed/Dotted) |
+| X / Y | Anchor position on canvas |
+| Width / Height | Explicit box size; drag resize handles to set visually |
 
 ---
 
@@ -315,6 +362,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `S` | Select tool |
 | `B` | Shape tool |
 | `C` | Connector tool |
+| `L` | Line tool |
 | `T` | Text tool |
 | `I` | Toggle icon library panel |
 | `Delete` / `Backspace` | Delete selected elements (or remove focused waypoint) |
@@ -332,7 +380,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Ctrl+Scroll` | Zoom in/out centred on pointer |
 | `Right-click drag` | Pan canvas |
 | `Dbl-click` shape/icon | Edit label inline |
-| `Dbl-click` connector | Add waypoint corner at click point |
+| `Dbl-click` connector/line | Add waypoint corner at click point |
 
 ---
 
@@ -340,8 +388,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~2,400 lines)
-diagram.css                       — UI and SVG styling (~820 lines)
+editor.js                         — All editor logic (~3,060 lines)
+diagram.css                       — UI and SVG styling (~860 lines)
 README.md                         — This file
 icons/                            — SVG icon library (1,241 icons total)
   AWS/                            — 26 AWS service categories
