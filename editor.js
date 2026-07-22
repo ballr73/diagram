@@ -117,9 +117,13 @@ function restoreSnapshot(snap) {
 }
 
 // ============================================================
-// JSON Serialization
+// JSON Serialization — Open / Save
 // ============================================================
-function exportDiagram() {
+function saveDiagram() {
+  const defaultName = 'diagram';
+  const name = window.prompt('Save as:', defaultName);
+  if (name === null) return; // cancelled
+  const filename = (name.trim() || defaultName).replace(/\.json$/i, '') + '.json';
   const data = {
     version: 1,
     nodes: [...state.nodes.values()],
@@ -131,7 +135,7 @@ function exportDiagram() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'diagram.json';
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -2310,13 +2314,13 @@ function init() {
   document.getElementById('btn-bring-front').addEventListener('click', bringToFront);
   document.getElementById('btn-send-back').addEventListener('click', sendToBack);
 
-  // Export / Import
-  document.getElementById('btn-export').addEventListener('click', exportDiagram);
-  document.getElementById('btn-export-svg').addEventListener('click', exportSVG);
-  document.getElementById('btn-export-png').addEventListener('click', exportPNG);
-  document.getElementById('btn-import').addEventListener('click', () => {
+  // Open / Save / Export
+  document.getElementById('btn-save').addEventListener('click', saveDiagram);
+  document.getElementById('btn-open').addEventListener('click', () => {
     document.getElementById('file-input').click();
   });
+  document.getElementById('btn-export-svg').addEventListener('click', exportSVG);
+  document.getElementById('btn-export-png').addEventListener('click', exportPNG);
   document.getElementById('file-input').addEventListener('change', e => {
     if (e.target.files[0]) {
       importDiagram(e.target.files[0]);

@@ -38,7 +38,7 @@ open index.html
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export/Import    │
+│ Open/Save │ Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export │
 ├──────┬──────────┬───────────────────────────────┬───────────────┤
 │      │ 🔍 Srch  │                               │               │
 │Select│ ▶ AWS    │                               │  Properties   │
@@ -52,7 +52,7 @@ open index.html
 
 - **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
 - **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
-- **Top toolbar** — zoom controls, undo/redo, clipboard, z-order, align/distribute, export/import
+- **Top toolbar** — open/save, zoom controls, undo/redo, clipboard, z-order, align/distribute, export
 - **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
 - **Properties panel** — edit the selected element's properties
 
@@ -106,7 +106,7 @@ Connectors can be bent into any shape using waypoints:
 4. Add as many waypoints as needed; each creates a new segment
 5. **Click a waypoint handle** to focus it, then press **Delete** / **Backspace** to remove it
 
-Waypoints are preserved through undo/redo, copy/paste, and JSON export/import.
+Waypoints are preserved through undo/redo, copy/paste, and open/save.
 
 ### Text Annotations
 
@@ -282,14 +282,16 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 
 ---
 
-## Export & Import
+## Open, Save & Export
 
 | Button | Description |
 |--------|-------------|
-| **JSON** | Download the diagram as `diagram.json` for later import |
-| **SVG** | Download a standalone `diagram.svg` — icons are embedded as data URIs; opens in browsers, Inkscape, Figma, etc. |
-| **PNG** | Download a `diagram.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
-| **Import** | Load a previously exported `diagram.json` |
+| **Open** (📂) | Open a previously saved `diagram.json` file |
+| **Save** (💾) | Prompts for a filename, then saves the diagram as `<name>.json` |
+| **SVG** | Export a standalone `diagram.svg` — icons are embedded as data URIs; opens in browsers, Inkscape, Figma, etc. |
+| **PNG** | Export a `diagram.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
+
+The **Open** and **Save** buttons sit in their own group at the far left of the top toolbar. SVG and PNG exports remain in a separate group on the right.
 
 Icon images are embedded as base64 data URIs in SVG and PNG exports, so exported files are fully self-contained.
 
