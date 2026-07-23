@@ -37,23 +37,26 @@ open index.html
 ## Interface Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│ Open/Save │ Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export │
-├──────┬──────────┬───────────────────────────────┬───────────────┤
-│      │ 🔍 Srch  │                               │               │
-│Select│ ▶ AWS    │                               │  Properties   │
-│Shape │   ▶Comp  │         Canvas                │    Panel      │
-│Conn. │   ▶Stor  │                               │               │
-│Line  │ ▶ Azure  │                               │               │
-│Text  │   ▶...   │                               │               │
-│Icons │ ▶ GCP    │                               │               │
-│Shapes│   ▶...   │                               │               │
-└──────┴──────────┴───────────────────────────────┴───────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│ Diagram name                                                          │
+├─────────────────────────────────────────────────────────────────────┤
+│ New │ Open/Save/SaveAs │ Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export │
+├──────┬──────────┬─────────────────────────────────┬─────────────────┤
+│      │ 🔍 Srch  │                                 │                 │
+│Select│ ▶ AWS    │                                 │   Properties    │
+│Shape │   ▶Comp  │           Canvas                │     Panel       │
+│Conn. │   ▶Stor  │                                 │                 │
+│Line  │ ▶ Azure  │                                 │                 │
+│Text  │   ▶...   │                                 │                 │
+│Icons │ ▶ GCP    │                                 │                 │
+│Shapes│   ▶...   │                                 │                 │
+└──────┴──────────┴─────────────────────────────────┴─────────────────┘
 ```
 
 - **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
 - **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
-- **Top toolbar** — open/save, zoom controls, undo/redo, clipboard, z-order, align/distribute, export
+- **Diagram name bar** — slim bar above the toolbar showing the current diagram name ("Untitled diagram" until saved)
+- **Top toolbar** — new/open/save, zoom controls, undo/redo, clipboard, z-order, align/distribute, export
 - **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
 - **Properties panel** — edit the selected element's properties
 
@@ -333,12 +336,16 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 
 | Button | Description |
 |--------|-------------|
-| **Open** (📂) | Open a previously saved `diagram.json` file |
-| **Save** (💾) | Prompts for a filename, then saves the diagram as `<name>.json` |
-| **SVG** | Export a standalone `diagram.svg` — icons are embedded as data URIs; opens in browsers, Inkscape, Figma, etc. |
+| **New** | Clear the canvas and start a fresh diagram (prompts to confirm if content exists) |
+| **Open** (📂) | Open a previously saved `.json` file — sets the diagram name from the filename |
+| **Save** (💾) | First save: prompts for a filename. Subsequent saves: overwrites silently using the same name |
+| **Save As** | Prompts for a new filename and saves — replaces the current diagram name; disabled until the diagram has been saved at least once |
+| **SVG** | Export a standalone `diagram.svg` — icons are embedded as data URIs |
 | **PNG** | Export a `diagram.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
 
-The **Open** and **Save** buttons sit in their own group at the far left of the top toolbar. SVG and PNG exports remain in a separate group on the right.
+**New**, **Open**, **Save**, and **Save As** are icon-only buttons. **New** sits in its own group; **Open**, **Save**, and **Save As** share a group. SVG and PNG exports are in a separate group on the right.
+
+The current diagram name is shown in the slim bar above the toolbar. It reads **"Untitled diagram"** until the file is saved or opened.
 
 Icon images are embedded as base64 data URIs in SVG and PNG exports, so exported files are fully self-contained.
 

@@ -20,6 +20,7 @@ const state = {
   zoom: 1.0,
   viewCenterX: 0,
   viewCenterY: 0,
+  diagramName: null,      // null = unsaved/new; string = last saved filename (without .json)
 };
 
 function genId() {
@@ -68,6 +69,7 @@ function saveToLocalStorage() {
       lines: [...state.lines.values()],
       annotations: [...state.annotations.values()],
       nextId: state.nextId,
+      diagramName: state.diagramName,
     };
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   } catch (_) {
@@ -91,6 +93,7 @@ function loadFromLocalStorage() {
     (data.lines || []).forEach(l => state.lines.set(l.id, { ...l }));
     (data.annotations || []).forEach(a => state.annotations.set(a.id, { ...a }));
     if (data.nextId) state.nextId = data.nextId;
+    if (data.diagramName) { state.diagramName = data.diagramName; }
     return true;
   } catch (_) {
     return false;
@@ -131,11 +134,52 @@ function restoreSnapshot(snap) {
 // ============================================================
 // JSON Serialization — Open / Save
 // ============================================================
+function newDiagram() {
+  const hasContent = state.nodes.size > 0 || state.edges.size > 0 ||
+                     state.lines.size > 0 || state.annotations.size > 0;
+  if (hasContent && !window.confirm('Discard current diagram and start a new one?')) return;
+
+  state.nodes.clear();
+  state.edges.clear();
+  state.lines.clear();
+  state.annotations.clear();
+  state.selected.clear();
+  state.selectedWaypoint = null;
+  state.diagramName = null;
+  state.nextId = 1;
+  state.history = [];
+  state.historyIndex = -1;
+  pushHistory();
+  render();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+  updateTitleDisplay();
+  saveToLocalStorage();
+}
+
 function saveDiagram() {
-  const defaultName = 'diagram';
-  const name = window.prompt('Save as:', defaultName);
-  if (name === null) return; // cancelled
-  const filename = (name.trim() || defaultName).replace(/\.json$/i, '') + '.json';
+  let baseName;
+  if (state.diagramName) {
+    // Already named — save directly without prompting
+    baseName = state.diagramName;
+  } else {
+    // New diagram — prompt for a name
+    const input = window.prompt('Save as:', 'diagram');
+    if (input === null) return; // cancelled
+    baseName = (input.trim() || 'diagram').replace(/\.json$/i, '');
+  }
+  _doSave(baseName);
+}
+
+function saveAsDiagram() {
+  const input = window.prompt('Save as:', state.diagramName || 'diagram');
+  if (input === null) return; // cancelled
+  const baseName = (input.trim() || 'diagram').replace(/\.json$/i, '');
+  _doSave(baseName);
+}
+
+function _doSave(baseName) {
+  const filename = baseName + '.json';
   const data = {
     version: 1,
     nodes: [...state.nodes.values()],
@@ -151,6 +195,10 @@ function saveDiagram() {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+
+  state.diagramName = baseName;
+  updateTitleDisplay();
+  saveToLocalStorage();
 }
 
 function importDiagram(file) {
@@ -174,6 +222,9 @@ function importDiagram(file) {
         .map(id => parseInt(id.replace('id-', ''), 10))
         .filter(n => !isNaN(n));
       state.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
+      // Derive diagram name from the opened filename (strip .json extension)
+      state.diagramName = file.name.replace(/\.json$/i, '');
+      updateTitleDisplay();
       pushHistory(); // save imported state as new history entry
       render();
       updatePropertiesPanel();
@@ -2563,6 +2614,13 @@ function updateToolbarStatus() {
   el.textContent = `${n} box${n !== 1 ? 'es' : ''}  ·  ${e} connector${e !== 1 ? 's' : ''}  ·  ${a} annotation${a !== 1 ? 's' : ''}`;
 }
 
+function updateTitleDisplay() {
+  const el = document.getElementById('diagram-title');
+  if (el) el.textContent = state.diagramName || 'Untitled diagram';
+  const btnSaveAs = document.getElementById('btn-save-as');
+  if (btnSaveAs) btnSaveAs.disabled = !state.diagramName;
+}
+
 // ============================================================
 // Zoom
 // ============================================================
@@ -2971,7 +3029,9 @@ function init() {
   on('btn-send-back',   'click', sendToBack);
 
   // Open / Save / Export
-  on('btn-save',       'click', saveDiagram);
+  on('btn-new',     'click', newDiagram);
+  on('btn-save',    'click', saveDiagram);
+  on('btn-save-as', 'click', saveAsDiagram);
   on('btn-open',       'click', () => document.getElementById('file-input')?.click());
   on('btn-export-svg', 'click', exportSVG);
   on('btn-export-png', 'click', exportPNG);
@@ -3050,6 +3110,7 @@ function init() {
 
   // Restore last diagram from localStorage (before seeding history)
   loadFromLocalStorage();
+  updateTitleDisplay();
 
   // Pre-cache data URIs for any symbol icons loaded from localStorage
   cacheAllSymbolIcons();
