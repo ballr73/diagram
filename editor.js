@@ -677,14 +677,14 @@ function getAnnResizeHandle(ann, x, y, threshold = 6) {
 // ============================================================
 // Rendering
 // ============================================================
-let svg, linesLayer, edgesLayer, nodesLayer, annotationsLayer, uiLayer;
+let svg, linesLayer, shapesLayer, annotationsLayer, bgAnnotationsLayer, uiLayer;
 
 function initSVG() {
   svg = document.getElementById('canvas');
   linesLayer = document.getElementById('lines-layer');
-  edgesLayer = document.getElementById('edges-layer');
-  nodesLayer = document.getElementById('nodes-layer');
+  shapesLayer = document.getElementById('shapes-layer');
   annotationsLayer = document.getElementById('annotations-layer');
+  bgAnnotationsLayer = document.getElementById('bg-annotations-layer');
   uiLayer = document.getElementById('ui-layer');
 }
 
@@ -698,9 +698,8 @@ function svgEl(tag, attrs, text) {
 }
 
 function render() {
+  renderShapes();
   renderLines();
-  renderEdges();
-  renderNodes();
   renderAnnotations();
 }
 
@@ -769,84 +768,217 @@ function createShapeEl(node, sel) {
   return el;
 }
 
-function renderNodes() {
-  nodesLayer.innerHTML = '';
-  for (const node of state.nodes.values()) {
-    const sel = state.selected.has(node.id);
-    const g = svgEl('g', { 'data-id': node.id, 'data-type': 'node' });
+/**
+ * Compute SVG label coordinates from node.labelPos.
+ * Positions: tl/tm/tr/ml/mm/mr/bl/bm/br
+ * Default: 'mm' for regular nodes, 'bm' for symbol nodes.
+ */
+function getLabelCoords(node) {
+  const pos = node.labelPos || (node.type === 'symbol' ? 'bm' : 'mm');
+  const PAD = 6;
+  const { x, y, width, height } = node;
+  const row = pos[0]; // 't', 'm', 'b'
+  const col = pos[1]; // 'l', 'm', 'r'
 
+  let lx, textAnchor;
+  if      (col === 'l') { lx = x + PAD;             textAnchor = 'start'; }
+  else if (col === 'r') { lx = x + width - PAD;     textAnchor = 'end'; }
+  else                  { lx = x + width / 2;        textAnchor = 'middle'; }
+
+  let ly, dominantBaseline;
+  if (row === 't') {
+    ly = y + PAD;
+    dominantBaseline = 'hanging';
+  } else if (row === 'b') {
     if (node.type === 'symbol') {
-      // Symbol node: SVG image + selection outline + label below
-      const img = svgEl('image', {
-        href: node.iconPath,
+      ly = y + height + 8;   // below icon with small gap
+      dominantBaseline = 'hanging';
+    } else {
+      ly = y + height - PAD;
+      dominantBaseline = 'auto';
+    }
+  } else {
+    ly = y + height / 2;
+    dominantBaseline = 'middle';
+  }
+  return { x: lx, y: ly, textAnchor, dominantBaseline };
+}
+
+/** Build and return an SVG <g> for a single node (does not append to DOM). */
+function renderNodeGroup(node) {
+  const sel = state.selected.has(node.id);
+  const g = svgEl('g', { 'data-id': node.id, 'data-type': 'node' });
+
+  if (node.type === 'symbol') {
+    // Symbol node: SVG image + selection outline + label
+    const img = svgEl('image', {
+      href: node.iconPath,
+      x: node.x, y: node.y,
+      width: node.width, height: node.height,
+      preserveAspectRatio: 'xMidYMid meet',
+    });
+    g.appendChild(img);
+
+    if (sel) {
+      const outline = svgEl('rect', {
         x: node.x, y: node.y,
         width: node.width, height: node.height,
-        preserveAspectRatio: 'xMidYMid meet',
+        class: 'node-shape selected',
+        fill: 'none',
       });
-      g.appendChild(img);
+      g.appendChild(outline);
+    }
 
-      if (sel) {
-        const outline = svgEl('rect', {
-          x: node.x, y: node.y,
-          width: node.width, height: node.height,
-          class: 'node-shape selected',
-          fill: 'none',
-        });
-        g.appendChild(outline);
-      }
-
-      if (node.label) {
-        const lbl = svgEl('text', {
-          x: node.x + node.width / 2,
-          y: node.y + node.height + 12,
-          'text-anchor': 'middle',
-          'dominant-baseline': 'middle',
-          class: 'node-label',
-        });
-        lbl.textContent = node.label;
-        applyFontStyle(lbl, node, { size: 11 });
-        g.appendChild(lbl);
-      }
-    } else {
-      const shapeEl = createShapeEl(node, sel);
-      shapeEl.style.fillOpacity = (node.opacity ?? 100) / 100;
-      applyStrokeStyle(shapeEl, node.strokeStyle);
-      g.appendChild(shapeEl);
-
+    if (node.label) {
+      const coords = getLabelCoords(node);
+      const fontSize = 11;
       const lbl = svgEl('text', {
-        x: node.x + node.width / 2,
-        y: node.y + node.height / 2,
-        'text-anchor': 'middle',
-        'dominant-baseline': 'middle',
+        x: coords.x, y: coords.y,
+        'text-anchor': coords.textAnchor,
+        'dominant-baseline': coords.dominantBaseline,
         class: 'node-label',
       });
-      lbl.textContent = node.label || '';
-      applyFontStyle(lbl, node, { size: 13 });
+      applyFontStyle(lbl, node, { size: fontSize });
+      const lines = (node.label || '').split('\n');
+      if (lines.length === 1) {
+        lbl.textContent = node.label;
+      } else {
+        lines.forEach((line, i) => {
+          lbl.appendChild(svgEl('tspan', { x: coords.x, dy: i === 0 ? '0' : `${fontSize * 1.3}` }, line));
+        });
+      }
       g.appendChild(lbl);
     }
+  } else {
+    const shapeEl = createShapeEl(node, sel);
+    shapeEl.style.fillOpacity = (node.opacity ?? 100) / 100;
+    applyStrokeStyle(shapeEl, node.strokeStyle);
+    g.appendChild(shapeEl);
 
-    // Resize handles (only when selected in select mode)
-    if (sel && state.tool === 'select') {
-      const handles = [
-        { name: 'nw', x: node.x,                  y: node.y },
-        { name: 'n',  x: node.x + node.width / 2,  y: node.y },
-        { name: 'ne', x: node.x + node.width,       y: node.y },
-        { name: 'e',  x: node.x + node.width,       y: node.y + node.height / 2 },
-        { name: 'se', x: node.x + node.width,       y: node.y + node.height },
-        { name: 's',  x: node.x + node.width / 2,   y: node.y + node.height },
-        { name: 'sw', x: node.x,                   y: node.y + node.height },
-        { name: 'w',  x: node.x,                   y: node.y + node.height / 2 },
-      ];
-      for (const h of handles) {
-        g.appendChild(svgEl('rect', {
-          x: h.x - 4, y: h.y - 4, width: 8, height: 8,
-          class: 'resize-handle',
-          'data-handle': h.name,
-        }));
-      }
+    const coords = getLabelCoords(node);
+    const lbl = svgEl('text', {
+      x: coords.x, y: coords.y,
+      'text-anchor': coords.textAnchor,
+      'dominant-baseline': coords.dominantBaseline,
+      class: 'node-label',
+    });
+    lbl.textContent = node.label || '';
+    applyFontStyle(lbl, node, { size: 13 });
+    g.appendChild(lbl);
+  }
+
+  // Resize handles (only when selected in select mode)
+  if (sel && state.tool === 'select') {
+    const handles = [
+      { name: 'nw', x: node.x,                  y: node.y },
+      { name: 'n',  x: node.x + node.width / 2,  y: node.y },
+      { name: 'ne', x: node.x + node.width,       y: node.y },
+      { name: 'e',  x: node.x + node.width,       y: node.y + node.height / 2 },
+      { name: 'se', x: node.x + node.width,       y: node.y + node.height },
+      { name: 's',  x: node.x + node.width / 2,   y: node.y + node.height },
+      { name: 'sw', x: node.x,                   y: node.y + node.height },
+      { name: 'w',  x: node.x,                   y: node.y + node.height / 2 },
+    ];
+    for (const h of handles) {
+      g.appendChild(svgEl('rect', {
+        x: h.x - 4, y: h.y - 4, width: 8, height: 8,
+        class: 'resize-handle',
+        'data-handle': h.name,
+      }));
     }
+  }
 
-    nodesLayer.appendChild(g);
+  return g;
+}
+
+/** Build and return an SVG <g> for a single edge (returns null if endpoints missing). */
+function renderEdgeGroup(edge) {
+  const pts = edgePoints(edge);
+  if (!pts) return null;
+  const sel = state.selected.has(edge.id);
+  const dir = edge.direction || 'forward';
+  const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+
+  const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
+
+  // Wide invisible hit area
+  g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
+
+  const defaultStroke = '#64748b';
+  const selStroke     = '#2563eb';
+  const strokeColor   = sel ? selStroke : (edge.stroke || defaultStroke);
+  const strokeWidth   = sel ? '2' : '1.5';
+
+  const endUrl   = sel ? 'url(#arrowhead-sel)'       : 'url(#arrowhead)';
+  const startUrl = sel ? 'url(#arrowhead-start-sel)' : 'url(#arrowhead-start)';
+  const lineAttrs = {
+    points: pointsStr,
+    class: 'edge-line' + (sel ? ' selected' : ''),
+  };
+  if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
+  if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
+
+  const lineEl = svgEl('polyline', lineAttrs);
+  lineEl.style.stroke      = strokeColor;
+  lineEl.style.strokeWidth = strokeWidth;
+  lineEl.style.color       = strokeColor;
+  applyStrokeStyle(lineEl, edge.strokeStyle);
+  g.appendChild(lineEl);
+
+  if (edge.label) {
+    const mid = pathMidpoint(pts);
+    const lblEl = svgEl('text', {
+      x: mid.x, y: mid.y - 5,
+      'text-anchor': 'middle',
+      class: 'edge-label',
+    }, edge.label);
+    applyFontStyle(lblEl, edge, { size: 11 });
+    g.appendChild(lblEl);
+  }
+
+  if (sel && edge.waypoints && edge.waypoints.length > 0) {
+    for (const wp of edge.waypoints) {
+      g.appendChild(svgEl('circle', {
+        cx: wp.x, cy: wp.y, r: 5,
+        class: 'waypoint-handle',
+        'data-wp-id': wp.id,
+      }));
+    }
+  }
+
+  return g;
+}
+
+/**
+ * Render all nodes and edges into shapes-layer, interleaved by Z-order.
+ * Edge Z = max(Z of from-node, Z of to-node), so connectors always sit
+ * at the same depth as the topmost node they connect to.
+ */
+function renderShapes() {
+  shapesLayer.innerHTML = '';
+
+  // Assign Z-values based on Map insertion order (back = 0, front = N-1)
+  const nodeZ = new Map();
+  let z = 0;
+  for (const node of state.nodes.values()) nodeZ.set(node.id, z++);
+
+  // Build combined item list
+  const items = [];
+  for (const node of state.nodes.values()) {
+    items.push({ kind: 'node', item: node, z: nodeZ.get(node.id) });
+  }
+  for (const edge of state.edges.values()) {
+    const fz = nodeZ.get(edge.from) ?? 0;
+    const tz = nodeZ.get(edge.to)   ?? 0;
+    items.push({ kind: 'edge', item: edge, z: Math.max(fz, tz) });
+  }
+
+  // Sort ascending by z; same z: edges render before their node (so node sits on top)
+  items.sort((a, b) => a.z !== b.z ? a.z - b.z : (a.kind === 'edge' ? -1 : 1));
+
+  for (const { kind, item } of items) {
+    const g = kind === 'node' ? renderNodeGroup(item) : renderEdgeGroup(item);
+    if (g) shapesLayer.appendChild(g);
   }
 }
 
@@ -941,76 +1073,11 @@ function renderLines() {
   }
 }
 
-function renderEdges() {
-  edgesLayer.innerHTML = '';
-  for (const edge of state.edges.values()) {
-    const pts = edgePoints(edge);
-    if (!pts) continue;
-    const sel = state.selected.has(edge.id);
-    const dir = edge.direction || 'forward';
-
-    const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
-
-    const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
-
-    // Wide invisible hit area
-    g.appendChild(svgEl('polyline', {
-      points: pointsStr,
-      class: 'edge-hit',
-    }));
-
-    // Resolve stroke colour: use selection colour when selected, custom or default otherwise
-    const defaultStroke = '#64748b';
-    const selStroke     = '#2563eb';
-    const strokeColor   = sel ? selStroke : (edge.stroke || defaultStroke);
-    const strokeWidth   = sel ? '2' : '1.5';
-
-    // Resolve marker URLs based on direction
-    const endUrl   = sel ? 'url(#arrowhead-sel)'       : 'url(#arrowhead)';
-    const startUrl = sel ? 'url(#arrowhead-start-sel)' : 'url(#arrowhead-start)';
-    const lineAttrs = {
-      points: pointsStr,
-      class: 'edge-line' + (sel ? ' selected' : ''),
-    };
-    if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
-    if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
-
-    const lineEl = svgEl('polyline', lineAttrs);
-    lineEl.style.stroke      = strokeColor;
-    lineEl.style.strokeWidth = strokeWidth;
-    lineEl.style.color       = strokeColor;
-    applyStrokeStyle(lineEl, edge.strokeStyle);
-    g.appendChild(lineEl);
-
-    if (edge.label) {
-      const mid = pathMidpoint(pts);
-      const lblEl = svgEl('text', {
-        x: mid.x, y: mid.y - 5,
-        'text-anchor': 'middle',
-        class: 'edge-label',
-      }, edge.label);
-      applyFontStyle(lblEl, edge, { size: 11 });
-      g.appendChild(lblEl);
-    }
-
-    // Waypoint handles — shown when edge is selected
-    if (sel && edge.waypoints && edge.waypoints.length > 0) {
-      for (const wp of edge.waypoints) {
-        g.appendChild(svgEl('circle', {
-          cx: wp.x, cy: wp.y, r: 5,
-          class: 'waypoint-handle',
-          'data-wp-id': wp.id,
-        }));
-      }
-    }
-
-    edgesLayer.appendChild(g);
-  }
-}
-
 function renderAnnotations() {
   annotationsLayer.innerHTML = '';
+  bgAnnotationsLayer.innerHTML = '';
   for (const ann of state.annotations.values()) {
+    const targetLayer = ann.zLayer === 'bg' ? bgAnnotationsLayer : annotationsLayer;
     const sel = state.selected.has(ann.id);
     const fontSize = ann.fontSize || 13;
     const lineHeight = fontSize * 1.4;
@@ -1029,7 +1096,10 @@ function renderAnnotations() {
         rx: 3, ry: 3,
         class: 'annotation-bg',
       });
-      if (ann.fill)   rect.style.fill = ann.fill;
+      if (ann.fill) {
+        rect.style.fill = ann.fill;
+        rect.style.fillOpacity = (ann.fillOpacity ?? 100) / 100;
+      }
       if (ann.stroke) {
         rect.style.stroke = ann.stroke;
         rect.style.strokeWidth = '1.5';
@@ -1083,7 +1153,7 @@ function renderAnnotations() {
     });
 
     g.appendChild(textEl);
-    annotationsLayer.appendChild(g);
+    targetLayer.appendChild(g);
   }
 }
 
@@ -1699,7 +1769,7 @@ function clearClass(cls) {
 }
 
 function addClassToNode(nodeId, cls) {
-  const el = nodesLayer.querySelector(`[data-id="${nodeId}"] .node-shape`);
+  const el = shapesLayer.querySelector(`[data-id="${nodeId}"] .node-shape`);
   if (el) el.classList.add(cls);
 }
 
@@ -2113,6 +2183,7 @@ function bringToFront() {
     const map = mapForId(id);
     if (!map) continue;
     const item = map.get(id);
+    if (state.annotations.has(id)) item.zLayer = 'fg';
     map.delete(id);
     map.set(id, item); // re-insert at end = rendered on top
   }
@@ -2125,6 +2196,7 @@ function sendToBack() {
     const map = mapForId(id);
     if (!map) continue;
     const item = map.get(id);
+    if (state.annotations.has(id)) item.zLayer = 'bg';
     map.delete(id);
     // Prepend by rebuilding the map
     const rest = [...map.entries()];
@@ -2316,11 +2388,39 @@ function bindColorInput(id, defaultValue, setter) {
   });
 }
 
+/** Generate the 3×3 label-position picker HTML. */
+function labelPosPickerHtml(current) {
+  const positions = ['tl','tm','tr','ml','mm','mr','bl','bm','br'];
+  const titles = { tl:'Top left', tm:'Top centre', tr:'Top right',
+                   ml:'Middle left', mm:'Centre', mr:'Middle right',
+                   bl:'Bottom left', bm:'Bottom centre', br:'Bottom right' };
+  return `<div class="pos-picker">${
+    positions.map(p =>
+      `<button class="pos-btn${current === p ? ' active' : ''}" data-pos="${p}" title="${titles[p]}"></button>`
+    ).join('')
+  }</div>`;
+}
+
+/** Wire click events for the label-position picker. */
+function bindLabelPosPicker(node, defaultPos) {
+  document.querySelectorAll('.pos-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      node.labelPos = btn.dataset.pos;
+      document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pushHistory();
+      render();
+    });
+  });
+}
+
 function renderSymbolProps(container, node) {
   const iconName = node.iconPath ? node.iconPath.split('/').pop().replace(/\.svg$/i, '') : '';
+  const curPos = node.labelPos || 'bm';
   container.innerHTML = `
     <div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
@@ -2329,6 +2429,7 @@ function renderSymbolProps(container, node) {
   `;
   bindFontControls(node, { size: 11 });
   bindPropInput('p-label', v => { node.label = v; });
+  bindLabelPosPicker(node, 'bm');
   bindPropInput('p-x', v => { node.x = +v || 0; }, true);
   bindPropInput('p-y', v => { node.y = +v || 0; }, true);
   bindPropInput('p-w', v => { node.width  = Math.max(16, +v || 16); }, true);
@@ -2342,9 +2443,11 @@ function renderNodeProps(container, node) {
   const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
     .map(([v, l]) => `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
     .join('');
+  const curPos = node.labelPos || 'mm';
   container.innerHTML = `
     <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
     <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', node.stroke, '#475569')}</div>
@@ -2384,6 +2487,7 @@ function renderNodeProps(container, node) {
   });
   opacitySlider.addEventListener('change', () => pushHistory());
   bindPropInput('p-label', v => { node.label = v; });
+  bindLabelPosPicker(node, 'mm');
   bindPropInput('p-x', v => { node.x = +v || 0; }, true);
   bindPropInput('p-y', v => { node.y = +v || 0; }, true);
   bindPropInput('p-w', v => { node.width = Math.max(40, +v || 40); }, true);
@@ -2480,6 +2584,13 @@ function renderAnnProps(container, ann) {
     <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13 })}</div>
     <div class="prop-group"><label>Color</label>${colorRow('p-color', ann.color, '#7c3aed')}</div>
     <div class="prop-group"><label>Background</label>${colorRow('p-fill', ann.fill, '#ffffff')}</div>
+    <div class="prop-group">
+      <label>Bg opacity</label>
+      <div class="opacity-row">
+        <input type="range" id="p-fill-opacity" min="0" max="100" step="1" value="${ann.fillOpacity ?? 100}">
+        <span id="p-fill-opacity-val">${ann.fillOpacity ?? 100}%</span>
+      </div>
+    </div>
     <div class="prop-group"><label>Border</label>${colorRow('p-stroke', ann.stroke, '#475569')}</div>
     <div class="prop-group"><label>Border style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(ann.x)}"></div>
@@ -2506,6 +2617,18 @@ function renderAnnProps(container, ann) {
   bindFontControls(ann, { size: 13 });
   bindColorInput('p-color',  '#7c3aed', v => { ann.color  = v || undefined; });
   bindColorInput('p-fill',   '#ffffff', v => { ann.fill   = v || undefined; });
+
+  const fillOpacitySlider = document.getElementById('p-fill-opacity');
+  const fillOpacityVal    = document.getElementById('p-fill-opacity-val');
+  if (fillOpacitySlider) {
+    fillOpacitySlider.addEventListener('input', () => {
+      ann.fillOpacity = parseInt(fillOpacitySlider.value, 10);
+      fillOpacityVal.textContent = ann.fillOpacity + '%';
+      render();
+    });
+    fillOpacitySlider.addEventListener('change', () => pushHistory());
+  }
+
   bindColorInput('p-stroke', '#475569', v => { ann.stroke = v || undefined; });
 
   const strokeStyleEl = document.getElementById('p-stroke-style');

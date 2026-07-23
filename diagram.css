@@ -871,3 +871,52 @@ kbd {
   border-color: #1d4ed8;
   color: #fff;
 }
+
+/* ── Label position picker (3×3 grid) ─────────────────────────── */
+.pos-picker {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 22px);
+  gap: 3px;
+}
+
+.pos-btn {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  background: #f8fafc;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+.pos-btn::after {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #94a3b8;
+  border-radius: 50%;
+}
+
+.pos-btn[data-pos='tl']::after { top: 3px; left: 3px; }
+.pos-btn[data-pos='tm']::after { top: 3px; left: 50%; transform: translateX(-50%); }
+.pos-btn[data-pos='tr']::after { top: 3px; right: 3px; }
+.pos-btn[data-pos='ml']::after { top: 50%; left: 3px; transform: translateY(-50%); }
+.pos-btn[data-pos='mm']::after { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.pos-btn[data-pos='mr']::after { top: 50%; right: 3px; transform: translateY(-50%); }
+.pos-btn[data-pos='bl']::after { bottom: 3px; left: 3px; }
+.pos-btn[data-pos='bm']::after { bottom: 3px; left: 50%; transform: translateX(-50%); }
+.pos-btn[data-pos='br']::after { bottom: 3px; right: 3px; }
+
+.pos-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.pos-btn.active {
+  border-color: #3b82f6;
+  background: #dbeafe;
+}
+
+.pos-btn.active::after { background: #3b82f6; }
