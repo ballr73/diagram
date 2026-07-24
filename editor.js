@@ -2876,10 +2876,14 @@ function updateEditButtons() {
   if (btnPaste) btnPaste.disabled = !hasCb;
   if (btnDupe)  btnDupe.disabled  = !hasSel;
 
-  // Align buttons require ≥2 positional items; distribute require ≥3
+  // Align toggle: enabled when ≥2 positional items selectable
   const alignCount = getAlignItems().length;
   const canAlign = alignCount >= 2;
   const canDist  = alignCount >= 3;
+  const btnAlignToggle = document.getElementById('btn-align-toggle');
+  if (btnAlignToggle) btnAlignToggle.disabled = !canAlign;
+
+  // Update popup buttons' disabled state (popup may be open)
   ['btn-align-left','btn-align-center-h','btn-align-right',
    'btn-align-top','btn-align-center-v','btn-align-bottom'].forEach(id => {
     const el = document.getElementById(id);
@@ -3137,15 +3141,50 @@ function init() {
   on('btn-paste',     'click', pasteClipboard);
   on('btn-duplicate', 'click', duplicateSelected);
 
-  // Align / Distribute
-  on('btn-align-left',     'click', alignLeft);
-  on('btn-align-center-h', 'click', alignCenterH);
-  on('btn-align-right',    'click', alignRight);
-  on('btn-align-top',      'click', alignTop);
-  on('btn-align-center-v', 'click', alignCenterV);
-  on('btn-align-bottom',   'click', alignBottom);
-  on('btn-dist-h',         'click', distributeH);
-  on('btn-dist-v',         'click', distributeV);
+  // Align / Distribute — floating popup
+  (function () {
+    const toggleBtn = document.getElementById('btn-align-toggle');
+    const popup     = document.getElementById('align-popup');
+    if (!toggleBtn || !popup) return;
+
+    function openPopup() {
+      const rect = toggleBtn.getBoundingClientRect();
+      popup.style.left = rect.left + 'px';
+      popup.style.top  = (rect.bottom + 4) + 'px';
+      popup.hidden = false;
+      toggleBtn.classList.add('active');
+    }
+
+    function closePopup() {
+      popup.hidden = true;
+      toggleBtn.classList.remove('active');
+    }
+
+    toggleBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      popup.hidden ? openPopup() : closePopup();
+    });
+
+    // Close on outside click
+    document.addEventListener('click', e => {
+      if (!popup.hidden && !popup.contains(e.target) && e.target !== toggleBtn) {
+        closePopup();
+      }
+    });
+
+    // Wire each popup action: run alignment, then close
+    function wrapAlign(fn) {
+      return () => { fn(); closePopup(); };
+    }
+    on('btn-align-left',     'click', wrapAlign(alignLeft));
+    on('btn-align-center-h', 'click', wrapAlign(alignCenterH));
+    on('btn-align-right',    'click', wrapAlign(alignRight));
+    on('btn-align-top',      'click', wrapAlign(alignTop));
+    on('btn-align-center-v', 'click', wrapAlign(alignCenterV));
+    on('btn-align-bottom',   'click', wrapAlign(alignBottom));
+    on('btn-dist-h',         'click', wrapAlign(distributeH));
+    on('btn-dist-v',         'click', wrapAlign(distributeV));
+  })();
 
   // Z-order
   on('btn-bring-front', 'click', bringToFront);

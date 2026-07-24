@@ -111,65 +111,11 @@
         </button>
       </div>
       <div class="tool-group toolbar-separator" id="align-group">
-        <span class="shape-label">Align:</span>
-        <button id="btn-align-left" class="shape-btn" title="Align left edges" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <line x1="3" y1="1" x2="3" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="3" y="3" width="9" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="3" y="10" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-          </svg>
-        </button>
-        <button id="btn-align-center-h" class="shape-btn" title="Align centers horizontally" disabled>
+        <button id="btn-align-toggle" class="shape-btn" title="Align / Distribute" disabled>
           <svg width="16" height="16" viewBox="0 0 16 16">
             <line x1="8" y1="1" x2="8" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             <rect x="3" y="3" width="10" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
             <rect x="5" y="10" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-          </svg>
-        </button>
-        <button id="btn-align-right" class="shape-btn" title="Align right edges" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <line x1="13" y1="1" x2="13" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="4" y="3" width="9" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="7" y="10" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-          </svg>
-        </button>
-        <button id="btn-align-top" class="shape-btn" title="Align top edges" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <line x1="1" y1="3" x2="15" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="3" y="3" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="10" y="3" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
-          </svg>
-        </button>
-        <button id="btn-align-center-v" class="shape-btn" title="Align centers vertically" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="3" y="3" width="3" height="10" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="10" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
-          </svg>
-        </button>
-        <button id="btn-align-bottom" class="shape-btn" title="Align bottom edges" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <line x1="1" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="3" y="4" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="10" y="7" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
-          </svg>
-        </button>
-        <button id="btn-dist-h" class="shape-btn" title="Distribute horizontally (equal gaps)" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <rect x="1" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="6.5" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="12" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <line x1="4" y1="8" x2="6.5" y2="8" stroke="currentColor" stroke-width="1" opacity="0.6"/>
-            <line x1="9.5" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="1" opacity="0.6"/>
-          </svg>
-        </button>
-        <button id="btn-dist-v" class="shape-btn" title="Distribute vertically (equal gaps)" disabled>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <rect x="5" y="1" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="5" y="6.5" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <rect x="5" y="12" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
-            <line x1="8" y1="4" x2="8" y2="6.5" stroke="currentColor" stroke-width="1" opacity="0.6"/>
-            <line x1="8" y1="9.5" x2="8" y2="12" stroke="currentColor" stroke-width="1" opacity="0.6"/>
           </svg>
         </button>
       </div>
@@ -309,6 +255,76 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating align/distribute popup -->
+  <div id="align-popup" class="align-popup" hidden>
+    <div class="align-popup-row">
+      <button id="btn-align-left" class="align-popup-btn" title="Align left edges">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <line x1="3" y1="1" x2="3" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="3" y="3" width="9" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="3" y="10" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+        </svg>
+      </button>
+      <button id="btn-align-center-h" class="align-popup-btn" title="Align centers horizontally">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <line x1="8" y1="1" x2="8" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="3" y="3" width="10" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="5" y="10" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+        </svg>
+      </button>
+      <button id="btn-align-right" class="align-popup-btn" title="Align right edges">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <line x1="13" y1="1" x2="13" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="4" y="3" width="9" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="7" y="10" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+        </svg>
+      </button>
+      <button id="btn-align-top" class="align-popup-btn" title="Align top edges">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <line x1="1" y1="3" x2="15" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="3" y="3" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="10" y="3" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
+        </svg>
+      </button>
+      <button id="btn-align-center-v" class="align-popup-btn" title="Align centers vertically">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="3" y="3" width="3" height="10" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="10" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
+        </svg>
+      </button>
+      <button id="btn-align-bottom" class="align-popup-btn" title="Align bottom edges">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <line x1="1" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="3" y="4" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="10" y="7" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
+        </svg>
+      </button>
+    </div>
+    <div class="align-popup-divider"></div>
+    <div class="align-popup-row">
+      <button id="btn-dist-h" class="align-popup-btn" title="Distribute horizontally (equal gaps)">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <rect x="1" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="6.5" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="12" y="5" width="3" height="6" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <line x1="4" y1="8" x2="6.5" y2="8" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+          <line x1="9.5" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+        </svg>
+      </button>
+      <button id="btn-dist-v" class="align-popup-btn" title="Distribute vertically (equal gaps)">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <rect x="5" y="1" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="5" y="6.5" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="5" y="12" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <line x1="8" y1="4" x2="8" y2="6.5" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+          <line x1="8" y1="9.5" x2="8" y2="12" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
   <script src="icons/manifest.js"></script>
   <script src="editor.js"></script>
 </body>

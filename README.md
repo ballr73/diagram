@@ -56,7 +56,7 @@ open index.html
 - **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
 - **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
 - **Diagram name bar** — slim bar above the toolbar showing the current diagram name ("Untitled diagram" until saved)
-- **Top toolbar** — new/open/save, zoom controls, undo/redo, clipboard, z-order, align/distribute, export
+- **Top toolbar** — new/open/save, zoom controls, undo/redo, clipboard, z-order, align/distribute (floating popup), export
 - **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
 - **Properties panel** — edit the selected element's properties
 
@@ -237,6 +237,7 @@ When one element is selected, the Properties panel on the right shows its editab
 |----------|-------------|
 | Shape | Change the shape type |
 | Label | Text displayed inside the shape |
+| Label pos | 3×3 position picker — place the label at any corner, edge midpoint, or centre of the shape |
 | Font | Size, Bold, Italic, Underline |
 | Fill | Fill colour (colour picker + reset) |
 | Stroke | Border colour (colour picker + reset) |
@@ -250,7 +251,8 @@ When one element is selected, the Properties panel on the right shows its editab
 | Property | Description |
 |----------|-------------|
 | Icon | Icon name (read-only) |
-| Label | Text displayed below the icon |
+| Label | Text displayed relative to the icon (supports multi-line with `\n`) |
+| Label pos | 3×3 position picker — default is bottom-centre (below icon); can be placed on any side or inside |
 | Font | Size, Bold, Italic, Underline |
 | X / Y | Position on canvas |
 | Width / Height | Size |
@@ -285,6 +287,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Font | Size, Bold, Italic, Underline |
 | Color | Text colour |
 | Background | Fill colour (shown behind text) |
+| Bg opacity | Background fill opacity 0–100% (useful for semi-transparent region boxes) |
 | Border | Stroke colour and style (Solid/Dashed/Dotted) |
 | X / Y | Anchor position on canvas |
 | Width / Height | Explicit box size; drag resize handles to set visually |
@@ -295,16 +298,22 @@ When one element is selected, the Properties panel on the right shows its editab
 
 | Button | Action | Enabled when |
 |--------|--------|-------------|
-| **Front** | Move selected element(s) above all others in their layer | anything selected |
-| **Back** | Move selected element(s) behind all others in their layer | anything selected |
+| **Front** | Move selected element(s) above all others | anything selected |
+| **Back** | Move selected element(s) behind all others | anything selected |
 
-Z-order operates within each layer (shapes compete with shapes, connectors with connectors, annotations with annotations).
+### How Z-order works
+
+- **Shapes and connectors** share the same rendering layer. A connector's Z-position automatically follows the topmost node it connects to — bring a node to front and its connectors come with it; send a node to back and its connectors recede behind shapes with higher Z.
+- **Text annotations (default)** render above all shapes and connectors. Use Bring to Front to move an annotation above other annotations.
+- **Text annotations (sent to back)** are moved to a separate background layer that renders *below* all shapes and connectors — ideal for region background boxes in architecture diagrams. Use Bring to Front to return them to the default layer.
 
 ---
 
-## Align & Distribute (Top Toolbar)
+## Align & Distribute
 
-Available when **2 or more** shapes/annotations are selected. Connectors are excluded.
+Click the **Align** icon button in the top toolbar to open a floating popup with all alignment and distribution options. The popup closes automatically after choosing an action, or click the button again to dismiss it.
+
+The Align button is enabled when **2 or more** shapes/annotations are selected. Connectors are excluded.
 
 | Button | Action | Min. selection |
 |--------|--------|---------------|
@@ -395,9 +404,10 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~3,060 lines)
-diagram.css                       — UI and SVG styling (~860 lines)
+editor.js                         — All editor logic (~3,200 lines)
+diagram.css                       — UI and SVG styling (~940 lines)
 README.md                         — This file
+azure-aks-architecture.json       — Example: Azure AKS multi-region architecture diagram
 icons/                            — SVG icon library (1,241 icons total)
   AWS/                            — 26 AWS service categories
   Azure/                          — 29 Azure service categories
