@@ -53,6 +53,7 @@ function pushHistory() {
   if (state.history.length > 100) state.history.shift();
   state.historyIndex = state.history.length - 1;
   saveToLocalStorage();
+  syncUndoRedoMenu();
 }
 
 // ============================================================
@@ -105,6 +106,7 @@ function undo() {
   state.historyIndex--;
   restoreSnapshot(state.history[state.historyIndex]);
   updateToolbarStatus();
+  syncUndoRedoMenu();
 }
 
 function redo() {
@@ -112,6 +114,7 @@ function redo() {
   state.historyIndex++;
   restoreSnapshot(state.history[state.historyIndex]);
   updateToolbarStatus();
+  syncUndoRedoMenu();
 }
 
 function restoreSnapshot(snap) {
@@ -2005,6 +2008,10 @@ function onKeyDown(e) {
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); return; }
   if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redo(); return; }
 
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveDiagram(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); newDiagram(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); document.getElementById('file-input')?.click(); return; }
+
   if ((e.ctrlKey || e.metaKey) && e.key === 'c') { e.preventDefault(); copySelected(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'x') { e.preventDefault(); cutSelected(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); pasteClipboard(); return; }
@@ -2879,6 +2886,13 @@ function initZoom() {
   ro.observe(document.getElementById('canvas-container'));
 }
 
+function syncUndoRedoMenu() {
+  const miUndo = document.getElementById('mi-undo');
+  const miRedo = document.getElementById('mi-redo');
+  if (miUndo) miUndo.disabled = state.historyIndex <= 0;
+  if (miRedo) miRedo.disabled = state.historyIndex >= state.history.length - 1;
+}
+
 function updateEditButtons() {
   const hasSel = state.selected.size > 0;
   const hasCb  = state.clipboard.nodes.length > 0 ||
@@ -2917,6 +2931,23 @@ function updateEditButtons() {
   const btnBack  = document.getElementById('btn-send-back');
   if (btnFront) btnFront.disabled = !hasSel;
   if (btnBack)  btnBack.disabled  = !hasSel;
+
+  // Sync menu item disabled states
+  const mi = (id, dis) => { const el = document.getElementById(id); if (el) el.disabled = dis; };
+  mi('mi-cut',          !hasSel);
+  mi('mi-copy',         !hasSel);
+  mi('mi-paste',        !hasCb);
+  mi('mi-duplicate',    !hasSel);
+  mi('mi-bring-front',  !hasSel);
+  mi('mi-send-back',    !hasSel);
+  mi('mi-align-left',   !canAlign);
+  mi('mi-align-center-h', !canAlign);
+  mi('mi-align-right',  !canAlign);
+  mi('mi-align-top',    !canAlign);
+  mi('mi-align-center-v', !canAlign);
+  mi('mi-align-bottom', !canAlign);
+  mi('mi-dist-h',       !canDist);
+  mi('mi-dist-v',       !canDist);
 }
 
 // ============================================================
@@ -3132,6 +3163,84 @@ function on(id, event, handler) {
   if (el) el.addEventListener(event, handler);
 }
 
+// ============================================================
+// Menu bar
+// ============================================================
+function initMenuBar() {
+  const menuBar = document.getElementById('menu-bar');
+  if (!menuBar) return;
+
+  const menus = Array.from(menuBar.querySelectorAll('.menu'));
+
+  function closeAll() {
+    menus.forEach(m => m.classList.remove('open'));
+  }
+
+  menus.forEach(menuEl => {
+    const titleBtn = menuEl.querySelector('.menu-title');
+
+    titleBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = menuEl.classList.contains('open');
+      closeAll();
+      if (!isOpen) menuEl.classList.add('open');
+    });
+
+    // Hover-open when another menu is already open
+    titleBtn.addEventListener('mouseenter', () => {
+      if (menus.some(m => m.classList.contains('open'))) {
+        closeAll();
+        menuEl.classList.add('open');
+      }
+    });
+  });
+
+  const menuActions = {
+    'new':            () => newDiagram(),
+    'open':           () => document.getElementById('file-input')?.click(),
+    'save':           () => saveDiagram(),
+    'export-png':     () => exportPNG(),
+    'export-svg':     () => exportSVG(),
+    'undo':           () => undo(),
+    'redo':           () => redo(),
+    'cut':            () => cutSelected(),
+    'copy':           () => copySelected(),
+    'paste':          () => pasteClipboard(),
+    'duplicate':      () => duplicateSelected(),
+    'zoom-in':        () => zoomIn(),
+    'zoom-out':       () => zoomOut(),
+    'zoom-100':       () => setZoom(1.0),
+    'zoom-fit':       () => fitWindow(),
+    'zoom-25':        () => setZoom(0.25),
+    'zoom-50':        () => setZoom(0.5),
+    'zoom-75':        () => setZoom(0.75),
+    'zoom-125':       () => setZoom(1.25),
+    'zoom-150':       () => setZoom(1.5),
+    'zoom-200':       () => setZoom(2.0),
+    'bring-front':    () => bringToFront(),
+    'send-back':      () => sendToBack(),
+    'align-left':     () => alignLeft(),
+    'align-center-h': () => alignCenterH(),
+    'align-right':    () => alignRight(),
+    'align-top':      () => alignTop(),
+    'align-center-v': () => alignCenterV(),
+    'align-bottom':   () => alignBottom(),
+    'dist-h':         () => distributeH(),
+    'dist-v':         () => distributeV(),
+  };
+
+  menuBar.addEventListener('click', e => {
+    const btn = e.target.closest('.menu-item');
+    if (!btn || btn.disabled) return;
+    e.stopPropagation();
+    closeAll();
+    const fn = menuActions[btn.dataset.action];
+    if (fn) fn();
+  });
+
+  document.addEventListener('click', closeAll);
+}
+
 function init() {
   initSVG();
 
@@ -3287,6 +3396,9 @@ function init() {
   // Initialise icon library panel
   initIconLibrary();
 
+  // Initialise menu bar
+  initMenuBar();
+
   // Restore last diagram from localStorage (before seeding history)
   loadFromLocalStorage();
   updateTitleDisplay();
@@ -3294,11 +3406,12 @@ function init() {
   // Pre-cache data URIs for any symbol icons loaded from localStorage
   cacheAllSymbolIcons();
 
-  pushHistory(); // history[0] = initial/restored state
+  pushHistory(); // history[0] = initial/restored state — also calls syncUndoRedoMenu
 
   render();
   updatePropertiesPanel();
   updateToolbarStatus();
+  updateEditButtons();
 }
 
 document.addEventListener('DOMContentLoaded', init);

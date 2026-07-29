@@ -9,6 +9,66 @@
 <body>
   <div id="app">
     <div id="diagram-title">Untitled diagram</div>
+
+    <nav id="menu-bar">
+      <div class="menu">
+        <button class="menu-title">File</button>
+        <ul class="menu-dropdown">
+          <li><button class="menu-item" data-action="new"><span>New</span><kbd>Ctrl+N</kbd></button></li>
+          <li><button class="menu-item" data-action="open"><span>Open…</span><kbd>Ctrl+O</kbd></button></li>
+          <li><button class="menu-item" data-action="save"><span>Save</span><kbd>Ctrl+S</kbd></button></li>
+          <li class="menu-sep"></li>
+          <li><button class="menu-item" data-action="export-png"><span>Export PNG</span></button></li>
+          <li><button class="menu-item" data-action="export-svg"><span>Export SVG</span></button></li>
+        </ul>
+      </div>
+      <div class="menu">
+        <button class="menu-title">Edit</button>
+        <ul class="menu-dropdown">
+          <li><button class="menu-item" id="mi-undo" data-action="undo"><span>Undo</span><kbd>Ctrl+Z</kbd></button></li>
+          <li><button class="menu-item" id="mi-redo" data-action="redo"><span>Redo</span><kbd>Ctrl+Y</kbd></button></li>
+          <li class="menu-sep"></li>
+          <li><button class="menu-item" id="mi-cut" data-action="cut"><span>Cut</span><kbd>Ctrl+X</kbd></button></li>
+          <li><button class="menu-item" id="mi-copy" data-action="copy"><span>Copy</span><kbd>Ctrl+C</kbd></button></li>
+          <li><button class="menu-item" id="mi-paste" data-action="paste"><span>Paste</span><kbd>Ctrl+V</kbd></button></li>
+          <li><button class="menu-item" id="mi-duplicate" data-action="duplicate"><span>Duplicate</span><kbd>Ctrl+D</kbd></button></li>
+        </ul>
+      </div>
+      <div class="menu">
+        <button class="menu-title">View</button>
+        <ul class="menu-dropdown">
+          <li><button class="menu-item" data-action="zoom-in"><span>Zoom In</span><kbd>Ctrl++</kbd></button></li>
+          <li><button class="menu-item" data-action="zoom-out"><span>Zoom Out</span><kbd>Ctrl+−</kbd></button></li>
+          <li><button class="menu-item" data-action="zoom-100"><span>100%</span><kbd>Ctrl+0</kbd></button></li>
+          <li><button class="menu-item" data-action="zoom-fit"><span>Fit Window</span><kbd>Ctrl+⇧0</kbd></button></li>
+          <li class="menu-sep"></li>
+          <li><button class="menu-item" data-action="zoom-25"><span>25%</span></button></li>
+          <li><button class="menu-item" data-action="zoom-50"><span>50%</span></button></li>
+          <li><button class="menu-item" data-action="zoom-75"><span>75%</span></button></li>
+          <li><button class="menu-item" data-action="zoom-125"><span>125%</span></button></li>
+          <li><button class="menu-item" data-action="zoom-150"><span>150%</span></button></li>
+          <li><button class="menu-item" data-action="zoom-200"><span>200%</span></button></li>
+        </ul>
+      </div>
+      <div class="menu">
+        <button class="menu-title">Arrange</button>
+        <ul class="menu-dropdown">
+          <li><button class="menu-item" id="mi-bring-front" data-action="bring-front"><span>Bring to Front</span></button></li>
+          <li><button class="menu-item" id="mi-send-back" data-action="send-back"><span>Send to Back</span></button></li>
+          <li class="menu-sep"></li>
+          <li><button class="menu-item" id="mi-align-left" data-action="align-left"><span>Align Left</span></button></li>
+          <li><button class="menu-item" id="mi-align-center-h" data-action="align-center-h"><span>Align Center</span></button></li>
+          <li><button class="menu-item" id="mi-align-right" data-action="align-right"><span>Align Right</span></button></li>
+          <li><button class="menu-item" id="mi-align-top" data-action="align-top"><span>Align Top</span></button></li>
+          <li><button class="menu-item" id="mi-align-center-v" data-action="align-center-v"><span>Align Middle</span></button></li>
+          <li><button class="menu-item" id="mi-align-bottom" data-action="align-bottom"><span>Align Bottom</span></button></li>
+          <li class="menu-sep"></li>
+          <li><button class="menu-item" id="mi-dist-h" data-action="dist-h"><span>Distribute Horizontally</span></button></li>
+          <li><button class="menu-item" id="mi-dist-v" data-action="dist-v"><span>Distribute Vertically</span></button></li>
+        </ul>
+      </div>
+    </nav>
+
     <div id="toolbar">
       <div class="tool-group" id="new-group">
         <button id="btn-new" title="New diagram">

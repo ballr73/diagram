@@ -39,8 +39,10 @@ open index.html
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │ Diagram name                                                          │
-├─────────────────────────────────────────────────────────────────────┤
-│ New │ Open/Save/SaveAs │ Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export │
+├──────────────────────────────────────────────────────────────────────┤
+│ File  Edit  View  Arrange                                             │
+├──────────────────────────────────────────────────────────────────────┤
+│ New │ Open/Save │ Zoom │ Undo/Redo │ Clipboard │ Order │ Align │ Export │
 ├──────┬──────────┬─────────────────────────────────┬─────────────────┤
 │      │ 🔍 Srch  │                                 │                 │
 │Select│ ▶ AWS    │                                 │   Properties    │
@@ -55,8 +57,9 @@ open index.html
 
 - **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
 - **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
-- **Diagram name bar** — slim bar above the toolbar showing the current diagram name ("Untitled diagram" until saved)
-- **Top toolbar** — new/open/save, zoom controls, undo/redo, clipboard, z-order, align/distribute (floating popup), export
+- **Diagram name bar** — slim bar above the menu bar showing the current diagram name ("Untitled diagram" until saved)
+- **Menu bar** — File, Edit, View, and Arrange menus with keyboard shortcuts shown on each item
+- **Top toolbar** — quick-access icon buttons for the most common actions
 - **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
 - **Properties panel** — edit the selected element's properties
 
@@ -341,20 +344,65 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 
 ---
 
+## Menu Bar
+
+A standard application menu bar sits between the diagram name and the icon toolbar. Click a menu title to open it; hover across titles to switch menus; click outside or select an item to close.
+
+### File
+
+| Item | Shortcut | Description |
+|------|----------|-------------|
+| New | `Ctrl+N` | Clear the canvas and start a fresh diagram |
+| Open… | `Ctrl+O` | Open a `.json` diagram file |
+| Save | `Ctrl+S` | Save the diagram — opens a native save dialog to choose filename and location |
+| Export PNG | | Export the diagram as a PNG image |
+| Export SVG | | Export the diagram as a self-contained SVG |
+
+### Edit
+
+| Item | Shortcut | Description |
+|------|----------|-------------|
+| Undo | `Ctrl+Z` | Undo the last action |
+| Redo | `Ctrl+Y` | Redo the last undone action |
+| Cut | `Ctrl+X` | Cut selected elements |
+| Copy | `Ctrl+C` | Copy selected elements |
+| Paste | `Ctrl+V` | Paste clipboard |
+| Duplicate | `Ctrl+D` | Duplicate selected elements |
+
+### View
+
+| Item | Shortcut | Description |
+|------|----------|-------------|
+| Zoom In | `Ctrl++` | Increase zoom by 10% |
+| Zoom Out | `Ctrl+−` | Decrease zoom by 10% |
+| 100% | `Ctrl+0` | Reset zoom to 100% |
+| Fit Window | `Ctrl+⇧0` | Fit the whole diagram into the viewport |
+| 25% – 200% | | Jump to a specific zoom preset |
+
+### Arrange
+
+| Item | Description |
+|------|-------------|
+| Bring to Front | Move selected elements above all others |
+| Send to Back | Move selected elements behind all others |
+| Align Left/Center/Right/Top/Middle/Bottom | Align selected elements (requires ≥ 2) |
+| Distribute Horizontally / Vertically | Equal spacing between elements (requires ≥ 3) |
+
+---
+
 ## Open, Save & Export
 
 | Button | Description |
 |--------|-------------|
 | **New** | Clear the canvas and start a fresh diagram (prompts to confirm if content exists) |
-| **Open** (📂) | Open a previously saved `.json` file — sets the diagram name from the filename |
-| **Save** (💾) | First save: prompts for a filename. Subsequent saves: overwrites silently using the same name |
-| **Save As** | Prompts for a new filename and saves — replaces the current diagram name; disabled until the diagram has been saved at least once |
-| **SVG** | Export a standalone `diagram.svg` — icons are embedded as data URIs |
-| **PNG** | Export a `diagram.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
+| **Open** | Open a previously saved `.json` file — sets the diagram name from the filename |
+| **Save** | Opens a native OS save dialog (Chrome/Edge) to choose filename and location; falls back to a browser download prompt on Firefox and Safari |
+| **SVG** | Export a self-contained `<name>.svg` — icons are embedded as data URIs |
+| **PNG** | Export a `<name>.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
 
-**New**, **Open**, **Save**, and **Save As** are icon-only buttons. **New** sits in its own group; **Open**, **Save**, and **Save As** share a group. SVG and PNG exports are in a separate group on the right.
+**New** and **Open** are also available in the **File** menu with keyboard shortcuts (`Ctrl+N`, `Ctrl+O`). **Save** is `Ctrl+S`.
 
-The current diagram name is shown in the slim bar above the toolbar. It reads **"Untitled diagram"** until the file is saved or opened.
+The current diagram name is shown in the slim bar above the menu bar. It reads **"Untitled diagram"** until the file is saved or opened. The name is taken from whatever the user types in the save dialog.
 
 Icon images are embedded as base64 data URIs in SVG and PNG exports, so exported files are fully self-contained.
 
@@ -383,6 +431,9 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `I` | Toggle icon library panel |
 | `Delete` / `Backspace` | Delete selected elements (or remove focused waypoint) |
 | `Escape` | Cancel current operation / deselect |
+| `Ctrl+N` | New diagram |
+| `Ctrl+O` | Open file |
+| `Ctrl+S` | Save diagram |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
 | `Ctrl+C` | Copy selected |
@@ -404,8 +455,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~3,200 lines)
-diagram.css                       — UI and SVG styling (~940 lines)
+editor.js                         — All editor logic (~3,300 lines)
+diagram.css                       — UI and SVG styling (~1,040 lines)
 README.md                         — This file
 azure-aks-architecture.json       — Example: Azure AKS multi-region architecture diagram
 icons/                            — SVG icon library (1,241 icons total)
