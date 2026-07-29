@@ -157,28 +157,45 @@ function newDiagram() {
   saveToLocalStorage();
 }
 
-function saveDiagram() {
-  let baseName;
-  if (state.diagramName) {
-    // Already named — save directly without prompting
-    baseName = state.diagramName;
-  } else {
-    // New diagram — prompt for a name
-    const input = window.prompt('Save as:', 'diagram');
-    if (input === null) return; // cancelled
-    baseName = (input.trim() || 'diagram').replace(/\.json$/i, '');
+// Save a Blob to disk. Uses showSaveFilePicker when available (Chrome/Edge);
+// falls back to anchor-click download for Safari and Firefox.
+// Returns the actual filename saved, or null if the user cancelled.
+async function saveBlob(blob, suggestedName, types) {
+  if (typeof window.showSaveFilePicker === 'function') {
+    try {
+      const handle = await window.showSaveFilePicker({ suggestedName, types });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return handle.name;
+    } catch (err) {
+      if (err.name === 'AbortError') return null; // user cancelled
+      console.warn('showSaveFilePicker failed, falling back to download:', err);
+    }
   }
-  _doSave(baseName);
+  // Legacy anchor-click fallback (Safari, Firefox, or picker failure)
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = suggestedName;
+  a.click();
+  URL.revokeObjectURL(url);
+  return suggestedName;
 }
 
-function saveAsDiagram() {
-  const input = window.prompt('Save as:', state.diagramName || 'diagram');
-  if (input === null) return; // cancelled
-  const baseName = (input.trim() || 'diagram').replace(/\.json$/i, '');
-  _doSave(baseName);
+async function saveDiagram() {
+  const baseName = state.diagramName || 'diagram';
+  if (typeof window.showSaveFilePicker !== 'function') {
+    // Fallback browsers (Safari, Firefox) — always prompt for name
+    const input = window.prompt('Save as:', baseName);
+    if (input === null) return;
+    await _doSave((input.trim() || 'diagram').replace(/\.json$/i, ''));
+  } else {
+    await _doSave(baseName); // picker dialog handles naming
+  }
 }
 
-function _doSave(baseName) {
+async function _doSave(baseName) {
   const filename = baseName + '.json';
   const data = {
     version: 1,
@@ -189,14 +206,13 @@ function _doSave(baseName) {
   };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 
-  state.diagramName = baseName;
+  const savedName = await saveBlob(blob, filename, [
+    { description: 'JSON Diagram', accept: { 'application/json': ['.json'] } },
+  ]);
+  if (savedName === null) return; // cancelled
+
+  state.diagramName = savedName.replace(/\.json$/i, '');
   updateTitleDisplay();
   saveToLocalStorage();
 }
@@ -385,12 +401,10 @@ async function buildExportSVG() {
 async function exportSVG() {
   const svgString = await buildExportSVG();
   const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'diagram.svg';
-  a.click();
-  URL.revokeObjectURL(url);
+  const name = state.diagramName || 'diagram';
+  await saveBlob(blob, name + '.svg', [
+    { description: 'SVG Image', accept: { 'image/svg+xml': ['.svg'] } },
+  ]);
 }
 
 async function exportPNG() {
@@ -402,31 +416,37 @@ async function exportPNG() {
   const w = match ? parseFloat(match[1]) : 800;
   const h = match ? parseFloat(match[2]) : 600;
 
-  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width  = w * scale;
-    canvas.height = h * scale;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(scale, scale);
-    ctx.drawImage(img, 0, 0, w, h);
-    URL.revokeObjectURL(url);
-    canvas.toBlob(pngBlob => {
-      const pngUrl = URL.createObjectURL(pngBlob);
-      const a = document.createElement('a');
-      a.href = pngUrl;
-      a.download = 'diagram.png';
-      a.click();
-      URL.revokeObjectURL(pngUrl);
-    }, 'image/png');
-  };
-  img.onerror = () => {
-    URL.revokeObjectURL(url);
+  const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  const pngBlob = await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(resolve, 'image/png');
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Image load failed'));
+    };
+    img.src = url;
+  }).catch(() => null);
+
+  if (!pngBlob) {
     alert('PNG export failed. Try SVG export instead.');
-  };
-  img.src = url;
+    return;
+  }
+
+  const name = state.diagramName || 'diagram';
+  await saveBlob(pngBlob, name + '.png', [
+    { description: 'PNG Image', accept: { 'image/png': ['.png'] } },
+  ]);
 }
 
 // ============================================================
@@ -2740,8 +2760,6 @@ function updateToolbarStatus() {
 function updateTitleDisplay() {
   const el = document.getElementById('diagram-title');
   if (el) el.textContent = state.diagramName || 'Untitled diagram';
-  const btnSaveAs = document.getElementById('btn-save-as');
-  if (btnSaveAs) btnSaveAs.disabled = !state.diagramName;
 }
 
 // ============================================================
@@ -3193,7 +3211,6 @@ function init() {
   // Open / Save / Export
   on('btn-new',     'click', newDiagram);
   on('btn-save',    'click', saveDiagram);
-  on('btn-save-as', 'click', saveAsDiagram);
   on('btn-open',       'click', () => document.getElementById('file-input')?.click());
   on('btn-export-svg', 'click', exportSVG);
   on('btn-export-png', 'click', exportPNG);
