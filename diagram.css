@@ -444,6 +444,8 @@ html, body, #app {
 #canvas-container {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
   position: relative;
   background: #f8fafc;
   /* Dot grid */
@@ -453,9 +455,119 @@ html, body, #app {
 }
 
 #canvas {
-  width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   display: block;
+}
+
+/* ============================================================
+   Tab bar
+   ============================================================ */
+#tab-bar {
+  display: flex;
+  align-items: center;
+  background: #1e293b;
+  border-top: 1px solid #0f172a;
+  min-height: 32px;
+  padding: 3px 6px;
+  gap: 2px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 10px;
+  background: #334155;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  max-width: 160px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.tab-btn:hover {
+  background: #475569;
+  color: #e2e8f0;
+}
+
+.tab-btn.active {
+  background: #1e40af;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+.tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 110px;
+}
+
+.tab-close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+
+.tab-btn:hover .tab-close,
+.tab-btn.active .tab-close,
+.tab-close:focus-visible {
+  opacity: 0.4;
+  pointer-events: auto;
+}
+
+.tab-close:hover {
+  opacity: 1;
+}
+
+.tab-add-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 1px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.tab-add-btn:hover {
+  background: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+.tab-rename-input {
+  background: #0f172a;
+  border: 1px solid #3b82f6;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 1px 4px;
+  border-radius: 2px;
+  width: 90px;
+  outline: none;
 }
 
 /* ============================================================

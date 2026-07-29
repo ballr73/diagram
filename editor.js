@@ -8,6 +8,8 @@ const state = {
   edges: new Map(),       // id → {id, from, to, label, waypoints:[{id,x,y}]}
   lines: new Map(),       // id → {id, x1, y1, x2, y2, waypoints, label, stroke, ...}
   annotations: new Map(), // id → {id, x, y, text}
+  tabs: [],
+  activeTabIndex: 0,
   selected: new Set(),
   selectedWaypoint: null, // {edgeId?, lineId?, waypointId} — waypoint focused for deletion
   tool: 'select',
@@ -22,6 +24,53 @@ const state = {
   viewCenterY: 0,
   diagramName: null,      // null = unsaved/new; string = last saved filename (without .json)
 };
+
+function createTab(name) {
+  return {
+    name,
+    nodes: new Map(),
+    edges: new Map(),
+    lines: new Map(),
+    annotations: new Map(),
+    history: [],
+    historyIndex: -1,
+    nextId: 1,
+    zoom: 1.0,
+    viewCenterX: 0,
+    viewCenterY: 0,
+    selected: new Set(),
+    selectedWaypoint: null,
+  };
+}
+
+function flushTabState() {
+  const tab = state.tabs[state.activeTabIndex];
+  if (!tab) return;
+  tab.historyIndex = state.historyIndex;
+  tab.nextId = state.nextId;
+  tab.zoom = state.zoom;
+  tab.viewCenterX = state.viewCenterX;
+  tab.viewCenterY = state.viewCenterY;
+  tab.selectedWaypoint = state.selectedWaypoint;
+}
+
+function loadTabToLiveState(index) {
+  const tab = state.tabs[index];
+  if (!tab) return;
+  state.activeTabIndex = index;
+  state.nodes = tab.nodes;
+  state.edges = tab.edges;
+  state.lines = tab.lines;
+  state.annotations = tab.annotations;
+  state.history = tab.history;
+  state.historyIndex = tab.historyIndex;
+  state.nextId = tab.nextId;
+  state.zoom = tab.zoom;
+  state.viewCenterX = tab.viewCenterX;
+  state.viewCenterY = tab.viewCenterY;
+  state.selected = tab.selected;
+  state.selectedWaypoint = tab.selectedWaypoint;
+}
 
 function genId() {
   return `id-${state.nextId++}`;
@@ -48,10 +97,13 @@ function snapshot() {
 
 function pushHistory() {
   // Truncate redo branch, add current state, cap at 100
-  state.history = state.history.slice(0, state.historyIndex + 1);
+  state.history.splice(state.historyIndex + 1);
   state.history.push(snapshot());
   if (state.history.length > 100) state.history.shift();
   state.historyIndex = state.history.length - 1;
+  if (state.tabs[state.activeTabIndex]) {
+    state.tabs[state.activeTabIndex].historyIndex = state.historyIndex;
+  }
   saveToLocalStorage();
   syncUndoRedoMenu();
 }
@@ -63,14 +115,19 @@ const LS_KEY = 'diagram-editor';
 
 function saveToLocalStorage() {
   try {
+    flushTabState();
     const data = {
-      version: 1,
-      nodes: [...state.nodes.values()],
-      edges: [...state.edges.values()],
-      lines: [...state.lines.values()],
-      annotations: [...state.annotations.values()],
-      nextId: state.nextId,
+      version: 2,
       diagramName: state.diagramName,
+      activeTabIndex: state.activeTabIndex,
+      tabs: state.tabs.map(tab => ({
+        name: tab.name,
+        nodes: [...tab.nodes.values()],
+        edges: [...tab.edges.values()],
+        lines: [...tab.lines.values()],
+        annotations: [...tab.annotations.values()],
+        nextId: tab.nextId,
+      })),
     };
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   } catch (_) {
@@ -84,17 +141,49 @@ function loadFromLocalStorage() {
     if (!raw) return false;
     const data = JSON.parse(raw);
     if (typeof data.version === 'undefined') return false;
-    state.nodes.clear();
-    state.edges.clear();
-    state.lines.clear();
-    state.annotations.clear();
-    state.selected.clear();
-    (data.nodes || []).forEach(n => state.nodes.set(n.id, { ...n }));
-    (data.edges || []).forEach(e => state.edges.set(e.id, { ...e }));
-    (data.lines || []).forEach(l => state.lines.set(l.id, { ...l }));
-    (data.annotations || []).forEach(a => state.annotations.set(a.id, { ...a }));
-    if (data.nextId) state.nextId = data.nextId;
-    if (data.diagramName) { state.diagramName = data.diagramName; }
+
+    if (data.tabs) {
+      state.tabs = data.tabs.map((td, i) => {
+        const tab = createTab(td.name || `tab-${i + 1}`);
+        (td.nodes || []).forEach(n => tab.nodes.set(n.id, { ...n }));
+        (td.edges || []).forEach(e => tab.edges.set(e.id, {
+          ...e,
+          waypoints: (e.waypoints || []).map(wp => ({ ...wp })),
+        }));
+        (td.lines || []).forEach(l => tab.lines.set(l.id, {
+          ...l,
+          waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
+        }));
+        (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
+        if (td.nextId) tab.nextId = td.nextId;
+        return tab;
+      });
+      if (!state.tabs.length) state.tabs = [createTab('tab-1')];
+      const activeIdx = Math.min(data.activeTabIndex || 0, state.tabs.length - 1);
+      loadTabToLiveState(activeIdx);
+    } else {
+      const tab = createTab('tab-1');
+      state.tabs = [tab];
+      tab.nodes.clear();
+      tab.edges.clear();
+      tab.lines.clear();
+      tab.annotations.clear();
+      tab.selected.clear();
+      tab.selectedWaypoint = null;
+      (data.nodes || []).forEach(n => tab.nodes.set(n.id, { ...n }));
+      (data.edges || []).forEach(e => tab.edges.set(e.id, {
+        ...e,
+        waypoints: (e.waypoints || []).map(wp => ({ ...wp })),
+      }));
+      (data.lines || []).forEach(l => tab.lines.set(l.id, {
+        ...l,
+        waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
+      }));
+      (data.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
+      if (data.nextId) tab.nextId = data.nextId;
+      loadTabToLiveState(0);
+    }
+    if (data.diagramName) state.diagramName = data.diagramName;
     return true;
   } catch (_) {
     return false;
@@ -104,6 +193,9 @@ function loadFromLocalStorage() {
 function undo() {
   if (state.historyIndex <= 0) return;
   state.historyIndex--;
+  if (state.tabs[state.activeTabIndex]) {
+    state.tabs[state.activeTabIndex].historyIndex = state.historyIndex;
+  }
   restoreSnapshot(state.history[state.historyIndex]);
   updateToolbarStatus();
   syncUndoRedoMenu();
@@ -112,24 +204,36 @@ function undo() {
 function redo() {
   if (state.historyIndex >= state.history.length - 1) return;
   state.historyIndex++;
+  if (state.tabs[state.activeTabIndex]) {
+    state.tabs[state.activeTabIndex].historyIndex = state.historyIndex;
+  }
   restoreSnapshot(state.history[state.historyIndex]);
   updateToolbarStatus();
   syncUndoRedoMenu();
 }
 
 function restoreSnapshot(snap) {
-  state.nodes = new Map([...snap.nodes].map(([k, v]) => [k, { ...v }]));
-  state.edges = new Map([...snap.edges].map(([k, v]) => [k, {
+  state.nodes.clear();
+  [...snap.nodes].forEach(([k, v]) => state.nodes.set(k, { ...v }));
+  state.edges.clear();
+  [...snap.edges].forEach(([k, v]) => state.edges.set(k, {
     ...v,
     waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
-  }]));
-  state.lines = new Map([...(snap.lines || [])].map(([k, v]) => [k, {
+  }));
+  state.lines.clear();
+  [...(snap.lines || [])].forEach(([k, v]) => state.lines.set(k, {
     ...v,
     waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
-  }]));
-  state.annotations = new Map([...snap.annotations].map(([k, v]) => [k, { ...v }]));
+  }));
+  state.annotations.clear();
+  [...snap.annotations].forEach(([k, v]) => state.annotations.set(k, { ...v }));
   state.nextId = snap.nextId;
+  if (state.tabs[state.activeTabIndex]) {
+    state.tabs[state.activeTabIndex].nextId = state.nextId;
+    state.tabs[state.activeTabIndex].selectedWaypoint = null;
+  }
   state.selected.clear();
+  state.selectedWaypoint = null;
   render();
   updatePropertiesPanel();
 }
@@ -138,25 +242,29 @@ function restoreSnapshot(snap) {
 // JSON Serialization — Open / Save
 // ============================================================
 function newDiagram() {
-  const hasContent = state.nodes.size > 0 || state.edges.size > 0 ||
-                     state.lines.size > 0 || state.annotations.size > 0;
+  const hasContent = state.tabs.some(t =>
+    t.nodes.size > 0 || t.edges.size > 0 || t.lines.size > 0 || t.annotations.size > 0
+  ) || state.nodes.size > 0 || state.edges.size > 0 || state.lines.size > 0 || state.annotations.size > 0;
   if (hasContent && !window.confirm('Discard current diagram and start a new one?')) return;
 
-  state.nodes.clear();
-  state.edges.clear();
-  state.lines.clear();
-  state.annotations.clear();
-  state.selected.clear();
-  state.selectedWaypoint = null;
+  const firstTab = createTab('tab-1');
+  state.tabs = [firstTab];
+  state.activeTabIndex = 0;
+  loadTabToLiveState(0);
   state.diagramName = null;
-  state.nextId = 1;
-  state.history = [];
-  state.historyIndex = -1;
+  drag = null;
+  panDrag = null;
+  clearInlineEditor();
+  if (uiLayer) uiLayer.innerHTML = '';
+  if (svg) svg.style.cursor = state.tool === 'select' ? 'default' : 'crosshair';
   pushHistory();
   render();
+  updateViewBox();
+  syncZoomSelect();
   updatePropertiesPanel();
   updateToolbarStatus();
   updateTitleDisplay();
+  renderTabBar();
   saveToLocalStorage();
 }
 
@@ -199,13 +307,17 @@ async function saveDiagram() {
 }
 
 async function _doSave(baseName) {
+  flushTabState();
   const filename = baseName + '.json';
   const data = {
-    version: 1,
-    nodes: [...state.nodes.values()],
-    edges: [...state.edges.values()],
-    lines: [...state.lines.values()],
-    annotations: [...state.annotations.values()],
+    version: 2,
+    tabs: state.tabs.map(tab => ({
+      name: tab.name,
+      nodes: [...tab.nodes.values()],
+      edges: [...tab.edges.values()],
+      lines: [...tab.lines.values()],
+      annotations: [...tab.annotations.values()],
+    })),
   };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -226,28 +338,47 @@ function importDiagram(file) {
     try {
       const data = JSON.parse(e.target.result);
       if (typeof data.version === 'undefined') throw new Error('Missing version field');
-      pushHistory();
-      state.nodes.clear();
-      state.edges.clear();
-      state.lines.clear();
-      state.annotations.clear();
-      state.selected.clear();
-      (data.nodes || []).forEach(n => state.nodes.set(n.id, { ...n }));
-      (data.edges || []).forEach(e => state.edges.set(e.id, { ...e }));
-      (data.lines || []).forEach(l => state.lines.set(l.id, { ...l }));
-      (data.annotations || []).forEach(a => state.annotations.set(a.id, { ...a }));
-      // Advance nextId past all imported ids
-      const allNums = [...state.nodes.keys(), ...state.edges.keys(), ...state.lines.keys(), ...state.annotations.keys()]
-        .map(id => parseInt(id.replace('id-', ''), 10))
-        .filter(n => !isNaN(n));
-      state.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
-      // Derive diagram name from the opened filename (strip .json extension)
+      const loadTabData = (tab, td) => {
+        (td.nodes || []).forEach(n => tab.nodes.set(n.id, { ...n }));
+        (td.edges || []).forEach(e => tab.edges.set(e.id, {
+          ...e,
+          waypoints: (e.waypoints || []).map(wp => ({ ...wp })),
+        }));
+        (td.lines || []).forEach(l => tab.lines.set(l.id, {
+          ...l,
+          waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
+        }));
+        (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
+        const allNums = [...tab.nodes.keys(), ...tab.edges.keys(), ...tab.lines.keys(), ...tab.annotations.keys()]
+          .map(id => parseInt(id.replace('id-', ''), 10))
+          .filter(n => !isNaN(n));
+        tab.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
+      };
+
+      if (data.tabs) {
+        state.tabs = data.tabs.map((td, i) => {
+          const tab = createTab(td.name || `tab-${i + 1}`);
+          loadTabData(tab, td);
+          return tab;
+        });
+        if (!state.tabs.length) state.tabs = [createTab('tab-1')];
+        loadTabToLiveState(0);
+      } else {
+        const tab = createTab('tab-1');
+        loadTabData(tab, data);
+        state.tabs = [tab];
+        loadTabToLiveState(0);
+      }
+
       state.diagramName = file.name.replace(/\.json$/i, '');
       updateTitleDisplay();
-      pushHistory(); // save imported state as new history entry
+      pushHistory();
       render();
+      updateViewBox();
+      syncZoomSelect();
       updatePropertiesPanel();
       updateToolbarStatus();
+      renderTabBar();
     } catch (err) {
       alert('Import failed: ' + err.message);
     }
@@ -297,8 +428,10 @@ function loadIconAsDataURI(iconPath) {
 /** Pre-cache data URIs for every symbol node currently in the diagram. */
 function cacheAllSymbolIcons() {
   const paths = new Set();
-  for (const node of state.nodes.values()) {
-    if (node.type === 'symbol' && node.iconPath) paths.add(node.iconPath);
+  for (const tab of state.tabs) {
+    for (const node of tab.nodes.values()) {
+      if (node.type === 'symbol' && node.iconPath) paths.add(node.iconPath);
+    }
   }
   return Promise.all([...paths].map(loadIconAsDataURI));
 }
@@ -353,7 +486,8 @@ async function buildExportSVG() {
   const clone = srcSvg.cloneNode(true);
 
   // Restore selection and re-render
-  state.selected = savedSelected;
+  state.selected.clear();
+  savedSelected.forEach(id => state.selected.add(id));
   render();
 
   // Strip interactive-only content from clone
@@ -2777,8 +2911,8 @@ const ZOOM_MAX = 4.0;
 const ZOOM_PRESETS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
 function getCanvasSize() {
-  const container = document.getElementById('canvas-container');
-  return { w: container.clientWidth, h: container.clientHeight };
+  const canvas = document.getElementById('canvas');
+  return { w: canvas.clientWidth, h: canvas.clientHeight };
 }
 
 function updateViewBox() {
@@ -3163,6 +3297,156 @@ function on(id, event, handler) {
   if (el) el.addEventListener(event, handler);
 }
 
+function switchToTab(index) {
+  if (index === state.activeTabIndex) return;
+  flushTabState();
+  drag = null;
+  panDrag = null;
+  clearInlineEditor();
+  if (uiLayer) uiLayer.innerHTML = '';
+  loadTabToLiveState(index);
+  if (svg) svg.style.cursor = state.tool === 'select' ? 'default' : 'crosshair';
+  render();
+  updateViewBox();
+  syncZoomSelect();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+  updateEditButtons();
+  syncUndoRedoMenu();
+  renderTabBar();
+  saveToLocalStorage();
+}
+
+function addTab() {
+  flushTabState();
+  drag = null;
+  panDrag = null;
+  clearInlineEditor();
+  if (uiLayer) uiLayer.innerHTML = '';
+  const defaultNames = state.tabs
+    .map(tab => /^tab-(\d+)$/.exec(tab.name))
+    .filter(Boolean)
+    .map(match => parseInt(match[1], 10));
+  const n = defaultNames.length ? Math.max(...defaultNames) + 1 : state.tabs.length + 1;
+  const tab = createTab(`tab-${n}`);
+  state.tabs.push(tab);
+  loadTabToLiveState(state.tabs.length - 1);
+  pushHistory();
+  render();
+  updateViewBox();
+  syncZoomSelect();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+  updateEditButtons();
+  syncUndoRedoMenu();
+  renderTabBar();
+  saveToLocalStorage();
+}
+
+function removeTab(index) {
+  if (state.tabs.length <= 1) return;
+  flushTabState();
+  drag = null;
+  panDrag = null;
+  clearInlineEditor();
+  if (uiLayer) uiLayer.innerHTML = '';
+  const prevActive = state.activeTabIndex;
+  state.tabs.splice(index, 1);
+  const newIndex = prevActive === index
+    ? Math.min(index, state.tabs.length - 1)
+    : (prevActive > index ? prevActive - 1 : prevActive);
+  loadTabToLiveState(newIndex);
+  pushHistory();
+  render();
+  updateViewBox();
+  syncZoomSelect();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+  updateEditButtons();
+  syncUndoRedoMenu();
+  renderTabBar();
+  saveToLocalStorage();
+}
+
+function renameTab(index, newName) {
+  const name = newName.trim();
+  if (!name) {
+    renderTabBar();
+    return;
+  }
+  state.tabs[index].name = name;
+  renderTabBar();
+  saveToLocalStorage();
+}
+
+function renderTabBar() {
+  const bar = document.getElementById('tab-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+
+  state.tabs.forEach((tab, i) => {
+    const tabEl = document.createElement('div');
+    tabEl.className = 'tab-btn' + (i === state.activeTabIndex ? ' active' : '');
+
+    const label = document.createElement('span');
+    label.className = 'tab-label';
+    label.textContent = tab.name;
+    label.title = 'Double-click to rename';
+    tabEl.appendChild(label);
+
+    if (state.tabs.length > 1) {
+      const close = document.createElement('button');
+      close.className = 'tab-close';
+      close.type = 'button';
+      close.innerHTML = '&times;';
+      close.title = `Close "${tab.name}"`;
+      close.addEventListener('click', e => {
+        e.stopPropagation();
+        if (window.confirm(`Close tab "${tab.name}"?`)) removeTab(i);
+      });
+      tabEl.appendChild(close);
+    }
+
+    tabEl.addEventListener('click', () => switchToTab(i));
+    label.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      startTabRename(i, label);
+    });
+
+    bar.appendChild(tabEl);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'tab-add-btn';
+  addBtn.type = 'button';
+  addBtn.textContent = '+';
+  addBtn.title = 'New tab';
+  addBtn.addEventListener('click', addTab);
+  bar.appendChild(addBtn);
+}
+
+function startTabRename(index, labelEl) {
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'tab-rename-input';
+  input.value = state.tabs[index].name;
+  labelEl.replaceWith(input);
+  input.focus();
+  input.select();
+  const commit = () => renameTab(index, input.value);
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      input.blur();
+    }
+    if (e.key === 'Escape') {
+      input.removeEventListener('blur', commit);
+      renderTabBar();
+    }
+  });
+}
+
 // ============================================================
 // Menu bar
 // ============================================================
@@ -3242,6 +3526,22 @@ function initMenuBar() {
 }
 
 function init() {
+  const initTab = createTab('tab-1');
+  initTab.nodes = state.nodes;
+  initTab.edges = state.edges;
+  initTab.lines = state.lines;
+  initTab.annotations = state.annotations;
+  initTab.history = state.history;
+  initTab.historyIndex = state.historyIndex;
+  initTab.nextId = state.nextId;
+  initTab.zoom = state.zoom;
+  initTab.viewCenterX = state.viewCenterX;
+  initTab.viewCenterY = state.viewCenterY;
+  initTab.selected = state.selected;
+  initTab.selectedWaypoint = state.selectedWaypoint;
+  state.tabs = [initTab];
+  state.activeTabIndex = 0;
+
   initSVG();
 
   // Toolbar tool buttons
@@ -3412,6 +3712,7 @@ function init() {
   updatePropertiesPanel();
   updateToolbarStatus();
   updateEditButtons();
+  renderTabBar();
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -52,6 +52,8 @@ open index.html
 │Text  │   ▶...   │                                 │                 │
 │Icons │ ▶ GCP    │                                 │                 │
 │Shapes│   ▶...   │                                 │                 │
+│      │          ├─────────────────────────────────┤                 │
+│      │          │ tab-1 │ tab-2 │ + │              │                 │
 └──────┴──────────┴─────────────────────────────────┴─────────────────┘
 ```
 
@@ -61,6 +63,7 @@ open index.html
 - **Menu bar** — File, Edit, View, and Arrange menus with keyboard shortcuts shown on each item
 - **Top toolbar** — quick-access icon buttons for the most common actions
 - **Canvas** — the drawing surface with a dot-grid background; right-click drag to pan
+- **Tab bar** — at the bottom of the canvas; each tab holds an independent diagram page
 - **Properties panel** — edit the selected element's properties
 
 ---
@@ -390,6 +393,27 @@ A standard application menu bar sits between the diagram name and the icon toolb
 
 ---
 
+## Tabs
+
+Each diagram file can contain multiple **tabs** — independent pages with their own shapes, connectors, annotations, undo history, and zoom level. The tab bar sits at the bottom-left of the canvas.
+
+| Action | How |
+|--------|-----|
+| Switch tab | Click a tab |
+| Add tab | Click **+** next to the last tab |
+| Rename tab | Double-click the tab label, type a new name, press `Enter` |
+| Close tab | Hover over a tab to reveal **×**, then click it (requires confirmation; hidden when only one tab exists) |
+
+**What is per-tab:** shapes, connectors, lines, annotations, undo/redo history, zoom level, pan position.
+
+**What is shared across tabs:** clipboard (copy in one tab, paste in another), diagram name, current drawing tool.
+
+**Saving** writes all tabs to a single `.json` file. **Export PNG / SVG** exports only the currently active tab.
+
+Opening a diagram file that was saved before tabs were introduced loads its content as a single `tab-1`.
+
+---
+
 ## Open, Save & Export
 
 | Button | Description |
@@ -455,8 +479,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 
 ```
 index.html                        — HTML shell and SVG canvas
-editor.js                         — All editor logic (~3,300 lines)
-diagram.css                       — UI and SVG styling (~1,040 lines)
+editor.js                         — All editor logic (~3,530 lines)
+diagram.css                       — UI and SVG styling (~1,100 lines)
 README.md                         — This file
 azure-aks-architecture.json       — Example: Azure AKS multi-region architecture diagram
 icons/                            — SVG icon library (1,241 icons total)
