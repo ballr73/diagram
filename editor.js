@@ -3454,6 +3454,11 @@ function initMenuBar() {
   const menuBar = document.getElementById('menu-bar');
   if (!menuBar) return;
 
+  // Sync version number from the left-toolbar element into the Help menu
+  const versionEl = document.getElementById('app-version');
+  const miVersionText = document.getElementById('mi-version-text');
+  if (versionEl && miVersionText) miVersionText.textContent = versionEl.textContent;
+
   const menus = Array.from(menuBar.querySelectorAll('.menu'));
 
   function closeAll() {
@@ -3511,6 +3516,8 @@ function initMenuBar() {
     'align-bottom':   () => alignBottom(),
     'dist-h':         () => distributeH(),
     'dist-v':         () => distributeV(),
+    'show-help':      () => { window.open('help.html', 'diagram-help', 'width=1000,height=720,resizable=yes'); },
+    'show-version':   () => {},  // display-only; version shown in menu text
   };
 
   menuBar.addEventListener('click', e => {
