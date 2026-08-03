@@ -74,7 +74,7 @@ jobs:
       - name: Build Pages artifact
         run: |
           mkdir -p _site
-          cp index.html editor.js diagram.css README.md _site/
+          cp index.html help.html editor.js diagram.css README.md _site/
           cp -r icons _site/icons
           cp -r scripts _site/scripts
 
