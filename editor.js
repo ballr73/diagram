@@ -673,10 +673,14 @@ function getNodeAt(x, y) {
   return null;
 }
 
-function getAnnotationAt(x, y) {
+function getAnnotationAt(x, y, layer = null) {
   const entries = [...state.annotations.entries()];
   for (let i = entries.length - 1; i >= 0; i--) {
     const [, ann] = entries[i];
+    if (layer !== null) {
+      const annLayer = ann.zLayer === 'bg' ? 'bg' : 'fg';
+      if (annLayer !== layer) continue;
+    }
     const bb = annBBox(ann);
     const pad = 4;
     if (x >= bb.x - pad && x <= bb.x + bb.w + pad &&
@@ -1377,14 +1381,21 @@ function hitTest(x, y) {
       }
     }
   }
+  // Hit-test in visual z-order (top to bottom):
+  // 1. fg annotations (annotations-layer — above shapes)
+  const fgAnn = getAnnotationAt(x, y, 'fg');
+  if (fgAnn) return { type: 'annotation', id: fgAnn.id, ann: fgAnn };
+  // 2. lines (lines-layer — above shapes)
+  const line = getLineAt(x, y);
+  if (line) return { type: 'line', id: line.id, line };
+  // 3. nodes then edges (shapes-layer — interleaved by z-order)
   const node = getNodeAt(x, y);
   if (node) return { type: 'node', id: node.id, node };
   const edge = getEdgeAt(x, y);
   if (edge) return { type: 'edge', id: edge.id, edge };
-  const line = getLineAt(x, y);
-  if (line) return { type: 'line', id: line.id, line };
-  const ann = getAnnotationAt(x, y);
-  if (ann) return { type: 'annotation', id: ann.id, ann };
+  // 4. bg annotations (bg-annotations-layer — below shapes)
+  const bgAnn = getAnnotationAt(x, y, 'bg');
+  if (bgAnn) return { type: 'annotation', id: bgAnn.id, ann: bgAnn };
   return { type: 'canvas' };
 }
 
