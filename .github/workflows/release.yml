@@ -118,7 +118,7 @@ jobs:
 
       - name: Sync site to S3
         run: |
-          aws s3 sync . s3://diagram-s3-static \
+          aws s3 sync . s3://${{ secrets.AWS_S3_BUCKET }} \
             --delete \
             --exclude ".git/*" \
             --exclude ".github/*" \
@@ -134,5 +134,5 @@ jobs:
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id E23QJFT7JG0EH8 \
+            --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
