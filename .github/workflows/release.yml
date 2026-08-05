@@ -113,6 +113,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions
           aws-region: eu-west-2
 
       - name: Sync site to S3
