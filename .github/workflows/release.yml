@@ -86,3 +86,52 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
+
+  deploy-s3:
+    name: Deploy to AWS S3
+    runs-on: ubuntu-latest
+    needs: release
+    permissions:
+      contents: read
+      id-token: write   # required for OIDC role assumption
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate version tag
+        id: version
+        run: |
+          TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Inject version into index.html
+        run: |
+          sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Sync site to S3
+        run: |
+          aws s3 sync . s3://diagram-s3-static \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "*.tar.gz" \
+            --exclude "scripts/*" \
+            --exclude "README.md" \
+            --include "index.html" \
+            --include "help.html" \
+            --include "editor.js" \
+            --include "diagram.css" \
+            --include "icons/*"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E23QJFT7JG0EH8 \
+            --paths "/*"
