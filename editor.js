@@ -127,6 +127,9 @@ function saveToLocalStorage() {
         lines: [...tab.lines.values()],
         annotations: [...tab.annotations.values()],
         nextId: tab.nextId,
+        zoom: tab.zoom,
+        viewCenterX: tab.viewCenterX,
+        viewCenterY: tab.viewCenterY,
       })),
     };
     localStorage.setItem(LS_KEY, JSON.stringify(data));
@@ -156,6 +159,9 @@ function loadFromLocalStorage() {
         }));
         (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
         if (td.nextId) tab.nextId = td.nextId;
+        if (td.zoom != null) tab.zoom = td.zoom;
+        if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
+        if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
         return tab;
       });
       if (!state.tabs.length) state.tabs = [createTab('tab-1')];
@@ -317,6 +323,9 @@ async function _doSave(baseName) {
       edges: [...tab.edges.values()],
       lines: [...tab.lines.values()],
       annotations: [...tab.annotations.values()],
+      zoom: tab.zoom,
+      viewCenterX: tab.viewCenterX,
+      viewCenterY: tab.viewCenterY,
     })),
   };
   const json = JSON.stringify(data, null, 2);
@@ -353,6 +362,9 @@ function importDiagram(file) {
           .map(id => parseInt(id.replace('id-', ''), 10))
           .filter(n => !isNaN(n));
         tab.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
+        if (td.zoom != null) tab.zoom = td.zoom;
+        if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
+        if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
       };
 
       if (data.tabs) {
@@ -3727,6 +3739,8 @@ function init() {
   pushHistory(); // history[0] = initial/restored state — also calls syncUndoRedoMenu
 
   render();
+  updateViewBox();
+  syncZoomSelect();
   updatePropertiesPanel();
   updateToolbarStatus();
   updateEditButtons();
