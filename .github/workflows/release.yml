@@ -114,7 +114,7 @@ jobs:
       - name: Inject version into index.html
         run: |
           sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
-          
+
       - name: Debug OIDC token
         run: |
           OIDC_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -140,6 +140,7 @@ jobs:
             --exclude "*.tar.gz" \
             --exclude "scripts/*" \
             --exclude "README.md" \
+            --include "ads.txt" \
             --include "index.html" \
             --include "help.html" \
             --include "editor.js" \
