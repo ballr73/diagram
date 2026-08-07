@@ -33,10 +33,19 @@ jobs:
         run: |
           sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
 
+      - name: Version asset filenames
+        run: |
+          TAG=${{ steps.version.outputs.tag }}
+          cp editor.js editor.${TAG}.js
+          cp diagram.css diagram.${TAG}.css
+          sed -i "s|href=\"diagram.css\"|href=\"diagram.${TAG}.css\"|" index.html
+          sed -i "s|src=\"editor.js\"|src=\"editor.${TAG}.js\"|" index.html
+
       - name: Package release files
         run: |
+          TAG=${{ steps.version.outputs.tag }}
           tar -czf diagram-editor.tar.gz \
-            index.html editor.js diagram.css help.html README.md \
+            index.html editor.${TAG}.js diagram.${TAG}.css help.html README.md \
             icons/manifest.js icons/manifest.json \
             icons/AWS icons/Azure icons/GCP \
             scripts/generate-manifest.js
@@ -77,10 +86,19 @@ jobs:
         run: |
           sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
 
+      - name: Version asset filenames
+        run: |
+          TAG=${{ steps.version.outputs.tag }}
+          cp editor.js editor.${TAG}.js
+          cp diagram.css diagram.${TAG}.css
+          sed -i "s|href=\"diagram.css\"|href=\"diagram.${TAG}.css\"|" index.html
+          sed -i "s|src=\"editor.js\"|src=\"editor.${TAG}.js\"|" index.html
+
       - name: Build Pages artifact
         run: |
+          TAG=${{ steps.version.outputs.tag }}
           mkdir -p _site
-          cp index.html help.html editor.js diagram.css README.md _site/
+          cp index.html help.html editor.${TAG}.js diagram.${TAG}.css README.md _site/
           cp -r icons _site/icons
           cp -r scripts _site/scripts
 
@@ -115,6 +133,14 @@ jobs:
         run: |
           sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
 
+      - name: Version asset filenames
+        run: |
+          TAG=${{ steps.version.outputs.tag }}
+          cp editor.js editor.${TAG}.js
+          cp diagram.css diagram.${TAG}.css
+          sed -i "s|href=\"diagram.css\"|href=\"diagram.${TAG}.css\"|" index.html
+          sed -i "s|src=\"editor.js\"|src=\"editor.${TAG}.js\"|" index.html
+
       - name: Debug OIDC token
         run: |
           OIDC_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -133,18 +159,15 @@ jobs:
 
       - name: Sync site to S3
         run: |
+          TAG=${{ steps.version.outputs.tag }}
           aws s3 sync . s3://${{ env.S3_BUCKET }} \
             --delete \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --exclude "*.tar.gz" \
-            --exclude "scripts/*" \
-            --exclude "README.md" \
+            --exclude "*" \
             --include "ads.txt" \
             --include "index.html" \
             --include "help.html" \
-            --include "editor.js" \
-            --include "diagram.css" \
+            --include "editor.${TAG}.js" \
+            --include "diagram.${TAG}.css" \
             --include "icons/*"
 
       - name: Invalidate CloudFront cache
