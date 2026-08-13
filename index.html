@@ -67,6 +67,9 @@
           <li class="menu-sep"></li>
           <li><button class="menu-item" id="mi-dist-h" data-action="dist-h"><span>Distribute Horizontally</span></button></li>
           <li><button class="menu-item" id="mi-dist-v" data-action="dist-v"><span>Distribute Vertically</span></button></li>
+          <li class="menu-sep"></li>
+          <li><button class="menu-item" id="mi-same-width" data-action="same-width"><span>Same Width</span></button></li>
+          <li><button class="menu-item" id="mi-same-height" data-action="same-height"><span>Same Height</span></button></li>
         </ul>
       </div>
       <div class="menu">
@@ -384,6 +387,25 @@
           <rect x="5" y="12" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.8"/>
           <line x1="8" y1="4" x2="8" y2="6.5" stroke="currentColor" stroke-width="1" opacity="0.6"/>
           <line x1="8" y1="9.5" x2="8" y2="12" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+        </svg>
+      </button>
+    </div>
+    <div class="align-popup-divider"></div>
+    <div class="align-popup-row">
+      <button id="btn-same-width" class="align-popup-btn" title="Same width (match last selected)">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <rect x="2" y="4" width="12" height="4" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="2" y="10" width="12" height="2" rx="0.5" fill="currentColor" opacity="0.5"/>
+          <line x1="2" y1="3" x2="2" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="14" y1="3" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button id="btn-same-height" class="align-popup-btn" title="Same height (match last selected)">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <rect x="4" y="2" width="4" height="12" rx="0.5" fill="currentColor" opacity="0.8"/>
+          <rect x="10" y="2" width="2" height="12" rx="0.5" fill="currentColor" opacity="0.5"/>
+          <line x1="3" y1="2" x2="13" y2="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="3" y1="14" x2="13" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </button>
     </div>

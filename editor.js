@@ -2349,6 +2349,25 @@ function distributeV() {
   pushHistory(); render();
 }
 
+function sameWidth() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  // Reference: last item in selection order (Set preserves insertion order)
+  const ref = items[items.length - 1];
+  const targetW = ref.item.width || 0;
+  items.forEach(e => { if (e !== ref) e.item.width = targetW; });
+  pushHistory(); render();
+}
+
+function sameHeight() {
+  const items = getAlignItems();
+  if (items.length < 2) return;
+  const ref = items[items.length - 1];
+  const targetH = ref.item.height || 0;
+  items.forEach(e => { if (e !== ref) e.item.height = targetH; });
+  pushHistory(); render();
+}
+
 // ============================================================
 // Z-order — Bring to Front / Send to Back
 // ============================================================
@@ -3082,6 +3101,10 @@ function updateEditButtons() {
     const el = document.getElementById(id);
     if (el) el.disabled = !canDist;
   });
+  ['btn-same-width','btn-same-height'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !canAlign;
+  });
 
   // Bring to front / Send to back require any selection
   const btnFront = document.getElementById('btn-bring-front');
@@ -3105,6 +3128,8 @@ function updateEditButtons() {
   mi('mi-align-bottom', !canAlign);
   mi('mi-dist-h',       !canDist);
   mi('mi-dist-v',       !canDist);
+  mi('mi-same-width',   !canAlign);
+  mi('mi-same-height',  !canAlign);
 }
 
 // ============================================================
@@ -3539,6 +3564,8 @@ function initMenuBar() {
     'align-bottom':   () => alignBottom(),
     'dist-h':         () => distributeH(),
     'dist-v':         () => distributeV(),
+    'same-width':     () => sameWidth(),
+    'same-height':    () => sameHeight(),
     'show-help':      () => { window.open('help.html', 'diagram-help', 'width=1000,height=720,resizable=yes'); },
     'show-about':     () => { window.open('about.html', 'diagram-about', 'width=680,height=620,resizable=yes'); },
     'show-version':   () => {},  // display-only; version shown in menu text
@@ -3642,6 +3669,8 @@ function init() {
     on('btn-align-bottom',   'click', wrapAlign(alignBottom));
     on('btn-dist-h',         'click', wrapAlign(distributeH));
     on('btn-dist-v',         'click', wrapAlign(distributeV));
+    on('btn-same-width',     'click', wrapAlign(sameWidth));
+    on('btn-same-height',    'click', wrapAlign(sameHeight));
   })();
 
   // Z-order

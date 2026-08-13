@@ -331,6 +331,8 @@ The Align button is enabled when **2 or more** shapes/annotations are selected. 
 | Align Bottom | Flush bottom edges to the bottommost element | 2 |
 | Distribute H | Equal horizontal gaps | 3 |
 | Distribute V | Equal vertical gaps | 3 |
+| Same Width | Match width of the last-selected shape | 2 |
+| Same Height | Match height of the last-selected shape | 2 |
 
 ---
 
@@ -390,6 +392,8 @@ A standard application menu bar sits between the diagram name and the icon toolb
 | Send to Back | Move selected elements behind all others |
 | Align Left/Center/Right/Top/Middle/Bottom | Align selected elements (requires ≥ 2) |
 | Distribute Horizontally / Vertically | Equal spacing between elements (requires ≥ 3) |
+| Same Width | Resize all selected shapes to the width of the last-selected (requires ≥ 2) |
+| Same Height | Resize all selected shapes to the height of the last-selected (requires ≥ 2) |
 
 ---
 
