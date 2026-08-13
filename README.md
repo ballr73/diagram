@@ -349,6 +349,26 @@ Pasted elements appear offset by 20 px each time (resets on the next copy). When
 
 ---
 
+## Group & Ungroup
+
+Select two or more shapes (shift-click or rubber-band select) then click the **Group** toolbar button or use `Ctrl+G`. The shapes are locked together as a single unit.
+
+| Action | Keyboard | Description |
+|--------|----------|-------------|
+| Group | `Ctrl+G` | Group 2+ selected shapes into one unit |
+| Ungroup | `Ctrl+Shift+G` | Dissolve a selected group back to individual shapes |
+
+**While grouped:**
+- Clicking any member selects the whole group
+- Dragging the group moves all members together
+- The Properties panel shows "Group (N shapes)" with an **Ungroup** button
+- Individual shape properties (colour, font, size) are not editable
+- A purple dashed border outlines the group bounding box
+
+Connectors attached to grouped shapes continue to work normally. Groups are preserved when saving and exporting, and support copy/paste (paste creates a new group with offset copies).
+
+---
+
 ## Menu Bar
 
 A standard application menu bar sits between the diagram name and the icon toolbar. Click a menu title to open it; hover across titles to switch menus; click outside or select an item to close.
@@ -373,6 +393,8 @@ A standard application menu bar sits between the diagram name and the icon toolb
 | Copy | `Ctrl+C` | Copy selected elements |
 | Paste | `Ctrl+V` | Paste clipboard |
 | Duplicate | `Ctrl+D` | Duplicate selected elements |
+| Group | `Ctrl+G` | Group 2+ selected shapes into one unit |
+| Ungroup | `Ctrl+Shift+G` | Dissolve selected group back to individual shapes |
 
 ### View
 
@@ -468,6 +490,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Ctrl+X` | Cut selected |
 | `Ctrl+V` | Paste clipboard |
 | `Ctrl+D` | Duplicate selected |
+| `Ctrl+G` | Group selected shapes |
+| `Ctrl+Shift+G` | Ungroup selected group |
 | `Ctrl+=` / `Ctrl++` | Zoom in 10% |
 | `Ctrl+-` | Zoom out 10% |
 | `Ctrl+0` | Reset zoom to 100% |

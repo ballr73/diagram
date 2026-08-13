@@ -736,6 +736,14 @@ html, body, #app {
   pointer-events: none;
 }
 
+.group-selection {
+  fill: rgba(139,92,246,0.05);
+  stroke: #7c3aed;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 3;
+  pointer-events: none;
+}
+
 /* ============================================================
    SVG — Inline editor (foreignObject input)
    ============================================================ */

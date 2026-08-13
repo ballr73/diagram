@@ -238,6 +238,7 @@
     <a href="#z-order">Z-Order</a>
     <a href="#align-distribute">Align &amp; Distribute</a>
     <a href="#copy-paste">Copy, Cut, Paste</a>
+    <a href="#group-ungroup">Group &amp; Ungroup</a>
 
     <div class="nav-section">Files</div>
     <a href="#open-save-export">Open, Save &amp; Export</a>
@@ -307,6 +308,8 @@
         <tr><td>Copy</td><td><kbd>Ctrl+C</kbd></td><td>Copy selected elements</td></tr>
         <tr><td>Paste</td><td><kbd>Ctrl+V</kbd></td><td>Paste clipboard</td></tr>
         <tr><td>Duplicate</td><td><kbd>Ctrl+D</kbd></td><td>Duplicate selected elements in-place (+20px offset)</td></tr>
+        <tr><td>Group</td><td><kbd>Ctrl+G</kbd></td><td>Group 2+ selected shapes into one unit</td></tr>
+        <tr><td>Ungroup</td><td><kbd>Ctrl+Shift+G</kbd></td><td>Dissolve a selected group back to individual shapes</td></tr>
       </table>
 
       <h3>View</h3>
@@ -606,6 +609,27 @@
       <p>Pasted elements appear offset by 20 px each time. When both ends of a connector are copied, paste creates a new connector between the new copies. Clipboard is shared across tabs.</p>
     </section>
 
+    <!-- ── Group & Ungroup ───────────────────────────────── -->
+    <section id="group-ungroup">
+      <h2>Group &amp; Ungroup</h2>
+      <p>Select two or more shapes (shift-click or rubber-band), then use the <strong>Group</strong> toolbar button or <kbd>Ctrl+G</kbd> to lock them together as a single unit.</p>
+      <table>
+        <tr><th>Action</th><th>Keyboard</th><th>Description</th></tr>
+        <tr><td>Group</td><td><kbd>Ctrl+G</kbd></td><td>Group 2+ selected shapes into one unit</td></tr>
+        <tr><td>Ungroup</td><td><kbd>Ctrl+Shift+G</kbd></td><td>Dissolve a selected group back to individual shapes</td></tr>
+      </table>
+      <p><strong>While grouped:</strong></p>
+      <ul>
+        <li>Clicking any member selects the whole group</li>
+        <li>Dragging the group moves all members together</li>
+        <li>The Properties panel shows <em>"Group (N shapes)"</em> with an <strong>Ungroup</strong> button</li>
+        <li>Individual shape properties (colour, font, size) are not editable while grouped</li>
+        <li>A purple dashed border outlines the group bounding box</li>
+        <li>Connectors attached to grouped shapes continue to work normally</li>
+        <li>Groups are preserved when saving, and copy/paste preserves group structure</li>
+      </ul>
+    </section>
+
     <!-- ── Open, Save & Export ────────────────────────────── -->
     <section id="open-save-export">
       <h2>Open, Save &amp; Export</h2>
@@ -653,6 +677,8 @@
         <tr><td><kbd>Ctrl+X</kbd></td><td>Cut selected</td></tr>
         <tr><td><kbd>Ctrl+V</kbd></td><td>Paste clipboard</td></tr>
         <tr><td><kbd>Ctrl+D</kbd></td><td>Duplicate selected</td></tr>
+        <tr><td><kbd>Ctrl+G</kbd></td><td>Group selected shapes</td></tr>
+        <tr><td><kbd>Ctrl+Shift+G</kbd></td><td>Ungroup selected group</td></tr>
         <tr><td><kbd>Ctrl+=</kbd> / <kbd>Ctrl++</kbd></td><td>Zoom in 10%</td></tr>
         <tr><td><kbd>Ctrl+-</kbd></td><td>Zoom out 10%</td></tr>
         <tr><td><kbd>Ctrl+0</kbd></td><td>Reset zoom to 100%</td></tr>

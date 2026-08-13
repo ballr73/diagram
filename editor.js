@@ -8,6 +8,7 @@ const state = {
   edges: new Map(),       // id → {id, from, to, label, waypoints:[{id,x,y}]}
   lines: new Map(),       // id → {id, x1, y1, x2, y2, waypoints, label, stroke, ...}
   annotations: new Map(), // id → {id, x, y, text}
+  groups: new Map(),      // id → {id, memberIds:[]}
   tabs: [],
   activeTabIndex: 0,
   selected: new Set(),
@@ -17,7 +18,7 @@ const state = {
   nextId: 1,
   history: [],
   historyIndex: -1,
-  clipboard: { nodes: [], edges: [], lines: [], annotations: [] },
+  clipboard: { nodes: [], edges: [], lines: [], annotations: [], groups: [] },
   pasteOffset: 0,
   zoom: 1.0,
   viewCenterX: 0,
@@ -32,6 +33,7 @@ function createTab(name) {
     edges: new Map(),
     lines: new Map(),
     annotations: new Map(),
+    groups: new Map(),
     history: [],
     historyIndex: -1,
     nextId: 1,
@@ -62,6 +64,7 @@ function loadTabToLiveState(index) {
   state.edges = tab.edges;
   state.lines = tab.lines;
   state.annotations = tab.annotations;
+  state.groups = tab.groups;
   state.history = tab.history;
   state.historyIndex = tab.historyIndex;
   state.nextId = tab.nextId;
@@ -91,6 +94,7 @@ function snapshot() {
       waypoints: (v.waypoints || []).map(wp => ({ ...wp })),
     }])),
     annotations: new Map([...state.annotations].map(([k, v]) => [k, { ...v }])),
+    groups: new Map([...state.groups].map(([k, v]) => [k, { ...v, memberIds: [...v.memberIds] }])),
     nextId: state.nextId,
   };
 }
@@ -126,6 +130,7 @@ function saveToLocalStorage() {
         edges: [...tab.edges.values()],
         lines: [...tab.lines.values()],
         annotations: [...tab.annotations.values()],
+        groups: [...tab.groups.values()],
         nextId: tab.nextId,
         zoom: tab.zoom,
         viewCenterX: tab.viewCenterX,
@@ -158,6 +163,7 @@ function loadFromLocalStorage() {
           waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
         }));
         (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
+        (td.groups || []).forEach(g => tab.groups.set(g.id, { ...g, memberIds: [...(g.memberIds || [])] }));
         if (td.nextId) tab.nextId = td.nextId;
         if (td.zoom != null) tab.zoom = td.zoom;
         if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
@@ -233,6 +239,8 @@ function restoreSnapshot(snap) {
   }));
   state.annotations.clear();
   [...snap.annotations].forEach(([k, v]) => state.annotations.set(k, { ...v }));
+  state.groups.clear();
+  [...(snap.groups || [])].forEach(([k, v]) => state.groups.set(k, { ...v, memberIds: [...(v.memberIds || [])] }));
   state.nextId = snap.nextId;
   if (state.tabs[state.activeTabIndex]) {
     state.tabs[state.activeTabIndex].nextId = state.nextId;
@@ -323,6 +331,7 @@ async function _doSave(baseName) {
       edges: [...tab.edges.values()],
       lines: [...tab.lines.values()],
       annotations: [...tab.annotations.values()],
+      groups: [...tab.groups.values()],
       zoom: tab.zoom,
       viewCenterX: tab.viewCenterX,
       viewCenterY: tab.viewCenterY,
@@ -358,6 +367,7 @@ function importDiagram(file) {
           waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
         }));
         (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
+        (td.groups || []).forEach(g => tab.groups.set(g.id, { ...g, memberIds: [...(g.memberIds || [])] }));
         const allNums = [...tab.nodes.keys(), ...tab.edges.keys(), ...tab.lines.keys(), ...tab.annotations.keys()]
           .map(id => parseInt(id.replace('id-', ''), 10))
           .filter(n => !isNaN(n));
@@ -874,6 +884,28 @@ function render() {
   renderShapes();
   renderLines();
   renderAnnotations();
+  renderGroupSelection();
+}
+
+/** Draw dashed bounding boxes around selected groups in the UI layer. */
+function renderGroupSelection() {
+  // Remove any existing group selection rects
+  if (!uiLayer) return;
+  uiLayer.querySelectorAll('.group-selection').forEach(el => el.remove());
+
+  for (const id of state.selected) {
+    const group = state.groups.get(id);
+    if (!group) continue;
+    const b = groupBounds(group);
+    if (!isFinite(b.x)) continue;
+    const pad = 8;
+    const rect = svgEl('rect', {
+      x: b.x - pad, y: b.y - pad,
+      width: b.w + pad * 2, height: b.h + pad * 2,
+      class: 'group-selection',
+    });
+    uiLayer.appendChild(rect);
+  }
 }
 
 /**
@@ -1396,18 +1428,27 @@ function hitTest(x, y) {
   // Hit-test in visual z-order (top to bottom):
   // 1. fg annotations (annotations-layer — above shapes)
   const fgAnn = getAnnotationAt(x, y, 'fg');
-  if (fgAnn) return { type: 'annotation', id: fgAnn.id, ann: fgAnn };
+  if (fgAnn) {
+    if (fgAnn.groupId) return { type: 'group', id: fgAnn.groupId };
+    return { type: 'annotation', id: fgAnn.id, ann: fgAnn };
+  }
   // 2. lines (lines-layer — above shapes)
   const line = getLineAt(x, y);
   if (line) return { type: 'line', id: line.id, line };
   // 3. nodes then edges (shapes-layer — interleaved by z-order)
   const node = getNodeAt(x, y);
-  if (node) return { type: 'node', id: node.id, node };
+  if (node) {
+    if (node.groupId) return { type: 'group', id: node.groupId };
+    return { type: 'node', id: node.id, node };
+  }
   const edge = getEdgeAt(x, y);
   if (edge) return { type: 'edge', id: edge.id, edge };
   // 4. bg annotations (bg-annotations-layer — below shapes)
   const bgAnn = getAnnotationAt(x, y, 'bg');
-  if (bgAnn) return { type: 'annotation', id: bgAnn.id, ann: bgAnn };
+  if (bgAnn) {
+    if (bgAnn.groupId) return { type: 'group', id: bgAnn.groupId };
+    return { type: 'annotation', id: bgAnn.id, ann: bgAnn };
+  }
   return { type: 'canvas' };
 }
 
@@ -1575,6 +1616,20 @@ function selectMouseDown(p, hit, e) {
     return;
   }
 
+  if (hit.type === 'group') {
+    state.selectedWaypoint = null;
+    if (e.shiftKey) {
+      state.selected.add(hit.id);
+    } else if (!state.selected.has(hit.id)) {
+      state.selected.clear();
+      state.selected.add(hit.id);
+    }
+    render();
+    updatePropertiesPanel();
+    drag = startMoveDrag(p);
+    return;
+  }
+
   // Canvas: start rubber-band selection
   state.selectedWaypoint = null;
   if (!e.shiftKey) { state.selected.clear(); render(); updatePropertiesPanel(); }
@@ -1636,9 +1691,20 @@ function textMouseDown(p, hit) {
 // If multiple movable items are selected, returns a move-multi drag.
 // Otherwise returns a single-item move-node or move-ann drag.
 function startMoveDrag(p) {
-  const movable = [...state.selected].filter(id =>
-    state.nodes.has(id) || state.annotations.has(id)
-  );
+  // Expand group IDs to their member node/annotation IDs
+  const movable = [];
+  for (const id of state.selected) {
+    if (state.nodes.has(id) || state.annotations.has(id)) {
+      movable.push(id);
+    } else if (state.groups.has(id)) {
+      const group = state.groups.get(id);
+      for (const memberId of group.memberIds) {
+        if (state.nodes.has(memberId) || state.annotations.has(memberId)) {
+          movable.push(memberId);
+        }
+      }
+    }
+  }
 
   if (movable.length > 1) {
     const origins = {};
@@ -1894,7 +1960,8 @@ function dragEnd(p) {
     for (const node of state.nodes.values()) {
       if (node.x >= x1 && node.y >= y1 &&
           node.x + node.width <= x2 && node.y + node.height <= y2) {
-        state.selected.add(node.id);
+        // Select group instead of individual member
+        state.selected.add(node.groupId || node.id);
       }
     }
     render();
@@ -2173,6 +2240,8 @@ function onKeyDown(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 'x') { e.preventDefault(); cutSelected(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); pasteClipboard(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); duplicateSelected(); return; }
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'g') { e.preventDefault(); groupItems(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'G' || e.key === 'g')) { e.preventDefault(); ungroupItems(); return; }
 
   // Zoom shortcuts
   if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); zoomIn(); return; }
@@ -2224,6 +2293,17 @@ function onKeyDown(e) {
 function deleteSelected() {
   if (state.selected.size === 0) return;
   const toDelete = new Set(state.selected);
+
+  // Expand group IDs: delete members and the group record
+  for (const id of [...toDelete]) {
+    const group = state.groups.get(id);
+    if (group) {
+      group.memberIds.forEach(mid => toDelete.add(mid));
+      state.groups.delete(id);
+      toDelete.delete(id);
+    }
+  }
+
   for (const id of toDelete) {
     state.nodes.delete(id);
     state.edges.delete(id);
@@ -2269,6 +2349,66 @@ function getAlignItems() {
 function setItemPos(entry, x, y) {
   entry.item.x = x;
   entry.item.y = y;
+}
+
+// ============================================================
+// Group / Ungroup
+// ============================================================
+
+/** Compute the bounding box of all members of a group. */
+function groupBounds(group) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const memberId of group.memberIds) {
+    const item = state.nodes.get(memberId) || state.annotations.get(memberId);
+    if (!item) continue;
+    minX = Math.min(minX, item.x);
+    minY = Math.min(minY, item.y);
+    maxX = Math.max(maxX, item.x + (item.width || 0));
+    maxY = Math.max(maxY, item.y + (item.height || 0));
+  }
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}
+
+function groupItems() {
+  // Only group ungrouped nodes and annotations
+  const candidates = [];
+  for (const id of state.selected) {
+    const node = state.nodes.get(id);
+    const ann  = state.annotations.get(id);
+    if (node && !node.groupId) candidates.push(node);
+    else if (ann && !ann.groupId) candidates.push(ann);
+  }
+  if (candidates.length < 2) return;
+
+  const gid = genId();
+  state.groups.set(gid, { id: gid, memberIds: candidates.map(c => c.id) });
+  candidates.forEach(c => { c.groupId = gid; });
+  state.selected.clear();
+  state.selected.add(gid);
+  pushHistory();
+  render();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+}
+
+function ungroupItems() {
+  const newSel = new Set();
+  for (const id of [...state.selected]) {
+    const group = state.groups.get(id);
+    if (!group) continue;
+    for (const memberId of group.memberIds) {
+      const item = state.nodes.get(memberId) || state.annotations.get(memberId);
+      if (item) { delete item.groupId; newSel.add(memberId); }
+    }
+    state.groups.delete(id);
+  }
+  if (newSel.size === 0) return;
+  state.selected.clear();
+  newSel.forEach(id => state.selected.add(id));
+  pushHistory();
+  render();
+  updatePropertiesPanel();
+  updateToolbarStatus();
 }
 
 function alignLeft() {
@@ -2419,7 +2559,20 @@ function copySelected() {
   state.clipboard.edges       = [];
   state.clipboard.lines       = [];
   state.clipboard.annotations = [];
+  state.clipboard.groups      = [];
   state.pasteOffset = 0;
+
+  // Expand group IDs to their members; record group structure
+  const expandedNodeIds = new Set();
+  for (const id of state.selected) {
+    const group = state.groups.get(id);
+    if (group) {
+      // Copy members and record the group
+      const cbGroup = { id, memberIds: [...group.memberIds] };
+      state.clipboard.groups.push(cbGroup);
+      group.memberIds.forEach(mid => expandedNodeIds.add(mid));
+    }
+  }
 
   for (const id of state.selected) {
     const node = state.nodes.get(id);
@@ -2429,6 +2582,14 @@ function copySelected() {
     if (node) state.clipboard.nodes.push({ ...node });
     if (edge) state.clipboard.edges.push({ ...edge });
     if (line) state.clipboard.lines.push({ ...line, waypoints: (line.waypoints || []).map(wp => ({ ...wp })) });
+    if (ann)  state.clipboard.annotations.push({ ...ann });
+  }
+  // Add group members not already directly selected
+  for (const mid of expandedNodeIds) {
+    if (state.selected.has(mid)) continue; // already added above
+    const node = state.nodes.get(mid);
+    const ann  = state.annotations.get(mid);
+    if (node) state.clipboard.nodes.push({ ...node });
     if (ann)  state.clipboard.annotations.push({ ...ann });
   }
   updateEditButtons();
@@ -2447,15 +2608,21 @@ function pasteClipboard() {
   state.pasteOffset += 20;
   const off = state.pasteOffset;
 
-  // Build old→new ID map for nodes so edges can be reconnected
+  // Build old→new ID map for nodes so edges and groups can be reconnected
   const idMap = new Map();
   const newIds = [];
+
+  // Track which old IDs are part of clipboard groups (so we select the group, not members)
+  const groupMemberOldIds = new Set();
+  (cb.groups || []).forEach(g => g.memberIds.forEach(mid => groupMemberOldIds.add(mid)));
 
   for (const node of cb.nodes) {
     const newId = genId();
     idMap.set(node.id, newId);
-    state.nodes.set(newId, { ...node, id: newId, x: node.x + off, y: node.y + off });
-    newIds.push(newId);
+    const pasted = { ...node, id: newId, x: node.x + off, y: node.y + off };
+    delete pasted.groupId; // will be reassigned below
+    state.nodes.set(newId, pasted);
+    if (!groupMemberOldIds.has(node.id)) newIds.push(newId);
   }
 
   for (const edge of cb.edges) {
@@ -2484,8 +2651,23 @@ function pasteClipboard() {
 
   for (const ann of cb.annotations) {
     const newId = genId();
-    state.annotations.set(newId, { ...ann, id: newId, x: ann.x + off, y: ann.y + off });
-    newIds.push(newId);
+    idMap.set(ann.id, newId);
+    const pasted = { ...ann, id: newId, x: ann.x + off, y: ann.y + off };
+    delete pasted.groupId;
+    state.annotations.set(newId, pasted);
+    if (!groupMemberOldIds.has(ann.id)) newIds.push(newId);
+  }
+
+  // Reconstitute groups with new IDs
+  for (const cbGroup of (cb.groups || [])) {
+    const newGid = genId();
+    const newMemberIds = cbGroup.memberIds.map(mid => idMap.get(mid)).filter(Boolean);
+    state.groups.set(newGid, { id: newGid, memberIds: newMemberIds });
+    newMemberIds.forEach(mid => {
+      const item = state.nodes.get(mid) || state.annotations.get(mid);
+      if (item) item.groupId = newGid;
+    });
+    newIds.push(newGid);
   }
 
   state.selected.clear();
@@ -2518,7 +2700,7 @@ function updateCursor(p) {
   else if (hit.type === 'ann-resize') svg.style.cursor = resizeCursors[hit.handle] || 'pointer';
   else if (hit.type === 'line-endpoint') svg.style.cursor = 'move';
   else if (hit.type === 'waypoint' || hit.type === 'line-waypoint') svg.style.cursor = 'move';
-  else if (hit.type === 'node' || hit.type === 'annotation' || hit.type === 'line') svg.style.cursor = 'move';
+  else if (hit.type === 'node' || hit.type === 'annotation' || hit.type === 'line' || hit.type === 'group') svg.style.cursor = 'move';
   else if (hit.type === 'edge')   svg.style.cursor = 'pointer';
   else svg.style.cursor = 'default';
 }
@@ -2540,6 +2722,22 @@ function updatePropertiesPanel() {
   }
 
   const id = [...state.selected][0];
+
+  // Group selected
+  const group = state.groups.get(id);
+  if (group) {
+    content.innerHTML = `
+      <div class="prop-group">
+        <label>Group</label>
+        <p class="prop-value">${group.memberIds.length} shapes</p>
+      </div>
+      <div class="prop-group">
+        <button id="p-ungroup" class="shape-btn" style="width:100%;justify-content:center">Ungroup</button>
+      </div>`;
+    document.getElementById('p-ungroup').addEventListener('click', () => ungroupItems());
+    return;
+  }
+
   const node = state.nodes.get(id);
   const edge = state.edges.get(id);
   const line = state.lines.get(id);
@@ -3112,12 +3310,27 @@ function updateEditButtons() {
   if (btnFront) btnFront.disabled = !hasSel;
   if (btnBack)  btnBack.disabled  = !hasSel;
 
+  // Group: enabled when ≥2 ungrouped nodes/annotations selected
+  const groupCandidates = [...state.selected].filter(id => {
+    const n = state.nodes.get(id); const a = state.annotations.get(id);
+    return (n && !n.groupId) || (a && !a.groupId);
+  });
+  const canGroup = groupCandidates.length >= 2;
+  // Ungroup: enabled when any selected ID is a group
+  const canUngroup = [...state.selected].some(id => state.groups.has(id));
+  const btnGroup   = document.getElementById('btn-group');
+  const btnUngroup = document.getElementById('btn-ungroup');
+  if (btnGroup)   btnGroup.disabled   = !canGroup;
+  if (btnUngroup) btnUngroup.disabled = !canUngroup;
+
   // Sync menu item disabled states
   const mi = (id, dis) => { const el = document.getElementById(id); if (el) el.disabled = dis; };
   mi('mi-cut',          !hasSel);
   mi('mi-copy',         !hasSel);
   mi('mi-paste',        !hasCb);
   mi('mi-duplicate',    !hasSel);
+  mi('mi-group',        !canGroup);
+  mi('mi-ungroup',      !canUngroup);
   mi('mi-bring-front',  !hasSel);
   mi('mi-send-back',    !hasSel);
   mi('mi-align-left',   !canAlign);
@@ -3544,6 +3757,8 @@ function initMenuBar() {
     'copy':           () => copySelected(),
     'paste':          () => pasteClipboard(),
     'duplicate':      () => duplicateSelected(),
+    'group':          () => groupItems(),
+    'ungroup':        () => ungroupItems(),
     'zoom-in':        () => zoomIn(),
     'zoom-out':       () => zoomOut(),
     'zoom-100':       () => setZoom(1.0),
@@ -3676,6 +3891,10 @@ function init() {
   // Z-order
   on('btn-bring-front', 'click', bringToFront);
   on('btn-send-back',   'click', sendToBack);
+
+  // Group / Ungroup
+  on('btn-group',   'click', groupItems);
+  on('btn-ungroup', 'click', ungroupItems);
 
   // Open / Save / Export
   on('btn-new',     'click', newDiagram);
