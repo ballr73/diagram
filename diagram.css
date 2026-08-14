@@ -29,6 +29,12 @@ html, body, #app {
   letter-spacing: 0.02em;
 }
 
+#diagram-title .dirty-indicator {
+  color: #f59e0b;
+  font-size: 9px;
+  vertical-align: middle;
+}
+
 /* ============================================================
    Menu bar
    ============================================================ */

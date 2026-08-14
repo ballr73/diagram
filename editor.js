@@ -24,6 +24,7 @@ const state = {
   viewCenterX: 0,
   viewCenterY: 0,
   diagramName: null,      // null = unsaved/new; string = last saved filename (without .json)
+  dirty: false,           // true when there are unsaved changes
 };
 
 function createTab(name) {
@@ -110,6 +111,8 @@ function pushHistory() {
   }
   saveToLocalStorage();
   syncUndoRedoMenu();
+  state.dirty = true;
+  updateTitleDisplay();
 }
 
 // ============================================================
@@ -196,6 +199,7 @@ function loadFromLocalStorage() {
       loadTabToLiveState(0);
     }
     if (data.diagramName) state.diagramName = data.diagramName;
+    state.dirty = false;
     return true;
   } catch (_) {
     return false;
@@ -266,12 +270,14 @@ function newDiagram() {
   state.activeTabIndex = 0;
   loadTabToLiveState(0);
   state.diagramName = null;
+  state.dirty = false;
   drag = null;
   panDrag = null;
   clearInlineEditor();
   if (uiLayer) uiLayer.innerHTML = '';
   if (svg) svg.style.cursor = state.tool === 'select' ? 'default' : 'crosshair';
   pushHistory();
+  state.dirty = false;
   render();
   updateViewBox();
   syncZoomSelect();
@@ -346,6 +352,7 @@ async function _doSave(baseName) {
   if (savedName === null) return; // cancelled
 
   state.diagramName = savedName.replace(/\.json$/i, '');
+  state.dirty = false;
   updateTitleDisplay();
   saveToLocalStorage();
 }
@@ -395,6 +402,7 @@ function importDiagram(file) {
       state.diagramName = file.name.replace(/\.json$/i, '');
       updateTitleDisplay();
       pushHistory();
+      state.dirty = false;
       render();
       updateViewBox();
       syncZoomSelect();
@@ -3140,7 +3148,13 @@ function updateToolbarStatus() {
 
 function updateTitleDisplay() {
   const el = document.getElementById('diagram-title');
-  if (el) el.textContent = state.diagramName || 'Untitled diagram';
+  if (!el) return;
+  const name = state.diagramName || 'Untitled diagram';
+  if (state.dirty) {
+    el.innerHTML = '<span class="dirty-indicator">●</span> ' + name;
+  } else {
+    el.textContent = name;
+  }
 }
 
 // ============================================================
