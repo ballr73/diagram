@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Editor — Blog</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    #blog-header {
+      background: #1e293b;
+      border-bottom: 1px solid #0f172a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    #blog-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    #blog-version {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* ── Content ─────────────────────────────────────────── */
+    #blog-content {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 32px 64px;
+    }
+
+    #blog-content > h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+
+    #blog-content > .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 40px;
+    }
+
+    /* ── Article card ────────────────────────────────────── */
+    .article-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      transition: border-color 0.15s;
+    }
+
+    .article-card:hover {
+      border-color: #3b82f6;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .article-date {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .article-tag {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #3b82f6;
+      background: #172035;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .article-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .article-excerpt {
+      color: #94a3b8;
+      line-height: 1.75;
+      margin-bottom: 20px;
+    }
+
+    .read-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: gap 0.15s;
+    }
+
+    .read-more:hover {
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .read-more .arrow {
+      transition: transform 0.15s;
+    }
+
+    .read-more:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 40px 0;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .footer-links a:hover { text-decoration: underline; }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+       crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div id="blog-header">
+    <h1>Diagram Editor — Blog</h1>
+    <span id="blog-version">dev</span>
+  </div>
+
+  <div id="blog-content">
+
+    <h2>Blog</h2>
+    <p class="subtitle">Updates, articles, and thoughts on Diagram Editor.</p>
+
+    <!-- Article 1 -->
+    <div class="article-card">
+      <div class="article-meta">
+        <span class="article-date">15 August 2026</span>
+        <span class="article-tag">Behind the Build</span>
+      </div>
+      <h3>Why I Built Diagram Editor: A Free, Lightweight, and Private Tool for Cloud Architecture Diagrams</h3>
+      <p class="article-excerpt">Cloud architecture diagrams are essential for planning systems, communicating ideas, and documenting infrastructure. But most diagramming tools today feel heavier than they need to be — packed with features you don't use, locked behind subscriptions, or slow to load when you just want to sketch an idea. Diagram Editor was created to solve that problem.</p>
+      <a href="blog-why-i-built.html" class="read-more">
+        Read article <span class="arrow">→</span>
+      </a>
+    </div>
+
+    <hr class="divider">
+
+    <div class="footer-links">
+      <a href="#" onclick="window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); return false;">Help</a>
+      <a href="#" onclick="window.open('faq.html','diagram-faq','width=800,height=700,resizable=yes'); return false;">FAQ</a>
+      <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub</a>
+    </div>
+
+  </div>
+
+  <script>
+    try {
+      const ver = window.opener &&
+                  window.opener.document &&
+                  window.opener.document.getElementById('app-version');
+      if (ver) {
+        document.getElementById('blog-version').textContent = ver.textContent;
+      }
+    } catch (_) {}
+  </script>
+
+</body>
+</html>

@@ -3746,6 +3746,17 @@ function renderTabBar() {
   });
   barLinks.appendChild(contactLink);
 
+  const blogLink = document.createElement('a');
+  blogLink.className = 'tab-privacy-link';
+  blogLink.href = '#';
+  blogLink.textContent = 'Blog';
+  blogLink.title = 'Blog';
+  blogLink.addEventListener('click', e => {
+    e.preventDefault();
+    window.open('blog.html', 'diagram-blog', 'width=860,height=700,resizable=yes');
+  });
+  barLinks.appendChild(blogLink);
+
   bar.appendChild(barLinks);
 }
 

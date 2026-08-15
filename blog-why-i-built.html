@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why I Built Diagram Editor — Diagram Editor Blog</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    #article-header {
+      background: #1e293b;
+      border-bottom: 1px solid #0f172a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    #article-header a {
+      font-size: 13px;
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    #article-header a:hover { text-decoration: underline; }
+
+    #article-header .sep {
+      font-size: 13px;
+      color: #334155;
+    }
+
+    #article-header .current {
+      font-size: 13px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+
+    /* ── Article layout ─────────────────────────────────── */
+    #article-body {
+      display: flex;
+      height: calc(100vh - 49px);
+      overflow: hidden;
+    }
+
+    /* ── Sidebar TOC ─────────────────────────────────────── */
+    #article-toc {
+      width: 220px;
+      flex-shrink: 0;
+      background: #1e293b;
+      border-right: 1px solid #0f172a;
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    #article-toc h2 {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      padding: 0 16px 10px;
+    }
+
+    #article-toc a {
+      display: block;
+      padding: 6px 16px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 12px;
+      line-height: 1.5;
+      border-left: 3px solid transparent;
+      transition: color 0.1s, background 0.1s, border-color 0.1s;
+    }
+
+    #article-toc a:hover {
+      color: #e2e8f0;
+      background: #263347;
+    }
+
+    #article-toc a.active {
+      color: #3b82f6;
+      border-left-color: #3b82f6;
+      background: #172035;
+    }
+
+    /* ── Article content ─────────────────────────────────── */
+    #article-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 56px 80px;
+      max-width: 860px;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .article-date {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .article-tag {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #3b82f6;
+      background: #172035;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    #article-content h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.3;
+      margin-bottom: 32px;
+    }
+
+    .article-section {
+      margin-bottom: 36px;
+      scroll-margin-top: 24px;
+    }
+
+    .article-section h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .article-section p {
+      color: #cbd5e1;
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    .article-section p:last-child { margin-bottom: 0; }
+
+    .article-section ul {
+      list-style: none;
+      margin: 10px 0 14px 0;
+    }
+
+    .article-section ul li {
+      color: #cbd5e1;
+      line-height: 1.7;
+      padding: 3px 0 3px 20px;
+      position: relative;
+    }
+
+    .article-section ul li::before {
+      content: "•";
+      color: #3b82f6;
+      position: absolute;
+      left: 6px;
+      font-weight: 700;
+    }
+
+    .article-section a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .article-section a:hover { text-decoration: underline; }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+       crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div id="article-header">
+    <a href="blog.html">Blog</a>
+    <span class="sep">/</span>
+    <span class="current">Why I Built Diagram Editor</span>
+  </div>
+
+  <div id="article-body">
+
+    <!-- Table of contents -->
+    <nav id="article-toc">
+      <h2>In this article</h2>
+      <a href="#free-for-everyone" class="active">Free for Everyone</a>
+      <a href="#lightweight">Lightweight by Design</a>
+      <a href="#privacy">Privacy First</a>
+      <a href="#ease-of-use">Ease of Use</a>
+      <a href="#why-exists">Why This Project Exists</a>
+      <a href="#whats-next">What's Next</a>
+    </nav>
+
+    <!-- Article -->
+    <div id="article-content">
+
+      <div class="article-meta">
+        <span class="article-date">15 August 2026</span>
+        <span class="article-tag">Behind the Build</span>
+      </div>
+
+      <h1>Why I Built Diagram Editor: A Free, Lightweight, and Private Tool for Cloud Architecture Diagrams</h1>
+
+      <div class="article-section" style="margin-bottom:36px;">
+        <p>Cloud architecture diagrams are essential for planning systems, communicating ideas, and documenting infrastructure. But most diagramming tools today feel heavier than they need to be — packed with features you don't use, locked behind subscriptions, or slow to load when you just want to sketch an idea.</p>
+        <p>Diagram Editor was created to solve that problem.</p>
+        <p>This article explains the goals behind the app, why it exists, and what makes it different from traditional diagramming tools.</p>
+      </div>
+
+      <!-- Free for Everyone -->
+      <section class="article-section" id="free-for-everyone">
+        <h2>A Tool That's Free for Everyone</h2>
+        <p>One of the core goals of Diagram Editor is accessibility. Many diagramming tools require:</p>
+        <ul>
+          <li>paid subscriptions</li>
+          <li>licence keys</li>
+          <li>account creation</li>
+          <li>workspace management</li>
+          <li>monthly fees</li>
+        </ul>
+        <p>Diagram Editor removes all of that.</p>
+        <p>The app is completely free to use. There are no licence requirements, no sign‑ups, and no hidden limitations. Whether you're a student learning cloud architecture, a developer planning a deployment, or an engineer documenting a production system, the tool is available instantly.</p>
+        <p>Free shouldn't mean limited — and Diagram Editor aims to prove that.</p>
+      </section>
+
+      <!-- Lightweight -->
+      <section class="article-section" id="lightweight">
+        <h2>Lightweight by Design</h2>
+        <p>Modern web apps often feel bloated. They load dozens of scripts, track user behaviour, and rely on heavy frameworks. Diagram Editor takes the opposite approach.</p>
+        <p>The app is intentionally lightweight:</p>
+        <ul>
+          <li>fast to load</li>
+          <li>responsive even on older devices</li>
+          <li>minimal external dependencies</li>
+          <li>no unnecessary UI complexity</li>
+        </ul>
+        <p>Everything is designed to get you drawing as quickly as possible. Open the site, drop icons onto the canvas, and start building your diagram — no onboarding flow, no pop‑ups, no waiting.</p>
+        <p>This simplicity is deliberate. A diagramming tool should help you think, not slow you down.</p>
+      </section>
+
+      <!-- Privacy -->
+      <section class="article-section" id="privacy">
+        <h2>Privacy First: Your Diagrams Stay on Your Device</h2>
+        <p>Privacy is one of the most important principles behind Diagram Editor.</p>
+        <p>Many online tools upload your work to a server, store your diagrams in the cloud, or require an account to save files. Diagram Editor does none of that.</p>
+        <p>The app runs entirely client‑side in your browser. This means:</p>
+        <ul>
+          <li>your diagrams never leave your device</li>
+          <li>nothing is uploaded or stored remotely</li>
+          <li>no personal data is collected</li>
+          <li>no cookies are set by the app</li>
+          <li>you stay in full control of your work</li>
+        </ul>
+        <p>You choose when to save or export your diagrams. Your files remain yours — always.</p>
+        <p>This approach makes the tool ideal for sensitive architecture work, internal documentation, or any environment where privacy matters.</p>
+      </section>
+
+      <!-- Ease of use -->
+      <section class="article-section" id="ease-of-use">
+        <h2>Ease of Use Above Everything</h2>
+        <p>A diagramming tool should be intuitive. Diagram Editor focuses on a clean, simple interface that lets you work without friction.</p>
+        <p>Key usability goals include:</p>
+        <ul>
+          <li>drag‑and‑drop simplicity</li>
+          <li>clear icon sets for AWS, Azure, GCP, and on‑prem components</li>
+          <li>keyboard shortcuts for speed</li>
+          <li>easy export options (PNG, SVG, JSON)</li>
+          <li>no clutter, no distractions</li>
+        </ul>
+        <p>Whether you're sketching a quick idea or building a full architecture diagram, the editor stays out of your way.</p>
+        <p>The goal is to make diagramming feel natural — something you can do in seconds, not minutes.</p>
+      </section>
+
+      <!-- Why exists -->
+      <section class="article-section" id="why-exists">
+        <h2>Why This Project Exists</h2>
+        <p>Diagram Editor was built to provide a fast, private, and accessible alternative to subscription‑based diagramming tools. It's a small project with a simple mission:</p>
+        <ul>
+          <li>make cloud diagrams easy</li>
+          <li>make them fast</li>
+          <li>make them free</li>
+          <li>make them private</li>
+          <li>make them available to everyone</li>
+        </ul>
+        <p>If the tool helps you plan a system, explain an idea, or document your architecture more easily, then it's doing its job.</p>
+      </section>
+
+      <!-- What's next -->
+      <section class="article-section" id="whats-next">
+        <h2>What's Next</h2>
+        <p>The app will continue to evolve with new features, improved icons, and better usability. Feedback from users helps shape the roadmap, and suggestions are always welcome.</p>
+        <p>If you want to request a feature or report an issue, you can do so here:</p>
+        <p><a href="https://github.com/ballr73/diagram/issues" target="_blank" rel="noopener">https://github.com/ballr73/diagram/issues</a></p>
+      </section>
+
+      <hr class="divider">
+
+      <a href="blog.html" class="back-link">← Back to Blog</a>
+
+    </div>
+  </div>
+
+  <script>
+    // Sidebar TOC active section on scroll
+    const sections = document.querySelectorAll('.article-section[id]');
+    const tocLinks = document.querySelectorAll('#article-toc a');
+    const content  = document.getElementById('article-content');
+
+    function updateActive() {
+      let current = sections[0] ? sections[0].id : '';
+      sections.forEach(sec => {
+        if (sec.getBoundingClientRect().top - content.getBoundingClientRect().top < 80) {
+          current = sec.id;
+        }
+      });
+      tocLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+
+    content.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+  </script>
+
+</body>
+</html>
