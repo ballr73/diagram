@@ -3699,6 +3699,17 @@ function renderTabBar() {
   addBtn.addEventListener('click', addTab);
   bar.appendChild(addBtn);
 
+  const faqLink = document.createElement('a');
+  faqLink.className = 'tab-privacy-link';
+  faqLink.href = '#';
+  faqLink.textContent = 'FAQ';
+  faqLink.title = 'Frequently Asked Questions';
+  faqLink.addEventListener('click', e => {
+    e.preventDefault();
+    window.open('faq.html', 'diagram-faq', 'width=800,height=700,resizable=yes');
+  });
+  bar.appendChild(faqLink);
+
   const privacyLink = document.createElement('a');
   privacyLink.className = 'tab-privacy-link';
   privacyLink.href = '#';
