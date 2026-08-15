@@ -482,6 +482,22 @@ html, body, #app {
   scrollbar-width: thin;
 }
 
+.tab-privacy-link {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #475569;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.1s;
+}
+
+.tab-privacy-link:hover {
+  color: #94a3b8;
+  text-decoration: underline;
+}
+
 .tab-btn {
   display: inline-flex;
   align-items: center;

@@ -3698,6 +3698,17 @@ function renderTabBar() {
   addBtn.title = 'New tab';
   addBtn.addEventListener('click', addTab);
   bar.appendChild(addBtn);
+
+  const privacyLink = document.createElement('a');
+  privacyLink.className = 'tab-privacy-link';
+  privacyLink.href = '#';
+  privacyLink.textContent = 'Privacy Policy';
+  privacyLink.title = 'Privacy Policy';
+  privacyLink.addEventListener('click', e => {
+    e.preventDefault();
+    window.open('privacy.html', 'diagram-privacy', 'width=900,height=700,resizable=yes');
+  });
+  bar.appendChild(privacyLink);
 }
 
 function startTabRename(index, labelEl) {

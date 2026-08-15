@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Editor — Privacy Policy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    #privacy-header {
+      background: #1e293b;
+      border-bottom: 1px solid #0f172a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    #privacy-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    #privacy-version {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    #privacy-body {
+      display: flex;
+      height: calc(100vh - 53px);
+      overflow: hidden;
+    }
+
+    /* ── Sidebar nav ─────────────────────────────────────── */
+    #privacy-nav {
+      width: 220px;
+      flex-shrink: 0;
+      background: #1e293b;
+      border-right: 1px solid #0f172a;
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    #privacy-nav h2 {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      padding: 0 16px 10px;
+    }
+
+    #privacy-nav a {
+      display: block;
+      padding: 7px 16px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      border-left: 3px solid transparent;
+      transition: color 0.1s, border-color 0.1s, background 0.1s;
+    }
+
+    #privacy-nav a:hover {
+      color: #e2e8f0;
+      background: #263347;
+    }
+
+    #privacy-nav a.active {
+      color: #3b82f6;
+      border-left-color: #3b82f6;
+      background: #172035;
+    }
+
+    /* ── Content ─────────────────────────────────────────── */
+    #privacy-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 48px 64px;
+    }
+
+    #privacy-content h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .last-updated {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 40px;
+    }
+
+    .policy-section {
+      margin-bottom: 40px;
+      scroll-margin-top: 24px;
+    }
+
+    .policy-section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #3b82f6;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .policy-section p {
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+
+    .policy-section p:last-child { margin-bottom: 0; }
+
+    .policy-section ul {
+      list-style: none;
+      margin: 8px 0 12px 0;
+    }
+
+    .policy-section ul li {
+      color: #cbd5e1;
+      line-height: 1.7;
+      padding: 2px 0 2px 20px;
+      position: relative;
+    }
+
+    .policy-section ul li::before {
+      content: "•";
+      color: #475569;
+      position: absolute;
+      left: 6px;
+    }
+
+    .highlight-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-left: 4px solid #22c55e;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 14px 0;
+    }
+
+    .highlight-box p {
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+
+    .highlight-box p:last-child { margin-bottom: 0; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 40px 0;
+    }
+
+    a.external {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    a.external:hover { text-decoration: underline; }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+       crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div id="privacy-header">
+    <h1>Diagram Editor</h1>
+    <span id="privacy-version">dev</span>
+  </div>
+
+  <div id="privacy-body">
+
+    <!-- Sidebar navigation -->
+    <nav id="privacy-nav">
+      <h2>Privacy Policy</h2>
+      <a href="#introduction" class="active">Introduction</a>
+      <a href="#no-collect">Information We Do Not Collect</a>
+      <a href="#how-works">How the App Works</a>
+      <a href="#third-party">Third‑Party Services</a>
+      <a href="#cookies">Cookies</a>
+      <a href="#data-storage">Data Storage</a>
+      <a href="#external-links">External Links</a>
+      <a href="#childrens-privacy">Children's Privacy</a>
+      <a href="#changes">Changes to This Policy</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <!-- Policy content -->
+    <div id="privacy-content">
+
+      <h2>Privacy Policy</h2>
+      <p class="last-updated">Last updated: 15 August 2026</p>
+
+      <!-- Introduction -->
+      <section class="policy-section" id="introduction">
+        <h3>Introduction</h3>
+        <p>Diagram Editor ("the App") is a free, browser‑based tool for creating cloud architecture diagrams. This Privacy Policy explains what information the App collects, how it is used, and how your data is protected.</p>
+        <div class="highlight-box">
+          <p>Diagram Editor is designed to operate entirely on your device. The App does not store, transmit, or process personal data on any server.</p>
+        </div>
+      </section>
+
+      <!-- Information We Do Not Collect -->
+      <section class="policy-section" id="no-collect">
+        <h3>Information We Do Not Collect</h3>
+        <p>Diagram Editor does not collect, store, or process any of the following:</p>
+        <ul>
+          <li>Personal information</li>
+          <li>Contact details</li>
+          <li>Account information</li>
+          <li>IP addresses</li>
+          <li>Cookies</li>
+          <li>Usage analytics</li>
+          <li>Saved diagrams</li>
+          <li>Uploaded files</li>
+          <li>Device identifiers</li>
+          <li>Location data</li>
+        </ul>
+        <p>The App does not require registration, login, or authentication of any kind.</p>
+      </section>
+
+      <!-- How the App Works -->
+      <section class="policy-section" id="how-works">
+        <h3>How the App Works</h3>
+        <p>Diagram Editor runs fully client‑side in your browser. All actions — including creating diagrams, editing shapes, uploading icons, and exporting files — happen locally on your device.</p>
+        <ul>
+          <li>Your diagrams are never uploaded to a server.</li>
+          <li>Your files remain entirely under your control.</li>
+        </ul>
+      </section>
+
+      <!-- Third-Party Services -->
+      <section class="policy-section" id="third-party">
+        <h3>Third‑Party Services</h3>
+        <p>Diagram Editor may use third‑party services for hosting or content delivery, such as:</p>
+        <ul>
+          <li>Amazon Web Services (AWS) for static file hosting</li>
+          <li>CloudFront CDN for faster global delivery</li>
+        </ul>
+        <p>These services may log standard technical information (e.g., request timestamps, user‑agent strings) as part of normal web hosting operations. This data is not linked to you personally and is not used by Diagram Editor for analytics or tracking.</p>
+        <p>If advertising is enabled, third‑party ad networks such as Google AdSense may use cookies or device identifiers to deliver personalised or non‑personalised ads. These technologies are controlled by the ad provider and governed by their own privacy policies.</p>
+      </section>
+
+      <!-- Cookies -->
+      <section class="policy-section" id="cookies">
+        <h3>Cookies</h3>
+        <p>Diagram Editor itself does not set or use cookies.</p>
+        <p>If ads are displayed, advertising partners may use cookies to:</p>
+        <ul>
+          <li>limit how often an ad is shown</li>
+          <li>measure ad performance</li>
+          <li>deliver relevant content</li>
+        </ul>
+        <p>You can manage or disable cookies through your browser settings.</p>
+      </section>
+
+      <!-- Data Storage -->
+      <section class="policy-section" id="data-storage">
+        <h3>Data Storage</h3>
+        <p>The App does not store any data on external servers.</p>
+        <p>Any diagrams you save are stored:</p>
+        <ul>
+          <li>locally on your device</li>
+          <li>in your browser's local storage (if you choose to use that feature)</li>
+          <li>in files you export manually</li>
+        </ul>
+        <p>You control all saved data.</p>
+      </section>
+
+      <!-- External Links -->
+      <section class="policy-section" id="external-links">
+        <h3>External Links</h3>
+        <p>The App may contain links to external websites or documentation. We are not responsible for the content or privacy practices of those sites.</p>
+      </section>
+
+      <!-- Children's Privacy -->
+      <section class="policy-section" id="childrens-privacy">
+        <h3>Children's Privacy</h3>
+        <p>Diagram Editor does not collect personal information from anyone, including children under 13. The App is safe to use without providing any personal data.</p>
+      </section>
+
+      <!-- Changes -->
+      <section class="policy-section" id="changes">
+        <h3>Changes to This Policy</h3>
+        <p>This Privacy Policy may be updated from time to time. The "Last updated" date at the top of the page reflects the most recent revision.</p>
+      </section>
+
+      <!-- Contact -->
+      <section class="policy-section" id="contact">
+        <h3>Contact</h3>
+        <p>If you have questions, feedback, or concerns about this Privacy Policy, please reach out via the Contact page or the project's <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener" class="external">GitHub repository</a>.</p>
+      </section>
+
+      <hr class="divider">
+
+      <p style="font-size:12px; color:#475569;">Diagram Editor · <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener" class="external">GitHub</a></p>
+
+    </div>
+  </div>
+
+  <script>
+    // Inherit version from opener if available
+    try {
+      const ver = window.opener &&
+                  window.opener.document &&
+                  window.opener.document.getElementById('app-version');
+      if (ver) {
+        document.getElementById('privacy-version').textContent = ver.textContent;
+      }
+    } catch (_) {}
+
+    // Sidebar active section highlight on scroll
+    const sections = document.querySelectorAll('.policy-section');
+    const navLinks = document.querySelectorAll('#privacy-nav a');
+    const content  = document.getElementById('privacy-content');
+
+    function updateActive() {
+      let current = sections[0].id;
+      sections.forEach(sec => {
+        if (sec.getBoundingClientRect().top - content.getBoundingClientRect().top < 80) {
+          current = sec.id;
+        }
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+
+    content.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+  </script>
+
+</body>
+</html>
