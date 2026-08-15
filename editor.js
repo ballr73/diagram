@@ -3724,6 +3724,17 @@ function renderTabBar() {
   });
   barLinks.appendChild(privacyLink);
 
+  const contactLink = document.createElement('a');
+  contactLink.className = 'tab-privacy-link';
+  contactLink.href = '#';
+  contactLink.textContent = 'Contact';
+  contactLink.title = 'Contact';
+  contactLink.addEventListener('click', e => {
+    e.preventDefault();
+    window.open('contact.html', 'diagram-contact', 'width=780,height=660,resizable=yes');
+  });
+  barLinks.appendChild(contactLink);
+
   bar.appendChild(barLinks);
 }
 

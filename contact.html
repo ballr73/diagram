@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Editor — Contact</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    #contact-header {
+      background: #1e293b;
+      border-bottom: 1px solid #0f172a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    #contact-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    #contact-version {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* ── Content ─────────────────────────────────────────── */
+    #contact-content {
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 32px 64px;
+    }
+
+    #contact-content > h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 14px;
+    }
+
+    #contact-content > .intro {
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 36px;
+    }
+
+    /* ── Sections ─────────────────────────────────────────── */
+    .contact-section {
+      margin-bottom: 36px;
+    }
+
+    .contact-section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #3b82f6;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .contact-section p {
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+
+    .contact-section p:last-child { margin-bottom: 0; }
+
+    .contact-section ul {
+      list-style: none;
+      margin: 8px 0 12px 0;
+    }
+
+    .contact-section ul li {
+      color: #cbd5e1;
+      line-height: 1.7;
+      padding: 3px 0 3px 20px;
+      position: relative;
+    }
+
+    .contact-section ul li::before {
+      content: "•";
+      color: #3b82f6;
+      position: absolute;
+      left: 6px;
+      font-weight: 700;
+    }
+
+    /* ── Issue tracker card ──────────────────────────────── */
+    .tracker-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .tracker-card-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: #0d1117;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tracker-card-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: #e2e8f0;
+    }
+
+    .tracker-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tracker-card-body .label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .tracker-card-body a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .tracker-card-body a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Why GitHub box ──────────────────────────────────── */
+    .info-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin-top: 8px;
+    }
+
+    .info-box ul {
+      margin: 0;
+    }
+
+    /* ── General questions box ───────────────────────────── */
+    .general-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-left: 4px solid #8b5cf6;
+      border-radius: 8px;
+      padding: 18px 22px;
+    }
+
+    .general-box p {
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 0;
+    }
+
+    .general-box a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .general-box a:hover { text-decoration: underline; }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 36px 0;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .footer-links a:hover { text-decoration: underline; }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+       crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div id="contact-header">
+    <h1>Diagram Editor</h1>
+    <span id="contact-version">dev</span>
+  </div>
+
+  <div id="contact-content">
+
+    <h2>Contact</h2>
+    <p class="intro">If you need help, want to report a problem, or have a suggestion for improving Diagram Editor, you can reach out through our public issue tracker.</p>
+
+    <!-- Report an Issue -->
+    <div class="contact-section">
+      <h3>Report an Issue</h3>
+      <p>The preferred way to contact the project is by opening an issue on GitHub:</p>
+
+      <div class="tracker-card">
+        <div class="tracker-card-icon">
+          <!-- GitHub mark -->
+          <svg viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/>
+          </svg>
+        </div>
+        <div class="tracker-card-body">
+          <div class="label">Project Issue Tracker</div>
+          <a href="https://github.com/ballr73/diagram/issues" target="_blank" rel="noopener">
+            https://github.com/ballr73/diagram/issues
+          </a>
+        </div>
+      </div>
+
+      <p>You can use the issue tracker to:</p>
+      <ul>
+        <li>report bugs</li>
+        <li>request new features</li>
+        <li>ask questions</li>
+        <li>share feedback</li>
+        <li>suggest improvements</li>
+      </ul>
+      <p>Issues are reviewed regularly, and responses are typically provided as soon as possible.</p>
+    </div>
+
+    <!-- Why GitHub Issues -->
+    <div class="contact-section">
+      <h3>Why GitHub Issues?</h3>
+      <div class="info-box">
+        <p style="color:#cbd5e1; line-height:1.6; margin-bottom:10px;">Using GitHub for support ensures that:</p>
+        <ul>
+          <li>all feedback is tracked in one place</li>
+          <li>bugs and feature requests are easy to organise</li>
+          <li>other users can follow discussions and solutions</li>
+          <li>fixes and improvements can be linked directly to code changes</li>
+        </ul>
+        <p style="color:#94a3b8; font-size:13px; margin-top:12px; margin-bottom:0;">This helps keep the project transparent, organised, and easy to maintain.</p>
+      </div>
+    </div>
+
+    <!-- General Questions -->
+    <div class="contact-section">
+      <h3>General Questions</h3>
+      <div class="general-box">
+        <p>If you have general questions about how the editor works, you may also find answers in the
+          <a href="#" onclick="window.open('faq.html','diagram-faq','width=800,height=700,resizable=yes'); return false;">FAQ</a>
+          or
+          <a href="#" onclick="window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); return false;">Help</a>
+          pages.
+        </p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="footer-links">
+      <a href="#" onclick="window.open('faq.html','diagram-faq','width=800,height=700,resizable=yes'); return false;">FAQ</a>
+      <a href="#" onclick="window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); return false;">Help</a>
+      <a href="#" onclick="window.open('privacy.html','diagram-privacy','width=900,height=700,resizable=yes'); return false;">Privacy Policy</a>
+      <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub</a>
+    </div>
+
+  </div>
+
+  <script>
+    try {
+      const ver = window.opener &&
+                  window.opener.document &&
+                  window.opener.document.getElementById('app-version');
+      if (ver) {
+        document.getElementById('contact-version').textContent = ver.textContent;
+      }
+    } catch (_) {}
+  </script>
+
+</body>
+</html>
