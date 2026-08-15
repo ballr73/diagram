@@ -3699,6 +3699,9 @@ function renderTabBar() {
   addBtn.addEventListener('click', addTab);
   bar.appendChild(addBtn);
 
+  const barLinks = document.createElement('div');
+  barLinks.className = 'tab-bar-links';
+
   const faqLink = document.createElement('a');
   faqLink.className = 'tab-privacy-link';
   faqLink.href = '#';
@@ -3708,7 +3711,7 @@ function renderTabBar() {
     e.preventDefault();
     window.open('faq.html', 'diagram-faq', 'width=800,height=700,resizable=yes');
   });
-  bar.appendChild(faqLink);
+  barLinks.appendChild(faqLink);
 
   const privacyLink = document.createElement('a');
   privacyLink.className = 'tab-privacy-link';
@@ -3719,7 +3722,9 @@ function renderTabBar() {
     e.preventDefault();
     window.open('privacy.html', 'diagram-privacy', 'width=900,height=700,resizable=yes');
   });
-  bar.appendChild(privacyLink);
+  barLinks.appendChild(privacyLink);
+
+  bar.appendChild(barLinks);
 }
 
 function startTabRename(index, labelEl) {
