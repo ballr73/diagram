@@ -3713,6 +3713,17 @@ function renderTabBar() {
   });
   barLinks.appendChild(faqLink);
 
+  const termsLink = document.createElement('a');
+  termsLink.className = 'tab-privacy-link';
+  termsLink.href = '#';
+  termsLink.textContent = 'Terms';
+  termsLink.title = 'Terms of Use';
+  termsLink.addEventListener('click', e => {
+    e.preventDefault();
+    window.open('terms.html', 'diagram-terms', 'width=900,height=700,resizable=yes');
+  });
+  barLinks.appendChild(termsLink);
+
   const privacyLink = document.createElement('a');
   privacyLink.className = 'tab-privacy-link';
   privacyLink.href = '#';
