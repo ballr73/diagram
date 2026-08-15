@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Editor — FAQ</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    #faq-header {
+      background: #1e293b;
+      border-bottom: 1px solid #0f172a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    #faq-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    #faq-version {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* ── Content ─────────────────────────────────────────── */
+    #faq-content {
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 32px 64px;
+    }
+
+    #faq-content > h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+
+    #faq-content > .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 40px;
+    }
+
+    /* ── FAQ Items ──────────────────────────────────────── */
+    .faq-item {
+      margin-bottom: 28px;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      background: #1e293b;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f1f5f9;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      user-select: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .faq-question:hover {
+      background: #263347;
+    }
+
+    .faq-question .chevron {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      color: #64748b;
+      transition: transform 0.2s ease;
+    }
+
+    .faq-item.open .faq-question .chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      display: none;
+      padding: 18px 20px;
+      background: #0f1a2e;
+      border-top: 1px solid #1e293b;
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    .faq-answer p {
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    .faq-answer p:last-child { margin-bottom: 0; }
+
+    .faq-answer ul {
+      list-style: none;
+      margin: 8px 0 10px 0;
+    }
+
+    .faq-answer ul li {
+      color: #cbd5e1;
+      line-height: 1.6;
+      padding: 2px 0 2px 20px;
+      position: relative;
+    }
+
+    .faq-answer ul li::before {
+      content: "•";
+      color: #3b82f6;
+      position: absolute;
+      left: 6px;
+      font-weight: 700;
+    }
+
+    .faq-answer kbd {
+      display: inline-block;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 12px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      color: #94a3b8;
+    }
+
+    .shortcut-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0;
+      color: #cbd5e1;
+    }
+
+    .shortcut-row .desc {
+      color: #94a3b8;
+    }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 36px 0;
+    }
+
+    /* ── Footer links ────────────────────────────────────── */
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .footer-links a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .footer-links a:hover { text-decoration: underline; }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+       crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div id="faq-header">
+    <h1>Diagram Editor — FAQ</h1>
+    <span id="faq-version">dev</span>
+  </div>
+
+  <div id="faq-content">
+
+    <h2>Frequently Asked Questions</h2>
+    <p class="subtitle">Common questions about Diagram Editor.</p>
+
+    <!-- Q1 -->
+    <div class="faq-item open">
+      <button class="faq-question">
+        <span>What is Diagram Editor?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Diagram Editor is a free, browser‑based tool for creating cloud architecture diagrams. It supports AWS, Azure, GCP, on‑premise components, and custom icons. The app runs entirely in your browser, with no installation or account required.</p>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Is the app free to use?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Yes. Diagram Editor is completely free.</p>
+        <p>There are no licence requirements, no subscriptions, and no usage limits. You can use it for personal projects, professional work, teaching, or anything else.</p>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Do I need to create an account?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>No. The editor works without registration.</p>
+        <p>All features are available immediately when you open the site.</p>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Does the app store my diagrams or data?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>No. Diagram Editor runs fully client‑side.</p>
+        <p>Your diagrams stay on your device and are never uploaded to a server. You choose when and where to save or export your work.</p>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>What browsers are supported?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Diagram Editor works on all modern browsers, including:</p>
+        <ul>
+          <li>Chrome</li>
+          <li>Edge</li>
+          <li>Firefox</li>
+          <li>Safari</li>
+        </ul>
+        <p>For the best performance, use the latest version of your browser.</p>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Can I export my diagrams?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Yes. You can export diagrams as:</p>
+        <ul>
+          <li>PNG images</li>
+          <li>SVG files</li>
+          <li>JSON project files (for re‑loading later)</li>
+        </ul>
+        <p>Exports happen entirely in your browser.</p>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Can I use the diagrams in commercial projects?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Yes. You are free to use diagrams created with the editor in commercial work, documentation, presentations, and client projects.</p>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Does the app support keyboard shortcuts?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Yes. Common shortcuts include:</p>
+        <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>S</kbd> <span class="desc">— Save</span></div>
+        <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Z</kbd> <span class="desc">— Undo</span></div>
+        <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Y</kbd> <span class="desc">— Redo</span></div>
+        <div class="shortcut-row"><kbd>Delete</kbd> <span class="desc">— Remove selected item</span></div>
+        <p style="margin-top:10px;">More shortcuts are listed in the <a href="#" onclick="window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); return false;" style="color:#3b82f6;">Help page</a>.</p>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Can I add my own icons?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Yes. You can upload custom SVG icons and use them alongside the built‑in cloud provider icons.</p>
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Is there a limit to the size of diagrams?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>No. You can create diagrams as large or as detailed as you need. Performance depends on your device and browser.</p>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Who created Diagram Editor?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Diagram Editor is a small independent project built to provide a fast, lightweight alternative to heavy subscription‑based diagramming tools.</p>
+      </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>How can I report an issue or suggest a feature?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>You can reach out through the Contact page or submit feedback directly via the project's <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener" style="color:#3b82f6;">GitHub repository</a>.</p>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="faq-item">
+      <button class="faq-question">
+        <span>Will new features be added?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="faq-answer">
+        <p>Yes. The editor is actively maintained, and new features, icons, and improvements are added regularly.</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="footer-links">
+      <a href="#" onclick="window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); return false;">Show Help</a>
+      <a href="#" onclick="window.open('about.html','diagram-about','width=680,height=620,resizable=yes'); return false;">About</a>
+      <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub Repository</a>
+    </div>
+
+  </div>
+
+  <script>
+    // Inherit version from opener if available
+    try {
+      const ver = window.opener &&
+                  window.opener.document &&
+                  window.opener.document.getElementById('app-version');
+      if (ver) {
+        document.getElementById('faq-version').textContent = ver.textContent;
+      }
+    } catch (_) {}
+
+    // Accordion toggle
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+
+</body>
+</html>
