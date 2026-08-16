@@ -3856,7 +3856,6 @@ function initMenuBar() {
     'same-width':     () => sameWidth(),
     'same-height':    () => sameHeight(),
     'show-help':      () => { window.open('help.html', 'diagram-help', 'width=1000,height=720,resizable=yes'); },
-    'show-faq':       () => { window.open('faq.html',  'diagram-faq',  'width=800,height=700,resizable=yes'); },
     'show-about':     () => { window.open('about.html', 'diagram-about', 'width=680,height=620,resizable=yes'); },
     'show-version':   () => {},  // display-only; version shown in menu text
   };
