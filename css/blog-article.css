@@ -1,0 +1,197 @@
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    #article-header {
+      background: #1e293b;
+      border-bottom: 1px solid #0f172a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    #article-header a {
+      font-size: 13px;
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    #article-header a:hover { text-decoration: underline; }
+
+    #article-header .sep {
+      font-size: 13px;
+      color: #334155;
+    }
+
+    #article-header .current {
+      font-size: 13px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+    }
+
+    /* ── Article layout ─────────────────────────────────── */
+    #article-body {
+      display: flex;
+      height: calc(100vh - 49px);
+      overflow: hidden;
+    }
+
+    /* ── Sidebar TOC ─────────────────────────────────────── */
+    #article-toc {
+      width: 220px;
+      flex-shrink: 0;
+      background: #1e293b;
+      border-right: 1px solid #0f172a;
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    #article-toc h2 {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      padding: 0 16px 10px;
+    }
+
+    #article-toc a {
+      display: block;
+      padding: 6px 16px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 12px;
+      line-height: 1.5;
+      border-left: 3px solid transparent;
+      transition: color 0.1s, background 0.1s, border-color 0.1s;
+    }
+
+    #article-toc a:hover {
+      color: #e2e8f0;
+      background: #263347;
+    }
+
+    #article-toc a.active {
+      color: #3b82f6;
+      border-left-color: #3b82f6;
+      background: #172035;
+    }
+
+    /* ── Article content ─────────────────────────────────── */
+    #article-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 56px 80px;
+      max-width: 860px;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .article-date {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .article-tag {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #3b82f6;
+      background: #172035;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    #article-content h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f1f5f9;
+      line-height: 1.3;
+      margin-bottom: 32px;
+    }
+
+    .article-section {
+      margin-bottom: 36px;
+      scroll-margin-top: 24px;
+    }
+
+    .article-section h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .article-section p {
+      color: #cbd5e1;
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    .article-section p:last-child { margin-bottom: 0; }
+
+    .article-section ul {
+      list-style: none;
+      margin: 10px 0 14px 0;
+    }
+
+    .article-section ul li {
+      color: #cbd5e1;
+      line-height: 1.7;
+      padding: 3px 0 3px 20px;
+      position: relative;
+    }
+
+    .article-section ul li::before {
+      content: "•";
+      color: #3b82f6;
+      position: absolute;
+      left: 6px;
+      font-weight: 700;
+    }
+
+    .article-section a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .article-section a:hover { text-decoration: underline; }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid #1e293b;
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+  
