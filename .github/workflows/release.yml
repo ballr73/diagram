@@ -36,16 +36,16 @@ jobs:
       - name: Version asset filenames
         run: |
           TAG=${{ steps.version.outputs.tag }}
-          cp editor.js editor.${TAG}.js
-          cp diagram.css diagram.${TAG}.css
-          sed -i "s|href=\"diagram.css\"|href=\"diagram.${TAG}.css\"|" index.html
-          sed -i "s|src=\"editor.js\"|src=\"editor.${TAG}.js\"|" index.html
+          cp js/editor.js js/editor.${TAG}.js
+          cp css/diagram.css css/diagram.${TAG}.css
+          sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
+          sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" index.html
 
       - name: Package release files
         run: |
           TAG=${{ steps.version.outputs.tag }}
           tar -czf diagram-editor.tar.gz \
-            index.html editor.${TAG}.js diagram.${TAG}.css help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md \
+            index.html js/editor.${TAG}.js css/diagram.${TAG}.css help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md \
             icons/manifest.js icons/manifest.json \
             icons/AWS icons/Azure icons/GCP \
             scripts/generate-manifest.js
@@ -89,16 +89,18 @@ jobs:
       - name: Version asset filenames
         run: |
           TAG=${{ steps.version.outputs.tag }}
-          cp editor.js editor.${TAG}.js
-          cp diagram.css diagram.${TAG}.css
-          sed -i "s|href=\"diagram.css\"|href=\"diagram.${TAG}.css\"|" index.html
-          sed -i "s|src=\"editor.js\"|src=\"editor.${TAG}.js\"|" index.html
+          cp js/editor.js js/editor.${TAG}.js
+          cp css/diagram.css css/diagram.${TAG}.css
+          sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
+          sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" index.html
 
       - name: Build Pages artifact
         run: |
           TAG=${{ steps.version.outputs.tag }}
-          mkdir -p _site
-          cp index.html help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html editor.${TAG}.js diagram.${TAG}.css README.md _site/
+          mkdir -p _site/js _site/css
+          cp index.html help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md _site/
+          cp js/editor.${TAG}.js _site/js/
+          cp css/diagram.${TAG}.css _site/css/
           cp -r icons _site/icons
           cp -r scripts _site/scripts
 
@@ -136,10 +138,10 @@ jobs:
       - name: Version asset filenames
         run: |
           TAG=${{ steps.version.outputs.tag }}
-          cp editor.js editor.${TAG}.js
-          cp diagram.css diagram.${TAG}.css
-          sed -i "s|href=\"diagram.css\"|href=\"diagram.${TAG}.css\"|" index.html
-          sed -i "s|src=\"editor.js\"|src=\"editor.${TAG}.js\"|" index.html
+          cp js/editor.js js/editor.${TAG}.js
+          cp css/diagram.css css/diagram.${TAG}.css
+          sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
+          sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" index.html
 
       - name: Debug OIDC token
         run: |
@@ -173,8 +175,8 @@ jobs:
             --include "terms.html" \
             --include "blog.html" \
             --include "blog-why-i-built.html" \
-            --include "editor.${TAG}.js" \
-            --include "diagram.${TAG}.css" \
+            --include "js/editor.${TAG}.js" \
+            --include "css/diagram.${TAG}.css" \
             --include "icons/*"
 
       - name: Invalidate CloudFront cache
