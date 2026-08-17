@@ -198,12 +198,21 @@
         <tr><td>— None</td><td>Plain line, no arrows</td></tr>
       </table>
 
-      <h3>Waypoints (corners)</h3>
+      <h3>Curved connectors</h3>
+      <p>Connectors can be rendered as smooth curves instead of straight lines:</p>
+      <ol>
+        <li>Select a connector</li>
+        <li>Open the <strong>Properties panel</strong></li>
+        <li>Change the <strong>Connector</strong> dropdown from <strong>Straight</strong> to <strong>Curved</strong></li>
+      </ol>
+      <p>In curved mode, waypoints act as curve-pull handles — dragging a waypoint reshapes the curve smoothly through that point rather than creating a sharp corner.</p>
+
+      <h3>Waypoints (corners / curves)</h3>
       <ol>
         <li>Select the <strong>Select</strong> tool</li>
         <li><strong>Double-click</strong> anywhere on an existing connector — a waypoint handle appears</li>
-        <li><strong>Drag the handle</strong> to pull the connector into a corner or angle</li>
-        <li>Add as many waypoints as needed; each creates a new segment</li>
+        <li><strong>Drag the handle</strong> to pull the connector into a corner or angle (straight) or to reshape the curve (curved)</li>
+        <li>Add as many waypoints as needed</li>
         <li><strong>Click a waypoint handle</strong> to focus it, then press <kbd>Delete</kbd> to remove it</li>
       </ol>
     </section>
@@ -223,6 +232,7 @@
         <tr><td>Reposition endpoint</td><td>Drag the endpoint handle</td></tr>
         <tr><td>Add a corner/waypoint</td><td>Double-click anywhere on a selected line</td></tr>
         <tr><td>Remove a waypoint</td><td>Click the handle, then press <kbd>Delete</kbd></td></tr>
+        <tr><td>Connector type</td><td>Straight or Curved (Properties panel)</td></tr>
         <tr><td>Line style</td><td>Solid / Dashed / Dotted (Properties panel)</td></tr>
         <tr><td>Stroke colour</td><td>Colour picker (Properties panel)</td></tr>
         <tr><td>Label</td><td>Text along the midpoint (Properties panel)</td></tr>
@@ -330,6 +340,7 @@
       <table>
         <tr><th>Property</th><th>Description</th></tr>
         <tr><td>Direction</td><td>→ Forward / ← Backward / ↔ Both / — None</td></tr>
+        <tr><td>Connector</td><td>Straight (default) or Curved — switches between polyline and smooth spline</td></tr>
         <tr><td>Line style</td><td>Solid / Dashed / Dotted</td></tr>
         <tr><td>Stroke</td><td>Line colour</td></tr>
         <tr><td>Label</td><td>Text along the connector</td></tr>
@@ -339,6 +350,7 @@
       <h3>Line properties</h3>
       <table>
         <tr><th>Property</th><th>Description</th></tr>
+        <tr><td>Connector</td><td>Straight (default) or Curved</td></tr>
         <tr><td>Stroke</td><td>Line colour</td></tr>
         <tr><td>Line style</td><td>Solid / Dashed / Dotted</td></tr>
         <tr><td>Start</td><td>End symbol at start: None / Dot / Square</td></tr>

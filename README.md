@@ -98,7 +98,7 @@ Pick a shape type from the shape picker in the **left toolbar** before drawing, 
 2. Drag from the edge of a source shape to a target shape
 3. A connector with an arrowhead is created
 
-Connector direction and line style can be changed in the Properties panel.
+Connector direction, style, and curve type can be changed in the Properties panel.
 
 | Direction option | Appearance |
 |-----------------|------------|
@@ -107,14 +107,24 @@ Connector direction and line style can be changed in the Properties panel.
 | ↔ Both | Arrows at both ends |
 | — None | Plain line, no arrows |
 
-### Connector waypoints (corners)
+### Curved connectors
 
-Connectors can be bent into any shape using waypoints:
+Connectors can be rendered as smooth curves instead of straight lines:
+
+1. Select a connector
+2. Open the **Properties panel**
+3. Change the **Connector** dropdown from **Straight** to **Curved**
+
+In curved mode, waypoints act as curve-pull handles — dragging a waypoint reshapes the curve through that point rather than creating a sharp corner.
+
+### Connector waypoints (corners / curves)
+
+Connectors can be bent or curved using waypoints:
 
 1. Select the **Select** tool
 2. **Double-click** anywhere on an existing connector — a waypoint handle appears at that point
-3. **Drag the handle** to pull the connector into a corner or angle
-4. Add as many waypoints as needed; each creates a new segment
+3. **Drag the handle** to pull the connector into a corner or angle (straight) or to reshape the curve (curved)
+4. Add as many waypoints as needed
 5. **Click a waypoint handle** to focus it, then press **Delete** / **Backspace** to remove it
 
 Waypoints are preserved through undo/redo, copy/paste, and open/save.
@@ -128,7 +138,7 @@ Free-floating lines not attached to any shape. Unlike connectors, lines have no 
 
 **End symbols** (set in Properties panel): each end can independently show **None**, **Dot**, or **Square**.
 
-Lines support all the same editing actions as connectors:
+Lines support all the same editing actions as connectors, including curved mode:
 
 | Feature | How |
 |---------|-----|
@@ -136,6 +146,7 @@ Lines support all the same editing actions as connectors:
 | Reposition an endpoint | Select the line — endpoint handles appear at each end; drag to move |
 | Add a corner/waypoint | **Double-click** anywhere on a selected line |
 | Remove a waypoint | Click the waypoint handle to focus it, then press **Delete** |
+| Connector type | Straight or Curved (Properties panel) |
 | Line style | Solid / Dashed / Dotted (Properties panel) |
 | Stroke colour | Colour picker (Properties panel) |
 | Label | Text along the midpoint (Properties panel) |
@@ -268,6 +279,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Property | Description |
 |----------|-------------|
 | Direction | → Forward / ← Backward / ↔ Both / — None |
+| Connector | Straight (default) or Curved — switches between polyline and Catmull-Rom spline |
 | Line style | Solid / Dashed / Dotted |
 | Stroke | Line colour |
 | Label | Text displayed along the connector |
@@ -277,6 +289,7 @@ When one element is selected, the Properties panel on the right shows its editab
 
 | Property | Description |
 |----------|-------------|
+| Connector | Straight (default) or Curved |
 | Stroke | Line colour |
 | Line style | Solid / Dashed / Dotted |
 | Start | End symbol at start point: None / Dot / Square |

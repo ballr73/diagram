@@ -821,6 +821,72 @@ function pathMidpoint(pts) {
   return pts[Math.floor(pts.length / 2)];
 }
 
+// ── Curved connector helpers ──────────────────────────────────────────────
+
+/**
+ * Convert an ordered array of points to an SVG cubic Bézier path string
+ * using Catmull-Rom parameterisation.  Each waypoint "pulls" the curve
+ * through it; dragging a waypoint reshapes the curve.
+ */
+function catmullRomToPath(pts) {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
+/**
+ * Build an SVG path `d` string for a connector.
+ * curved=true → Catmull-Rom spline; curved=false → straight polyline-as-path.
+ */
+function buildPathD(pts, curved) {
+  if (pts.length < 2) return '';
+  if (!curved) return 'M ' + pts.map(p => `${p.x},${p.y}`).join(' L ');
+  return catmullRomToPath(pts);
+}
+
+/**
+ * Sample the Catmull-Rom curve defined by pts at ~40 points and return
+ * the point at 50% arc length.  Used for label placement on curved connectors.
+ */
+function curvedMidpoint(pts) {
+  if (pts.length < 2) return pts[0] || { x: 0, y: 0 };
+  // Sample the curve by evaluating cubic Bézier segments
+  const samples = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    const steps = 20;
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const u = 1 - t;
+      samples.push({
+        x: u*u*u*p1.x + 3*u*u*t*cp1x + 3*u*t*t*cp2x + t*t*t*p2.x,
+        y: u*u*u*p1.y + 3*u*u*t*cp1y + 3*u*t*t*cp2y + t*t*t*p2.y,
+      });
+    }
+  }
+  return pathMidpoint(samples);
+}
+
+
+
 function segmentDist(px, py, x1, y1, x2, y2) {
   const dx = x2 - x1, dy = y2 - y1;
   const lenSq = dx * dx + dy * dy;
@@ -1108,45 +1174,73 @@ function renderNodeGroup(node) {
 function renderEdgeGroup(edge) {
   const pts = edgePoints(edge);
   if (!pts) return null;
-  const sel = state.selected.has(edge.id);
-  const dir = edge.direction || 'forward';
-  const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+  const sel    = state.selected.has(edge.id);
+  const dir    = edge.direction || 'forward';
+  const curved = edge.curveStyle === 'curved';
 
   const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
-
-  // Wide invisible hit area
-  g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
 
   const defaultStroke = '#64748b';
   const selStroke     = '#2563eb';
   const strokeColor   = sel ? selStroke : (edge.stroke || defaultStroke);
   const strokeWidth   = sel ? '2' : '1.5';
-
   const endUrl   = sel ? 'url(#arrowhead-sel)'       : 'url(#arrowhead)';
   const startUrl = sel ? 'url(#arrowhead-start-sel)' : 'url(#arrowhead-start)';
-  const lineAttrs = {
-    points: pointsStr,
-    class: 'edge-line' + (sel ? ' selected' : ''),
-  };
-  if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
-  if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
 
-  const lineEl = svgEl('polyline', lineAttrs);
-  lineEl.style.stroke      = strokeColor;
-  lineEl.style.strokeWidth = strokeWidth;
-  lineEl.style.color       = strokeColor;
-  applyStrokeStyle(lineEl, edge.strokeStyle);
-  g.appendChild(lineEl);
+  if (curved) {
+    const pathD = buildPathD(pts, true);
 
-  if (edge.label) {
-    const mid = pathMidpoint(pts);
-    const lblEl = svgEl('text', {
-      x: mid.x, y: mid.y - 5,
-      'text-anchor': 'middle',
-      class: 'edge-label',
-    }, edge.label);
-    applyFontStyle(lblEl, edge, { size: 11 });
-    g.appendChild(lblEl);
+    // Wide invisible hit area
+    const hitPath = svgEl('path', { d: pathD, class: 'edge-hit' });
+    g.appendChild(hitPath);
+
+    const pathAttrs = {
+      d: pathD,
+      class: 'edge-line' + (sel ? ' selected' : ''),
+      fill: 'none',
+    };
+    if (dir === 'forward' || dir === 'both') pathAttrs['marker-end']   = endUrl;
+    if (dir === 'back'    || dir === 'both') pathAttrs['marker-start'] = startUrl;
+
+    const lineEl = svgEl('path', pathAttrs);
+    lineEl.style.stroke      = strokeColor;
+    lineEl.style.strokeWidth = strokeWidth;
+    lineEl.style.color       = strokeColor;
+    applyStrokeStyle(lineEl, edge.strokeStyle);
+    g.appendChild(lineEl);
+
+    if (edge.label) {
+      const mid = curvedMidpoint(pts);
+      const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, edge.label);
+      applyFontStyle(lblEl, edge, { size: 11 });
+      g.appendChild(lblEl);
+    }
+  } else {
+    const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+
+    // Wide invisible hit area
+    g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
+
+    const lineAttrs = {
+      points: pointsStr,
+      class: 'edge-line' + (sel ? ' selected' : ''),
+    };
+    if (dir === 'forward' || dir === 'both') lineAttrs['marker-end']   = endUrl;
+    if (dir === 'back'    || dir === 'both') lineAttrs['marker-start'] = startUrl;
+
+    const lineEl = svgEl('polyline', lineAttrs);
+    lineEl.style.stroke      = strokeColor;
+    lineEl.style.strokeWidth = strokeWidth;
+    lineEl.style.color       = strokeColor;
+    applyStrokeStyle(lineEl, edge.strokeStyle);
+    g.appendChild(lineEl);
+
+    if (edge.label) {
+      const mid = pathMidpoint(pts);
+      const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, edge.label);
+      applyFontStyle(lblEl, edge, { size: 11 });
+      g.appendChild(lblEl);
+    }
   }
 
   if (sel && edge.waypoints && edge.waypoints.length > 0) {
@@ -1161,6 +1255,7 @@ function renderEdgeGroup(edge) {
 
   return g;
 }
+
 
 /**
  * Render all nodes and edges into shapes-layer, interleaved by Z-order.
@@ -1216,46 +1311,70 @@ function getLineAt(x, y, threshold = 8) {
 function renderLines() {
   linesLayer.innerHTML = '';
   for (const line of state.lines.values()) {
-    const sel = state.selected.has(line.id);
-    const pts = linePoints(line);
-    const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+    const sel    = state.selected.has(line.id);
+    const curved = line.curveStyle === 'curved';
+    const pts    = linePoints(line);
     const defaultStroke = '#64748b';
     const selStroke     = '#2563eb';
     const strokeColor   = sel ? selStroke : (line.stroke || defaultStroke);
     const strokeWidth   = sel ? '2' : '1.5';
 
-    const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
-
-    // Wide invisible hit area
-    g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
-
-    // Resolve symbol markers
     const startSym = line.startSymbol || 'none';
     const endSym   = line.endSymbol   || 'none';
-    const lineAttrs = {
-      points: pointsStr,
-      class: 'edge-line' + (sel ? ' selected' : ''),
-    };
-    if (startSym !== 'none') lineAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
-    if (endSym   !== 'none') lineAttrs['marker-end']   = sel ? `url(#${endSym}-marker-sel)`   : `url(#${endSym}-marker)`;
 
-    const lineEl = svgEl('polyline', lineAttrs);
-    lineEl.style.stroke      = strokeColor;
-    lineEl.style.strokeWidth = strokeWidth;
-    lineEl.style.color       = strokeColor;
-    applyStrokeStyle(lineEl, line.strokeStyle);
-    g.appendChild(lineEl);
+    const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
 
-    // Label at midpoint
-    if (line.label) {
-      const mid = pathMidpoint(pts);
-      const lblEl = svgEl('text', {
-        x: mid.x, y: mid.y - 5,
-        'text-anchor': 'middle',
-        class: 'edge-label',
-      }, line.label);
-      applyFontStyle(lblEl, line, { size: 11 });
-      g.appendChild(lblEl);
+    if (curved) {
+      const pathD = buildPathD(pts, true);
+
+      g.appendChild(svgEl('path', { d: pathD, class: 'edge-hit' }));
+
+      const pathAttrs = {
+        d: pathD,
+        class: 'edge-line' + (sel ? ' selected' : ''),
+        fill: 'none',
+      };
+      if (startSym !== 'none') pathAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+      if (endSym   !== 'none') pathAttrs['marker-end']   = sel ? `url(#${endSym}-marker-sel)`   : `url(#${endSym}-marker)`;
+
+      const lineEl = svgEl('path', pathAttrs);
+      lineEl.style.stroke      = strokeColor;
+      lineEl.style.strokeWidth = strokeWidth;
+      lineEl.style.color       = strokeColor;
+      applyStrokeStyle(lineEl, line.strokeStyle);
+      g.appendChild(lineEl);
+
+      if (line.label) {
+        const mid = curvedMidpoint(pts);
+        const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, line.label);
+        applyFontStyle(lblEl, line, { size: 11 });
+        g.appendChild(lblEl);
+      }
+    } else {
+      const pointsStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+
+      g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
+
+      const lineAttrs = {
+        points: pointsStr,
+        class: 'edge-line' + (sel ? ' selected' : ''),
+      };
+      if (startSym !== 'none') lineAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+      if (endSym   !== 'none') lineAttrs['marker-end']   = sel ? `url(#${endSym}-marker-sel)`   : `url(#${endSym}-marker)`;
+
+      const lineEl = svgEl('polyline', lineAttrs);
+      lineEl.style.stroke      = strokeColor;
+      lineEl.style.strokeWidth = strokeWidth;
+      lineEl.style.color       = strokeColor;
+      applyStrokeStyle(lineEl, line.strokeStyle);
+      g.appendChild(lineEl);
+
+      if (line.label) {
+        const mid = pathMidpoint(pts);
+        const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, line.label);
+        applyFontStyle(lblEl, line, { size: 11 });
+        g.appendChild(lblEl);
+      }
     }
 
     if (sel) {
@@ -2907,6 +3026,7 @@ function renderEdgeProps(container, edge) {
   const fromNode = state.nodes.get(edge.from);
   const toNode = state.nodes.get(edge.to);
   const dir = edge.direction || 'forward';
+  const curveStyle = edge.curveStyle || 'straight';
   const dirOpts = [
     ['forward', '→ Forward'],
     ['back',    '← Backward'],
@@ -2916,9 +3036,13 @@ function renderEdgeProps(container, edge) {
   const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
     .map(([v, l]) => `<option value="${v}"${(edge.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
     .join('');
+  const curveOpts = [['straight','Straight'],['curved','Curved']]
+    .map(([v, l]) => `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
 
   container.innerHTML = `
     <div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
+    <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
@@ -2928,6 +3052,11 @@ function renderEdgeProps(container, edge) {
   `;
   document.getElementById('p-dir').addEventListener('change', e => {
     edge.direction = e.target.value;
+    pushHistory();
+    render();
+  });
+  document.getElementById('p-curve-style').addEventListener('change', e => {
+    edge.curveStyle = e.target.value;
     pushHistory();
     render();
   });
@@ -2942,14 +3071,19 @@ function renderEdgeProps(container, edge) {
 }
 
 function renderLineProps(container, line) {
+  const curveStyle = line.curveStyle || 'straight';
   const dashOpts = [['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]
     .map(([v, l]) => `<option value="${v}"${(line.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    .join('');
+  const curveOpts = [['straight','Straight'],['curved','Curved']]
+    .map(([v, l]) => `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`)
     .join('');
   const symOpts = field => [['none','None'],['dot','Dot'],['square','Square']]
     .map(([v, l]) => `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`)
     .join('');
 
   container.innerHTML = `
+    <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', line.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Start</label><select id="p-start-sym">${symOpts('startSymbol')}</select></div>
@@ -2957,6 +3091,9 @@ function renderLineProps(container, line) {
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>
   `;
+  document.getElementById('p-curve-style').addEventListener('change', e => {
+    line.curveStyle = e.target.value; pushHistory(); render();
+  });
   document.getElementById('p-stroke-style').addEventListener('change', e => {
     line.strokeStyle = e.target.value; pushHistory(); render();
   });
