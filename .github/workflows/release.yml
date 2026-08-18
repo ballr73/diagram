@@ -1,267 +1,185 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 env:
-  AWS_REGION: eu-west-2
-  IAM_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-  CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+    AWS_REGION: eu-west-2
+    IAM_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+    S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+    CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
 
 jobs:
-  release:
-    name: Create release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write   # required to create tags and releases
+    release:
+        name: Create release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # required to create tags and releases
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
 
-      - name: Generate version tag
-        id: version
-        run: |
-          TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Generated tag: $TAG"
+            - name: Generate version tag
+              id: version
+              run: |
+                  TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
+                  echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+                  echo "Generated tag: $TAG"
 
-      - name: Inject version into index.html
-        run: |
-          sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
+            - name: Inject version into index.html
+              run: |
+                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
 
-      - name: Version asset filenames
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          cp js/editor.js js/editor.${TAG}.js
-          cp js/gdrive.js js/gdrive.${TAG}.js
-          cp css/diagram.css css/diagram.${TAG}.css
-          cp css/blog.css css/blog.${TAG}.css
-          cp css/blog-article.css css/blog-article.${TAG}.css
-          cp css/contact.css css/contact.${TAG}.css
-          cp css/faq.css css/faq.${TAG}.css
-          cp css/help.css css/help.${TAG}.css
-          cp css/privacy.css css/privacy.${TAG}.css
-          cp css/terms.css css/terms.${TAG}.css
-          sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
-          sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" index.html
-          sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.js\"|" index.html
-          sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
-          sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
-          sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
-          sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
-          sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
-          sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
-          sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
+            - name: Version asset filenames
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  cp js/editor.js js/editor.${TAG}.js
+                  cp js/gdrive.js js/gdrive.${TAG}.js
+                  cp css/diagram.css css/diagram.${TAG}.css
+                  cp css/blog.css css/blog.${TAG}.css
+                  cp css/blog-article.css css/blog-article.${TAG}.css
+                  cp css/contact.css css/contact.${TAG}.css
+                  cp css/faq.css css/faq.${TAG}.css
+                  cp css/help.css css/help.${TAG}.css
+                  cp css/privacy.css css/privacy.${TAG}.css
+                  cp css/terms.css css/terms.${TAG}.css
+                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
+                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" index.html
+                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.js\"|" index.html
+                  sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
+                  sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
+                  sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
+                  sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
+                  sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
+                  sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
+                  sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
 
-      - name: Package release files
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          tar -czf diagram-editor.tar.gz \
-            index.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
-            css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
-            css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
-            help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md \
-            icons/manifest.js icons/manifest.json \
-            icons/AWS icons/Azure icons/GCP \
-            scripts/generate-manifest.js
+            - name: Package release files
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  tar -czf diagram-editor.tar.gz \
+                    index.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
+                    css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
+                    css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
+                    help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md \
+                    icons/manifest.js icons/manifest.json \
+                    icons/AWS icons/Azure icons/GCP \
+                    scripts/generate-manifest.js
 
-      - name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            --title "Diagram Editor ${{ steps.version.outputs.tag }}" \
-            --generate-notes \
-            diagram-editor.tar.gz
+            - name: Create GitHub release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh release create "${{ steps.version.outputs.tag }}" \
+                    --title "Diagram Editor ${{ steps.version.outputs.tag }}" \
+                    --generate-notes \
+                    diagram-editor.tar.gz
 
-  deploy:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: release
-    permissions:
-      contents: read
-      pages: write      # required to deploy to GitHub Pages
-      id-token: write   # required for OIDC Pages deployment
+    deploy-s3:
+        name: Deploy to AWS S3
+        runs-on: ubuntu-latest
+        needs: release
+        permissions:
+            contents: read
+            id-token: write # required for OIDC role assumption
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+            - name: Set up Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: '20'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '20'
+            - name: Generate version tag
+              id: version
+              run: |
+                  TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
+                  echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Generate version tag
-        id: version
-        run: |
-          TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            - name: Inject version into index.html
+              run: |
+                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
 
-      - name: Inject version into index.html
-        run: |
-          sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
+            - name: Minify JS
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  npm install --global esbuild
+                  esbuild js/editor.js --bundle=false --minify --outfile=js/editor.${TAG}.min.js
+                  esbuild js/gdrive.js --bundle=false --minify --outfile=js/gdrive.${TAG}.min.js
 
-      - name: Minify JS
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          npm install --global esbuild
-          esbuild js/editor.js --bundle=false --minify --outfile=js/editor.${TAG}.min.js
-          esbuild js/gdrive.js --bundle=false --minify --outfile=js/gdrive.${TAG}.min.js
+            - name: Version asset filenames
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  cp css/diagram.css css/diagram.${TAG}.css
+                  cp css/blog.css css/blog.${TAG}.css
+                  cp css/blog-article.css css/blog-article.${TAG}.css
+                  cp css/contact.css css/contact.${TAG}.css
+                  cp css/faq.css css/faq.${TAG}.css
+                  cp css/help.css css/help.${TAG}.css
+                  cp css/privacy.css css/privacy.${TAG}.css
+                  cp css/terms.css css/terms.${TAG}.css
+                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
+                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" index.html
+                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" index.html
+                  sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
+                  sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
+                  sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
+                  sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
+                  sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
+                  sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
+                  sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
 
-      - name: Version asset filenames
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          cp css/diagram.css css/diagram.${TAG}.css
-          cp css/blog.css css/blog.${TAG}.css
-          cp css/blog-article.css css/blog-article.${TAG}.css
-          cp css/contact.css css/contact.${TAG}.css
-          cp css/faq.css css/faq.${TAG}.css
-          cp css/help.css css/help.${TAG}.css
-          cp css/privacy.css css/privacy.${TAG}.css
-          cp css/terms.css css/terms.${TAG}.css
-          sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
-          sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" index.html
-          sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" index.html
-          sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
-          sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
-          sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
-          sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
-          sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
-          sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
-          sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
+            - name: Debug OIDC token
+              run: |
+                  OIDC_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                  "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
 
-      - name: Build Pages artifact
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          mkdir -p _site/js _site/css
-          cp index.html help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md _site/
-          cp js/editor.${TAG}.min.js js/gdrive.${TAG}.min.js _site/js/
-          cp css/diagram.${TAG}.css _site/css/
-          cp css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css _site/css/
-          cp css/faq.${TAG}.css css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css _site/css/
-          cp -r icons _site/icons
-          cp -r scripts _site/scripts
+                  # Decode claims (header.payload.signature)
+                  echo "$OIDC_TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq
+                  # Look at: sub, aud, ref, environment
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: _site
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v6
+              with:
+                  role-to-assume: ${{ env.IAM_ROLE_ARN }}
+                  role-session-name: github-actions
+                  aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v5
+            - name: Sync site to S3
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  aws s3 sync . s3://${{ env.S3_BUCKET }} \
+                    --delete \
+                    --exclude "*" \
+                    --include "ads.txt" \
+                    --include "index.html" \
+                    --include "help.html" \
+                    --include "about.html" \
+                    --include "faq.html" \
+                    --include "privacy.html" \
+                    --include "contact.html" \
+                    --include "terms.html" \
+                    --include "blog.html" \
+                    --include "blog-why-i-built.html" \
+                    --include "js/editor.${TAG}.min.js" \
+                    --include "js/gdrive.${TAG}.min.js" \
+                    --include "css/diagram.${TAG}.css" \
+                    --include "css/blog.${TAG}.css" \
+                    --include "css/blog-article.${TAG}.css" \
+                    --include "css/contact.${TAG}.css" \
+                    --include "css/faq.${TAG}.css" \
+                    --include "css/help.${TAG}.css" \
+                    --include "css/privacy.${TAG}.css" \
+                    --include "css/terms.${TAG}.css" \
+                    --include "icons/*"
 
-  deploy-s3:
-    name: Deploy to AWS S3
-    runs-on: ubuntu-latest
-    needs: release
-    permissions:
-      contents: read
-      id-token: write   # required for OIDC role assumption
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '20'
-
-      - name: Generate version tag
-        id: version
-        run: |
-          TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Inject version into index.html
-        run: |
-          sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
-
-      - name: Minify JS
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          npm install --global esbuild
-          esbuild js/editor.js --bundle=false --minify --outfile=js/editor.${TAG}.min.js
-          esbuild js/gdrive.js --bundle=false --minify --outfile=js/gdrive.${TAG}.min.js
-
-      - name: Version asset filenames
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          cp css/diagram.css css/diagram.${TAG}.css
-          cp css/blog.css css/blog.${TAG}.css
-          cp css/blog-article.css css/blog-article.${TAG}.css
-          cp css/contact.css css/contact.${TAG}.css
-          cp css/faq.css css/faq.${TAG}.css
-          cp css/help.css css/help.${TAG}.css
-          cp css/privacy.css css/privacy.${TAG}.css
-          cp css/terms.css css/terms.${TAG}.css
-          sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
-          sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" index.html
-          sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" index.html
-          sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
-          sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
-          sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
-          sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
-          sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
-          sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
-          sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
-
-      - name: Debug OIDC token
-        run: |
-          OIDC_TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
-        
-          # Decode claims (header.payload.signature)
-          echo "$OIDC_TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq
-          # Look at: sub, aud, ref, environment
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ env.IAM_ROLE_ARN }}
-          role-session-name: github-actions
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Sync site to S3
-        run: |
-          TAG=${{ steps.version.outputs.tag }}
-          aws s3 sync . s3://${{ env.S3_BUCKET }} \
-            --delete \
-            --exclude "*" \
-            --include "ads.txt" \
-            --include "index.html" \
-            --include "help.html" \
-            --include "about.html" \
-            --include "faq.html" \
-            --include "privacy.html" \
-            --include "contact.html" \
-            --include "terms.html" \
-            --include "blog.html" \
-            --include "blog-why-i-built.html" \
-            --include "js/editor.${TAG}.min.js" \
-            --include "js/gdrive.${TAG}.min.js" \
-            --include "css/diagram.${TAG}.css" \
-            --include "css/blog.${TAG}.css" \
-            --include "css/blog-article.${TAG}.css" \
-            --include "css/contact.${TAG}.css" \
-            --include "css/faq.${TAG}.css" \
-            --include "css/help.${TAG}.css" \
-            --include "css/privacy.${TAG}.css" \
-            --include "css/terms.${TAG}.css" \
-            --include "icons/*"
-
-      - name: Invalidate CloudFront cache
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
+            - name: Invalidate CloudFront cache
+              run: |
+                  aws cloudfront create-invalidation \
+                    --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
+                    --paths "/*"

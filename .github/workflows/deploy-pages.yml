@@ -1,0 +1,93 @@
+name: Deploy to GitHub Pages
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+        inputs:
+            branch:
+                description: 'Branch to deploy (defaults to the branch selected above)'
+                required: false
+
+jobs:
+    deploy:
+        name: Deploy to GitHub Pages
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pages: write # required to deploy to GitHub Pages
+            id-token: write # required for OIDC Pages deployment
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deploy.outputs.page_url }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: Generate version tag
+              id: version
+              run: |
+                  TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
+                  echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+            - name: Inject version into index.html
+              run: |
+                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
+
+            - name: Minify JS
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  npm install --global esbuild
+                  esbuild js/editor.js --bundle=false --minify --outfile=js/editor.${TAG}.min.js
+                  esbuild js/gdrive.js --bundle=false --minify --outfile=js/gdrive.${TAG}.min.js
+
+            - name: Version asset filenames
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  cp css/diagram.css css/diagram.${TAG}.css
+                  cp css/blog.css css/blog.${TAG}.css
+                  cp css/blog-article.css css/blog-article.${TAG}.css
+                  cp css/contact.css css/contact.${TAG}.css
+                  cp css/faq.css css/faq.${TAG}.css
+                  cp css/help.css css/help.${TAG}.css
+                  cp css/privacy.css css/privacy.${TAG}.css
+                  cp css/terms.css css/terms.${TAG}.css
+                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
+                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" index.html
+                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" index.html
+                  sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
+                  sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
+                  sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
+                  sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
+                  sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
+                  sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
+                  sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
+
+            - name: Build Pages artifact
+              run: |
+                  TAG=${{ steps.version.outputs.tag }}
+                  mkdir -p _site/js _site/css
+                  cp index.html help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md _site/
+                  cp js/editor.${TAG}.min.js js/gdrive.${TAG}.min.js _site/js/
+                  cp css/diagram.${TAG}.css _site/css/
+                  cp css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css _site/css/
+                  cp css/faq.${TAG}.css css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css _site/css/
+                  cp -r icons _site/icons
+                  cp -r scripts _site/scripts
+
+            - name: Upload Pages artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: _site
+
+            - name: Deploy to GitHub Pages
+              id: deploy
+              uses: actions/deploy-pages@v4
