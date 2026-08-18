@@ -1,164 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Why I Built Diagram Editor — Diagram Editor Blog</title>
-  <link rel="stylesheet" href="css/blog-article.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
-       crossorigin="anonymous"></script>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Why I Built Diagram Editor — Diagram Editor Blog</title>
+        <link rel="stylesheet" href="css/blog-article.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="article-header">
+            <a href="blog.html">Blog</a>
+            <span class="sep">/</span>
+            <span class="current">Why I Built Diagram Editor</span>
+        </div>
 
-  <div id="article-header">
-    <a href="blog.html">Blog</a>
-    <span class="sep">/</span>
-    <span class="current">Why I Built Diagram Editor</span>
-  </div>
+        <div id="article-body">
+            <!-- Table of contents -->
+            <nav id="article-toc">
+                <h2>In this article</h2>
+                <a href="#free-for-everyone" class="active"
+                    >Free for Everyone</a
+                >
+                <a href="#lightweight">Lightweight by Design</a>
+                <a href="#privacy">Privacy First</a>
+                <a href="#ease-of-use">Ease of Use</a>
+                <a href="#why-exists">Why This Project Exists</a>
+                <a href="#whats-next">What's Next</a>
+            </nav>
 
-  <div id="article-body">
+            <!-- Article -->
+            <div id="article-content">
+                <div class="article-meta">
+                    <span class="article-date">15 August 2026</span>
+                    <span class="article-tag">Behind the Build</span>
+                </div>
 
-    <!-- Table of contents -->
-    <nav id="article-toc">
-      <h2>In this article</h2>
-      <a href="#free-for-everyone" class="active">Free for Everyone</a>
-      <a href="#lightweight">Lightweight by Design</a>
-      <a href="#privacy">Privacy First</a>
-      <a href="#ease-of-use">Ease of Use</a>
-      <a href="#why-exists">Why This Project Exists</a>
-      <a href="#whats-next">What's Next</a>
-    </nav>
+                <h1>
+                    Why I Built Diagram Editor: A Free, Lightweight, and Private
+                    Tool for Cloud Architecture Diagrams
+                </h1>
 
-    <!-- Article -->
-    <div id="article-content">
+                <div class="article-section" style="margin-bottom: 36px">
+                    <p>
+                        Cloud architecture diagrams are essential for planning
+                        systems, communicating ideas, and documenting
+                        infrastructure. But most diagramming tools today feel
+                        heavier than they need to be — packed with features you
+                        don't use, locked behind subscriptions, or slow to load
+                        when you just want to sketch an idea.
+                    </p>
+                    <p>Diagram Editor was created to solve that problem.</p>
+                    <p>
+                        This article explains the goals behind the app, why it
+                        exists, and what makes it different from traditional
+                        diagramming tools.
+                    </p>
+                </div>
 
-      <div class="article-meta">
-        <span class="article-date">15 August 2026</span>
-        <span class="article-tag">Behind the Build</span>
-      </div>
+                <!-- Free for Everyone -->
+                <section class="article-section" id="free-for-everyone">
+                    <h2>A Tool That's Free for Everyone</h2>
+                    <p>
+                        One of the core goals of Diagram Editor is
+                        accessibility. Many diagramming tools require:
+                    </p>
+                    <ul>
+                        <li>paid subscriptions</li>
+                        <li>licence keys</li>
+                        <li>account creation</li>
+                        <li>workspace management</li>
+                        <li>monthly fees</li>
+                    </ul>
+                    <p>Diagram Editor removes all of that.</p>
+                    <p>
+                        The app is completely free to use. There are no licence
+                        requirements, no sign‑ups, and no hidden limitations.
+                        Whether you're a student learning cloud architecture, a
+                        developer planning a deployment, or an engineer
+                        documenting a production system, the tool is available
+                        instantly.
+                    </p>
+                    <p>
+                        Free shouldn't mean limited — and Diagram Editor aims to
+                        prove that.
+                    </p>
+                </section>
 
-      <h1>Why I Built Diagram Editor: A Free, Lightweight, and Private Tool for Cloud Architecture Diagrams</h1>
+                <!-- Lightweight -->
+                <section class="article-section" id="lightweight">
+                    <h2>Lightweight by Design</h2>
+                    <p>
+                        Modern web apps often feel bloated. They load dozens of
+                        scripts, track user behaviour, and rely on heavy
+                        frameworks. Diagram Editor takes the opposite approach.
+                    </p>
+                    <p>The app is intentionally lightweight:</p>
+                    <ul>
+                        <li>fast to load</li>
+                        <li>responsive even on older devices</li>
+                        <li>minimal external dependencies</li>
+                        <li>no unnecessary UI complexity</li>
+                    </ul>
+                    <p>
+                        Everything is designed to get you drawing as quickly as
+                        possible. Open the site, drop icons onto the canvas, and
+                        start building your diagram — no onboarding flow, no
+                        pop‑ups, no waiting.
+                    </p>
+                    <p>
+                        This simplicity is deliberate. A diagramming tool should
+                        help you think, not slow you down.
+                    </p>
+                </section>
 
-      <div class="article-section" style="margin-bottom:36px;">
-        <p>Cloud architecture diagrams are essential for planning systems, communicating ideas, and documenting infrastructure. But most diagramming tools today feel heavier than they need to be — packed with features you don't use, locked behind subscriptions, or slow to load when you just want to sketch an idea.</p>
-        <p>Diagram Editor was created to solve that problem.</p>
-        <p>This article explains the goals behind the app, why it exists, and what makes it different from traditional diagramming tools.</p>
-      </div>
+                <!-- Privacy -->
+                <section class="article-section" id="privacy">
+                    <h2>Privacy First: Your Diagrams Stay on Your Device</h2>
+                    <p>
+                        Privacy is one of the most important principles behind
+                        Diagram Editor.
+                    </p>
+                    <p>
+                        Many online tools upload your work to a server, store
+                        your diagrams in the cloud, or require an account to
+                        save files. Diagram Editor does none of that.
+                    </p>
+                    <p>
+                        The app runs entirely client‑side in your browser. This
+                        means:
+                    </p>
+                    <ul>
+                        <li>your diagrams never leave your device</li>
+                        <li>nothing is uploaded or stored remotely</li>
+                        <li>no personal data is collected</li>
+                        <li>no cookies are set by the app</li>
+                        <li>you stay in full control of your work</li>
+                    </ul>
+                    <p>
+                        You choose when to save or export your diagrams. Your
+                        files remain yours — always.
+                    </p>
+                    <p>
+                        This approach makes the tool ideal for sensitive
+                        architecture work, internal documentation, or any
+                        environment where privacy matters.
+                    </p>
+                </section>
 
-      <!-- Free for Everyone -->
-      <section class="article-section" id="free-for-everyone">
-        <h2>A Tool That's Free for Everyone</h2>
-        <p>One of the core goals of Diagram Editor is accessibility. Many diagramming tools require:</p>
-        <ul>
-          <li>paid subscriptions</li>
-          <li>licence keys</li>
-          <li>account creation</li>
-          <li>workspace management</li>
-          <li>monthly fees</li>
-        </ul>
-        <p>Diagram Editor removes all of that.</p>
-        <p>The app is completely free to use. There are no licence requirements, no sign‑ups, and no hidden limitations. Whether you're a student learning cloud architecture, a developer planning a deployment, or an engineer documenting a production system, the tool is available instantly.</p>
-        <p>Free shouldn't mean limited — and Diagram Editor aims to prove that.</p>
-      </section>
+                <!-- Ease of use -->
+                <section class="article-section" id="ease-of-use">
+                    <h2>Ease of Use Above Everything</h2>
+                    <p>
+                        A diagramming tool should be intuitive. Diagram Editor
+                        focuses on a clean, simple interface that lets you work
+                        without friction.
+                    </p>
+                    <p>Key usability goals include:</p>
+                    <ul>
+                        <li>drag‑and‑drop simplicity</li>
+                        <li>
+                            clear icon sets for AWS, Azure, GCP, and on‑prem
+                            components
+                        </li>
+                        <li>keyboard shortcuts for speed</li>
+                        <li>easy export options (PNG, SVG, JSON)</li>
+                        <li>no clutter, no distractions</li>
+                    </ul>
+                    <p>
+                        Whether you're sketching a quick idea or building a full
+                        architecture diagram, the editor stays out of your way.
+                    </p>
+                    <p>
+                        The goal is to make diagramming feel natural — something
+                        you can do in seconds, not minutes.
+                    </p>
+                </section>
 
-      <!-- Lightweight -->
-      <section class="article-section" id="lightweight">
-        <h2>Lightweight by Design</h2>
-        <p>Modern web apps often feel bloated. They load dozens of scripts, track user behaviour, and rely on heavy frameworks. Diagram Editor takes the opposite approach.</p>
-        <p>The app is intentionally lightweight:</p>
-        <ul>
-          <li>fast to load</li>
-          <li>responsive even on older devices</li>
-          <li>minimal external dependencies</li>
-          <li>no unnecessary UI complexity</li>
-        </ul>
-        <p>Everything is designed to get you drawing as quickly as possible. Open the site, drop icons onto the canvas, and start building your diagram — no onboarding flow, no pop‑ups, no waiting.</p>
-        <p>This simplicity is deliberate. A diagramming tool should help you think, not slow you down.</p>
-      </section>
+                <!-- Why exists -->
+                <section class="article-section" id="why-exists">
+                    <h2>Why This Project Exists</h2>
+                    <p>
+                        Diagram Editor was built to provide a fast, private, and
+                        accessible alternative to subscription‑based diagramming
+                        tools. It's a small project with a simple mission:
+                    </p>
+                    <ul>
+                        <li>make cloud diagrams easy</li>
+                        <li>make them fast</li>
+                        <li>make them free</li>
+                        <li>make them private</li>
+                        <li>make them available to everyone</li>
+                    </ul>
+                    <p>
+                        If the tool helps you plan a system, explain an idea, or
+                        document your architecture more easily, then it's doing
+                        its job.
+                    </p>
+                </section>
 
-      <!-- Privacy -->
-      <section class="article-section" id="privacy">
-        <h2>Privacy First: Your Diagrams Stay on Your Device</h2>
-        <p>Privacy is one of the most important principles behind Diagram Editor.</p>
-        <p>Many online tools upload your work to a server, store your diagrams in the cloud, or require an account to save files. Diagram Editor does none of that.</p>
-        <p>The app runs entirely client‑side in your browser. This means:</p>
-        <ul>
-          <li>your diagrams never leave your device</li>
-          <li>nothing is uploaded or stored remotely</li>
-          <li>no personal data is collected</li>
-          <li>no cookies are set by the app</li>
-          <li>you stay in full control of your work</li>
-        </ul>
-        <p>You choose when to save or export your diagrams. Your files remain yours — always.</p>
-        <p>This approach makes the tool ideal for sensitive architecture work, internal documentation, or any environment where privacy matters.</p>
-      </section>
+                <!-- What's next -->
+                <section class="article-section" id="whats-next">
+                    <h2>What's Next</h2>
+                    <p>
+                        The app will continue to evolve with new features,
+                        improved icons, and better usability. Feedback from
+                        users helps shape the roadmap, and suggestions are
+                        always welcome.
+                    </p>
+                    <p>
+                        If you want to request a feature or report an issue, you
+                        can do so here:
+                    </p>
+                    <p>
+                        <a
+                            href="https://github.com/ballr73/diagram/issues"
+                            target="_blank"
+                            rel="noopener"
+                            >https://github.com/ballr73/diagram/issues</a
+                        >
+                    </p>
+                </section>
 
-      <!-- Ease of use -->
-      <section class="article-section" id="ease-of-use">
-        <h2>Ease of Use Above Everything</h2>
-        <p>A diagramming tool should be intuitive. Diagram Editor focuses on a clean, simple interface that lets you work without friction.</p>
-        <p>Key usability goals include:</p>
-        <ul>
-          <li>drag‑and‑drop simplicity</li>
-          <li>clear icon sets for AWS, Azure, GCP, and on‑prem components</li>
-          <li>keyboard shortcuts for speed</li>
-          <li>easy export options (PNG, SVG, JSON)</li>
-          <li>no clutter, no distractions</li>
-        </ul>
-        <p>Whether you're sketching a quick idea or building a full architecture diagram, the editor stays out of your way.</p>
-        <p>The goal is to make diagramming feel natural — something you can do in seconds, not minutes.</p>
-      </section>
+                <hr class="divider" />
 
-      <!-- Why exists -->
-      <section class="article-section" id="why-exists">
-        <h2>Why This Project Exists</h2>
-        <p>Diagram Editor was built to provide a fast, private, and accessible alternative to subscription‑based diagramming tools. It's a small project with a simple mission:</p>
-        <ul>
-          <li>make cloud diagrams easy</li>
-          <li>make them fast</li>
-          <li>make them free</li>
-          <li>make them private</li>
-          <li>make them available to everyone</li>
-        </ul>
-        <p>If the tool helps you plan a system, explain an idea, or document your architecture more easily, then it's doing its job.</p>
-      </section>
+                <a href="blog.html" class="back-link">← Back to Blog</a>
+            </div>
+        </div>
 
-      <!-- What's next -->
-      <section class="article-section" id="whats-next">
-        <h2>What's Next</h2>
-        <p>The app will continue to evolve with new features, improved icons, and better usability. Feedback from users helps shape the roadmap, and suggestions are always welcome.</p>
-        <p>If you want to request a feature or report an issue, you can do so here:</p>
-        <p><a href="https://github.com/ballr73/diagram/issues" target="_blank" rel="noopener">https://github.com/ballr73/diagram/issues</a></p>
-      </section>
+        <script>
+            // Sidebar TOC active section on scroll
+            const sections = document.querySelectorAll('.article-section[id]');
+            const tocLinks = document.querySelectorAll('#article-toc a');
+            const content = document.getElementById('article-content');
 
-      <hr class="divider">
+            function updateActive() {
+                let current = sections[0] ? sections[0].id : '';
+                sections.forEach((sec) => {
+                    if (
+                        sec.getBoundingClientRect().top -
+                            content.getBoundingClientRect().top <
+                        80
+                    ) {
+                        current = sec.id;
+                    }
+                });
+                tocLinks.forEach((a) => {
+                    a.classList.toggle(
+                        'active',
+                        a.getAttribute('href') === '#' + current,
+                    );
+                });
+            }
 
-      <a href="blog.html" class="back-link">← Back to Blog</a>
-
-    </div>
-  </div>
-
-  <script>
-    // Sidebar TOC active section on scroll
-    const sections = document.querySelectorAll('.article-section[id]');
-    const tocLinks = document.querySelectorAll('#article-toc a');
-    const content  = document.getElementById('article-content');
-
-    function updateActive() {
-      let current = sections[0] ? sections[0].id : '';
-      sections.forEach(sec => {
-        if (sec.getBoundingClientRect().top - content.getBoundingClientRect().top < 80) {
-          current = sec.id;
-        }
-      });
-      tocLinks.forEach(a => {
-        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-      });
-    }
-
-    content.addEventListener('scroll', updateActive, { passive: true });
-    updateActive();
-  </script>
-
-</body>
+            content.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        </script>
+    </body>
 </html>

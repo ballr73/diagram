@@ -1,329 +1,386 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diagram Editor — About</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Diagram Editor — About</title>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-    html, body {
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
-      background: #0f172a;
-      color: #e2e8f0;
-    }
+            html,
+            body {
+                height: 100%;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                    sans-serif;
+                font-size: 14px;
+                background: #0f172a;
+                color: #e2e8f0;
+            }
 
-    /* ── Header ─────────────────────────────────────────── */
-    #about-header {
-      background: #1e293b;
-      border-bottom: 1px solid #0f172a;
-      padding: 14px 32px;
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
-      flex-shrink: 0;
-    }
+            /* ── Header ─────────────────────────────────────────── */
+            #about-header {
+                background: #1e293b;
+                border-bottom: 1px solid #0f172a;
+                padding: 14px 32px;
+                display: flex;
+                align-items: baseline;
+                gap: 16px;
+                flex-shrink: 0;
+            }
 
-    #about-header h1 {
-      font-size: 18px;
-      font-weight: 600;
-      color: #f1f5f9;
-    }
+            #about-header h1 {
+                font-size: 18px;
+                font-weight: 600;
+                color: #f1f5f9;
+            }
 
-    #about-version {
-      font-size: 12px;
-      color: #64748b;
-    }
+            #about-version {
+                font-size: 12px;
+                color: #64748b;
+            }
 
-    /* ── Content ─────────────────────────────────────────── */
-    #about-content {
-      max-width: 720px;
-      margin: 40px auto;
-      padding: 0 32px 64px;
-    }
+            /* ── Content ─────────────────────────────────────────── */
+            #about-content {
+                max-width: 720px;
+                margin: 40px auto;
+                padding: 0 32px 64px;
+            }
 
-    .about-logo {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 40px;
-    }
+            .about-logo {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                margin-bottom: 40px;
+            }
 
-    .about-logo-icon {
-      width: 56px;
-      height: 56px;
-      background: #3b82f6;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+            .about-logo-icon {
+                width: 56px;
+                height: 56px;
+                background: #3b82f6;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
 
-    .about-logo-icon svg {
-      width: 32px;
-      height: 32px;
-      fill: none;
-      stroke: #fff;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
+            .about-logo-icon svg {
+                width: 32px;
+                height: 32px;
+                fill: none;
+                stroke: #fff;
+                stroke-width: 2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
 
-    .about-logo-text h2 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #f1f5f9;
-    }
+            .about-logo-text h2 {
+                font-size: 22px;
+                font-weight: 700;
+                color: #f1f5f9;
+            }
 
-    .about-logo-text p {
-      font-size: 13px;
-      color: #64748b;
-      margin-top: 2px;
-    }
+            .about-logo-text p {
+                font-size: 13px;
+                color: #64748b;
+                margin-top: 2px;
+            }
 
-    section {
-      margin-bottom: 36px;
-    }
+            section {
+                margin-bottom: 36px;
+            }
 
-    section h3 {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #3b82f6;
-      margin-bottom: 12px;
-    }
+            section h3 {
+                font-size: 13px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: #3b82f6;
+                margin-bottom: 12px;
+            }
 
-    section p {
-      color: #cbd5e1;
-      line-height: 1.7;
-      margin-bottom: 10px;
-    }
+            section p {
+                color: #cbd5e1;
+                line-height: 1.7;
+                margin-bottom: 10px;
+            }
 
-    section p:last-child { margin-bottom: 0; }
+            section p:last-child {
+                margin-bottom: 0;
+            }
 
-    ul.feature-list {
-      list-style: none;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 24px;
-      margin-top: 4px;
-    }
+            ul.feature-list {
+                list-style: none;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px 24px;
+                margin-top: 4px;
+            }
 
-    ul.feature-list li {
-      color: #cbd5e1;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      line-height: 1.5;
-    }
+            ul.feature-list li {
+                color: #cbd5e1;
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                line-height: 1.5;
+            }
 
-    ul.feature-list li::before {
-      content: "✓";
-      color: #22c55e;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
+            ul.feature-list li::before {
+                content: '✓';
+                color: #22c55e;
+                font-weight: 700;
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
 
-    .cloud-icons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+            .cloud-icons {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-top: 12px;
+            }
 
-    .cloud-badge {
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-    }
+            .cloud-badge {
+                padding: 5px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.03em;
+            }
 
-    .cloud-badge.aws   { background: #ff9900; color: #1a1a1a; }
-    .cloud-badge.azure { background: #0078d4; color: #fff; }
-    .cloud-badge.gcp   { background: #4285f4; color: #fff; }
-    .cloud-badge.custom { background: #334155; color: #cbd5e1; border: 1px solid #475569; }
+            .cloud-badge.aws {
+                background: #ff9900;
+                color: #1a1a1a;
+            }
+            .cloud-badge.azure {
+                background: #0078d4;
+                color: #fff;
+            }
+            .cloud-badge.gcp {
+                background: #4285f4;
+                color: #fff;
+            }
+            .cloud-badge.custom {
+                background: #334155;
+                color: #cbd5e1;
+                border: 1px solid #475569;
+            }
 
-    .licence-box {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-left: 4px solid #22c55e;
-      border-radius: 8px;
-      padding: 20px 24px;
-    }
+            .licence-box {
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-left: 4px solid #22c55e;
+                border-radius: 8px;
+                padding: 20px 24px;
+            }
 
-    .licence-box p {
-      margin-bottom: 10px;
-    }
+            .licence-box p {
+                margin-bottom: 10px;
+            }
 
-    .privacy-box {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-left: 4px solid #3b82f6;
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin-top: 16px;
-    }
+            .privacy-box {
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-left: 4px solid #3b82f6;
+                border-radius: 8px;
+                padding: 20px 24px;
+                margin-top: 16px;
+            }
 
-    .privacy-box p { margin-bottom: 0; }
+            .privacy-box p {
+                margin-bottom: 0;
+            }
 
-    .divider {
-      border: none;
-      border-top: 1px solid #1e293b;
-      margin: 36px 0;
-    }
+            .divider {
+                border: none;
+                border-top: 1px solid #1e293b;
+                margin: 36px 0;
+            }
 
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      margin-top: 8px;
-    }
+            .footer-links {
+                display: flex;
+                gap: 24px;
+                margin-top: 8px;
+            }
 
-    .footer-links a {
-      color: #3b82f6;
-      text-decoration: none;
-      font-size: 13px;
-    }
+            .footer-links a {
+                color: #3b82f6;
+                text-decoration: none;
+                font-size: 13px;
+            }
 
-    .footer-links a:hover { text-decoration: underline; }
-  </style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
-     crossorigin="anonymous"></script>  
-</head>
-<body>
+            .footer-links a:hover {
+                text-decoration: underline;
+            }
+        </style>
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="about-header">
+            <h1>Diagram Editor</h1>
+            <span id="about-version">dev</span>
+        </div>
 
-  <div id="about-header">
-    <h1>Diagram Editor</h1>
-    <span id="about-version">dev</span>
-  </div>
+        <div id="about-content">
+            <div class="about-logo">
+                <div class="about-logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                        <line x1="10" y1="6.5" x2="14" y2="6.5" />
+                        <line x1="10" y1="17.5" x2="14" y2="17.5" />
+                        <line x1="6.5" y1="10" x2="6.5" y2="14" />
+                        <line x1="17.5" y1="10" x2="17.5" y2="14" />
+                    </svg>
+                </div>
+                <div class="about-logo-text">
+                    <h2>Diagram Editor</h2>
+                    <p>A fast, lightweight browser-based diagramming tool</p>
+                </div>
+            </div>
 
-  <div id="about-content">
+            <section>
+                <h3>What is Diagram Editor?</h3>
+                <p>
+                    Diagram Editor is a free, browser-based SVG diagramming tool
+                    built for engineers, architects, and teams who need to
+                    create clear, professional diagrams without installing
+                    software or signing up for an account.
+                </p>
+                <p>
+                    The editor runs entirely client‑side — your diagrams never
+                    leave your browser. No accounts, no data collection, no
+                    storage — just a fast, lightweight interface for creating
+                    AWS, Azure, GCP, and custom diagrams.
+                </p>
+            </section>
 
-    <div class="about-logo">
-      <div class="about-logo-icon">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-          <line x1="10" y1="6.5" x2="14" y2="6.5"/>
-          <line x1="10" y1="17.5" x2="14" y2="17.5"/>
-          <line x1="6.5" y1="10" x2="6.5" y2="14"/>
-          <line x1="17.5" y1="10" x2="17.5" y2="14"/>
-        </svg>
-      </div>
-      <div class="about-logo-text">
-        <h2>Diagram Editor</h2>
-        <p>A fast, lightweight browser-based diagramming tool</p>
-      </div>
-    </div>
+            <section>
+                <h3>Supported Diagram Types</h3>
+                <p>
+                    Diagram Editor ships with a curated icon library covering
+                    the major cloud providers and custom shapes:
+                </p>
+                <div class="cloud-icons">
+                    <span class="cloud-badge aws">AWS</span>
+                    <span class="cloud-badge azure">Azure</span>
+                    <span class="cloud-badge gcp">GCP</span>
+                    <span class="cloud-badge custom">Custom shapes</span>
+                </div>
+                <p style="margin-top: 14px">Use it to create:</p>
+                <ul class="feature-list" style="margin-top: 8px">
+                    <li>AWS architecture diagrams</li>
+                    <li>Azure solution diagrams</li>
+                    <li>GCP infrastructure diagrams</li>
+                    <li>System and network diagrams</li>
+                    <li>Flowcharts and process flows</li>
+                    <li>Custom multi-service diagrams</li>
+                    <li>Multi-tab diagram workspaces</li>
+                    <li>Annotated region diagrams</li>
+                </ul>
+            </section>
 
-    <section>
-      <h3>What is Diagram Editor?</h3>
-      <p>
-        Diagram Editor is a free, browser-based SVG diagramming tool built for engineers, architects,
-        and teams who need to create clear, professional diagrams without installing software or signing
-        up for an account.
-      </p>
-      <p>
-        The editor runs entirely client‑side — your diagrams never leave your browser.
-        No accounts, no data collection, no storage — just a fast, lightweight interface for
-        creating AWS, Azure, GCP, and custom diagrams.
-      </p>
-    </section>
+            <section>
+                <h3>Key Features</h3>
+                <ul class="feature-list">
+                    <li>Drag-and-drop icon library</li>
+                    <li>Smart connectors with waypoints</li>
+                    <li>Text annotations and region boxes</li>
+                    <li>Multiple tabs per diagram</li>
+                    <li>Zoom, pan, and fit-to-window</li>
+                    <li>Align and distribute tools</li>
+                    <li>Bring to front / send to back</li>
+                    <li>Label position control</li>
+                    <li>Shape opacity control</li>
+                    <li>Undo / redo history</li>
+                    <li>Save &amp; open JSON diagrams</li>
+                    <li>Export to PNG and SVG</li>
+                    <li>Keyboard shortcuts throughout</li>
+                    <li>Runs 100% in your browser</li>
+                </ul>
+            </section>
 
-    <section>
-      <h3>Supported Diagram Types</h3>
-      <p>Diagram Editor ships with a curated icon library covering the major cloud providers and custom shapes:</p>
-      <div class="cloud-icons">
-        <span class="cloud-badge aws">AWS</span>
-        <span class="cloud-badge azure">Azure</span>
-        <span class="cloud-badge gcp">GCP</span>
-        <span class="cloud-badge custom">Custom shapes</span>
-      </div>
-      <p style="margin-top:14px;">Use it to create:</p>
-      <ul class="feature-list" style="margin-top:8px;">
-        <li>AWS architecture diagrams</li>
-        <li>Azure solution diagrams</li>
-        <li>GCP infrastructure diagrams</li>
-        <li>System and network diagrams</li>
-        <li>Flowcharts and process flows</li>
-        <li>Custom multi-service diagrams</li>
-        <li>Multi-tab diagram workspaces</li>
-        <li>Annotated region diagrams</li>
-      </ul>
-    </section>
+            <hr class="divider" />
 
-    <section>
-      <h3>Key Features</h3>
-      <ul class="feature-list">
-        <li>Drag-and-drop icon library</li>
-        <li>Smart connectors with waypoints</li>
-        <li>Text annotations and region boxes</li>
-        <li>Multiple tabs per diagram</li>
-        <li>Zoom, pan, and fit-to-window</li>
-        <li>Align and distribute tools</li>
-        <li>Bring to front / send to back</li>
-        <li>Label position control</li>
-        <li>Shape opacity control</li>
-        <li>Undo / redo history</li>
-        <li>Save &amp; open JSON diagrams</li>
-        <li>Export to PNG and SVG</li>
-        <li>Keyboard shortcuts throughout</li>
-        <li>Runs 100% in your browser</li>
-      </ul>
-    </section>
+            <section>
+                <h3>Licence &amp; Usage</h3>
+                <div class="licence-box">
+                    <p>
+                        There are no licences, no fees, and no registration
+                        requirements. You are free to use the application for
+                        personal, educational, and commercial work.
+                    </p>
+                </div>
 
-    <hr class="divider">
+                <div class="privacy-box">
+                    <p>
+                        The editor runs entirely client‑side, meaning your
+                        diagrams never leave your browser. No accounts, no data
+                        collection, no storage — just a fast, lightweight
+                        interface for creating AWS, Azure, GCP, and custom
+                        diagrams.
+                    </p>
+                </div>
+            </section>
 
-    <section>
-      <h3>Licence &amp; Usage</h3>
-      <div class="licence-box">
-        <p>
-          There are no licences, no fees, and no registration requirements. You are free to use
-          the application for personal, educational, and commercial work.
-        </p>
-      </div>
+            <hr class="divider" />
 
-      <div class="privacy-box">
-        <p>
-          The editor runs entirely client‑side, meaning your diagrams never leave your browser.
-          No accounts, no data collection, no storage — just a fast, lightweight interface for
-          creating AWS, Azure, GCP, and custom diagrams.
-        </p>
-      </div>
-    </section>
+            <section>
+                <h3>More Information</h3>
+                <div class="footer-links">
+                    <a
+                        href="#"
+                        onclick="
+                            window.opener && window.opener.document
+                                ? (function () {
+                                      var w = window.open(
+                                          'help.html',
+                                          'diagram-help',
+                                          'width=1000,height=720,resizable=yes',
+                                      );
+                                      w && w.focus();
+                                  })()
+                                : window.open('help.html', '_blank');
+                            return false;
+                        "
+                    >
+                        Show Help
+                    </a>
+                    <a
+                        href="https://github.com/ballr73/diagram"
+                        target="_blank"
+                        rel="noopener"
+                        >GitHub Repository</a
+                    >
+                </div>
+            </section>
+        </div>
 
-    <hr class="divider">
-
-    <section>
-      <h3>More Information</h3>
-      <div class="footer-links">
-        <a href="#" onclick="window.opener && window.opener.document ? (function(){ var w = window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); w && w.focus(); })() : window.open('help.html','_blank'); return false;">
-          Show Help
-        </a>
-        <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub Repository</a>
-      </div>
-    </section>
-
-  </div>
-
-  <script>
-    // Inherit version from opener if available
-    try {
-      const ver = window.opener &&
-                  window.opener.document &&
-                  window.opener.document.getElementById('app-version');
-      if (ver) {
-        document.getElementById('about-version').textContent = ver.textContent;
-      }
-    } catch (_) {}
-  </script>
-
-</body>
+        <script>
+            // Inherit version from opener if available
+            try {
+                const ver =
+                    window.opener &&
+                    window.opener.document &&
+                    window.opener.document.getElementById('app-version');
+                if (ver) {
+                    document.getElementById('about-version').textContent =
+                        ver.textContent;
+                }
+            } catch (_) {}
+        </script>
+    </body>
 </html>

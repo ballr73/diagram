@@ -1,59 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diagram Editor — Help</title>
-  <link rel="stylesheet" href="css/help.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
-     crossorigin="anonymous"></script>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Diagram Editor — Help</title>
+        <link rel="stylesheet" href="css/help.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="help-header">
+            <h1>Diagram Editor — Help</h1>
+            <span id="help-version"></span>
+        </div>
 
-<div id="help-header">
-  <h1>Diagram Editor — Help</h1>
-  <span id="help-version"></span>
-</div>
+        <div id="help-body">
+            <nav id="help-nav">
+                <div class="nav-section">Interface</div>
+                <a href="#interface-overview">Interface Overview</a>
+                <a href="#menu-bar">Menu Bar</a>
+                <a href="#tabs">Tabs</a>
 
-<div id="help-body">
+                <div class="nav-section">Tools</div>
+                <a href="#drawing-tools">Drawing Tools</a>
+                <a href="#shapes">Shapes</a>
+                <a href="#connectors">Connectors</a>
+                <a href="#lines">Lines</a>
+                <a href="#text-annotations">Text Annotations</a>
+                <a href="#icon-library">Icon Library</a>
 
-  <nav id="help-nav">
-    <div class="nav-section">Interface</div>
-    <a href="#interface-overview">Interface Overview</a>
-    <a href="#menu-bar">Menu Bar</a>
-    <a href="#tabs">Tabs</a>
+                <div class="nav-section">Editing</div>
+                <a href="#zoom-pan">Zoom &amp; Pan</a>
+                <a href="#editing-elements">Editing Elements</a>
+                <a href="#properties-panel">Properties Panel</a>
+                <a href="#z-order">Z-Order</a>
+                <a href="#align-distribute">Align &amp; Distribute</a>
+                <a href="#copy-paste">Copy, Cut, Paste</a>
+                <a href="#group-ungroup">Group &amp; Ungroup</a>
 
-    <div class="nav-section">Tools</div>
-    <a href="#drawing-tools">Drawing Tools</a>
-    <a href="#shapes">Shapes</a>
-    <a href="#connectors">Connectors</a>
-    <a href="#lines">Lines</a>
-    <a href="#text-annotations">Text Annotations</a>
-    <a href="#icon-library">Icon Library</a>
+                <div class="nav-section">Files</div>
+                <a href="#open-save-export">Open, Save &amp; Export</a>
+                <a href="#undo-redo">Undo &amp; Redo</a>
 
-    <div class="nav-section">Editing</div>
-    <a href="#zoom-pan">Zoom &amp; Pan</a>
-    <a href="#editing-elements">Editing Elements</a>
-    <a href="#properties-panel">Properties Panel</a>
-    <a href="#z-order">Z-Order</a>
-    <a href="#align-distribute">Align &amp; Distribute</a>
-    <a href="#copy-paste">Copy, Cut, Paste</a>
-    <a href="#group-ungroup">Group &amp; Ungroup</a>
+                <div class="nav-section">Reference</div>
+                <a href="#keyboard-shortcuts">Keyboard Shortcuts</a>
+            </nav>
 
-    <div class="nav-section">Files</div>
-    <a href="#open-save-export">Open, Save &amp; Export</a>
-    <a href="#undo-redo">Undo &amp; Redo</a>
-
-    <div class="nav-section">Reference</div>
-    <a href="#keyboard-shortcuts">Keyboard Shortcuts</a>
-  </nav>
-
-  <main id="help-content">
-
-    <!-- ── Interface Overview ─────────────────────────────── -->
-    <section id="interface-overview">
-      <h2>Interface Overview</h2>
-      <pre>
+            <main id="help-content">
+                <!-- ── Interface Overview ─────────────────────────────── -->
+                <section id="interface-overview">
+                    <h2>Interface Overview</h2>
+                    <pre>
 ┌──────────────────────────────────────────────────────────────────────┐
 │ Diagram name                                                          │
 ├──────────────────────────────────────────────────────────────────────┤
@@ -71,507 +71,1453 @@
 │Shapes│   ▶...   │                                 │                 │
 │      │          ├─────────────────────────────────┤                 │
 │      │          │ tab-1 │ tab-2 │ + │              │                 │
-└──────┴──────────┴─────────────────────────────────┴─────────────────┘</pre>
-      <ul>
-        <li><strong>Diagram name bar</strong> — shows the current diagram name ("Untitled diagram" until saved)</li>
-        <li><strong>Menu bar</strong> — File, Edit, View, Arrange, and Help menus</li>
-        <li><strong>Top toolbar</strong> — quick-access icon buttons for the most common actions</li>
-        <li><strong>Left toolbar</strong> — drawing tools, icon library toggle, shape picker, version number</li>
-        <li><strong>Icon library panel</strong> — 1,241 AWS, Azure &amp; GCP icons, searchable</li>
-        <li><strong>Canvas</strong> — the drawing surface; right-click drag to pan</li>
-        <li><strong>Tab bar</strong> — bottom of canvas; each tab is an independent diagram page</li>
-        <li><strong>Properties panel</strong> — edit the selected element's properties</li>
-      </ul>
-    </section>
+└──────┴──────────┴─────────────────────────────────┴─────────────────┘</pre
+                    >
+                    <ul>
+                        <li>
+                            <strong>Diagram name bar</strong> — shows the
+                            current diagram name ("Untitled diagram" until
+                            saved)
+                        </li>
+                        <li>
+                            <strong>Menu bar</strong> — File, Edit, View,
+                            Arrange, and Help menus
+                        </li>
+                        <li>
+                            <strong>Top toolbar</strong> — quick-access icon
+                            buttons for the most common actions
+                        </li>
+                        <li>
+                            <strong>Left toolbar</strong> — drawing tools, icon
+                            library toggle, shape picker, version number
+                        </li>
+                        <li>
+                            <strong>Icon library panel</strong> — 1,241 AWS,
+                            Azure &amp; GCP icons, searchable
+                        </li>
+                        <li>
+                            <strong>Canvas</strong> — the drawing surface;
+                            right-click drag to pan
+                        </li>
+                        <li>
+                            <strong>Tab bar</strong> — bottom of canvas; each
+                            tab is an independent diagram page
+                        </li>
+                        <li>
+                            <strong>Properties panel</strong> — edit the
+                            selected element's properties
+                        </li>
+                    </ul>
+                </section>
 
-    <!-- ── Menu Bar ───────────────────────────────────────── -->
-    <section id="menu-bar">
-      <h2>Menu Bar</h2>
-      <p>Click a menu title to open it; hover across titles to switch menus; click outside or select an item to close.</p>
+                <!-- ── Menu Bar ───────────────────────────────────────── -->
+                <section id="menu-bar">
+                    <h2>Menu Bar</h2>
+                    <p>
+                        Click a menu title to open it; hover across titles to
+                        switch menus; click outside or select an item to close.
+                    </p>
 
-      <h3>File</h3>
-      <table>
-        <tr><th>Item</th><th>Shortcut</th><th>Description</th></tr>
-        <tr><td>New</td><td><kbd>Ctrl+N</kbd></td><td>Clear the canvas and start a fresh diagram</td></tr>
-        <tr><td>Open…</td><td><kbd>Ctrl+O</kbd></td><td>Open a <code>.json</code> diagram file</td></tr>
-        <tr><td>Open from Google Drive…</td><td></td><td>Open a diagram previously saved to Google Drive — browse folders and select a file</td></tr>
-        <tr><td>Save</td><td><kbd>Ctrl+S</kbd></td><td>Save the diagram — opens a native save dialog on Chrome/Edge; browser download on Firefox/Safari</td></tr>
-        <tr><td>Save to Google Drive…</td><td></td><td>Save the diagram to Google Drive — choose a folder and save; overwrites if the file already exists</td></tr>
-        <tr><td>Export PNG</td><td></td><td>Export the current tab as a PNG image</td></tr>
-        <tr><td>Export SVG</td><td></td><td>Export the current tab as a self-contained SVG</td></tr>
-      </table>
+                    <h3>File</h3>
+                    <table>
+                        <tr>
+                            <th>Item</th>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>New</td>
+                            <td><kbd>Ctrl+N</kbd></td>
+                            <td>Clear the canvas and start a fresh diagram</td>
+                        </tr>
+                        <tr>
+                            <td>Open…</td>
+                            <td><kbd>Ctrl+O</kbd></td>
+                            <td>Open a <code>.json</code> diagram file</td>
+                        </tr>
+                        <tr>
+                            <td>Open from Google Drive…</td>
+                            <td></td>
+                            <td>
+                                Open a diagram previously saved to Google Drive
+                                — browse folders and select a file
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Save</td>
+                            <td><kbd>Ctrl+S</kbd></td>
+                            <td>
+                                Save the diagram — opens a native save dialog on
+                                Chrome/Edge; browser download on Firefox/Safari
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Save to Google Drive…</td>
+                            <td></td>
+                            <td>
+                                Save the diagram to Google Drive — choose a
+                                folder and save; overwrites if the file already
+                                exists
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Export PNG</td>
+                            <td></td>
+                            <td>Export the current tab as a PNG image</td>
+                        </tr>
+                        <tr>
+                            <td>Export SVG</td>
+                            <td></td>
+                            <td>
+                                Export the current tab as a self-contained SVG
+                            </td>
+                        </tr>
+                    </table>
 
-      <h3>Edit</h3>
-      <table>
-        <tr><th>Item</th><th>Shortcut</th><th>Description</th></tr>
-        <tr><td>Undo</td><td><kbd>Ctrl+Z</kbd></td><td>Undo the last action</td></tr>
-        <tr><td>Redo</td><td><kbd>Ctrl+Y</kbd></td><td>Redo the last undone action</td></tr>
-        <tr><td>Cut</td><td><kbd>Ctrl+X</kbd></td><td>Cut selected elements</td></tr>
-        <tr><td>Copy</td><td><kbd>Ctrl+C</kbd></td><td>Copy selected elements</td></tr>
-        <tr><td>Paste</td><td><kbd>Ctrl+V</kbd></td><td>Paste clipboard</td></tr>
-        <tr><td>Duplicate</td><td><kbd>Ctrl+D</kbd></td><td>Duplicate selected elements in-place (+20px offset)</td></tr>
-        <tr><td>Group</td><td><kbd>Ctrl+G</kbd></td><td>Group 2+ selected shapes into one unit</td></tr>
-        <tr><td>Ungroup</td><td><kbd>Ctrl+Shift+G</kbd></td><td>Dissolve a selected group back to individual shapes</td></tr>
-      </table>
+                    <h3>Edit</h3>
+                    <table>
+                        <tr>
+                            <th>Item</th>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Undo</td>
+                            <td><kbd>Ctrl+Z</kbd></td>
+                            <td>Undo the last action</td>
+                        </tr>
+                        <tr>
+                            <td>Redo</td>
+                            <td><kbd>Ctrl+Y</kbd></td>
+                            <td>Redo the last undone action</td>
+                        </tr>
+                        <tr>
+                            <td>Cut</td>
+                            <td><kbd>Ctrl+X</kbd></td>
+                            <td>Cut selected elements</td>
+                        </tr>
+                        <tr>
+                            <td>Copy</td>
+                            <td><kbd>Ctrl+C</kbd></td>
+                            <td>Copy selected elements</td>
+                        </tr>
+                        <tr>
+                            <td>Paste</td>
+                            <td><kbd>Ctrl+V</kbd></td>
+                            <td>Paste clipboard</td>
+                        </tr>
+                        <tr>
+                            <td>Duplicate</td>
+                            <td><kbd>Ctrl+D</kbd></td>
+                            <td>
+                                Duplicate selected elements in-place (+20px
+                                offset)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Group</td>
+                            <td><kbd>Ctrl+G</kbd></td>
+                            <td>Group 2+ selected shapes into one unit</td>
+                        </tr>
+                        <tr>
+                            <td>Ungroup</td>
+                            <td><kbd>Ctrl+Shift+G</kbd></td>
+                            <td>
+                                Dissolve a selected group back to individual
+                                shapes
+                            </td>
+                        </tr>
+                    </table>
 
-      <h3>View</h3>
-      <table>
-        <tr><th>Item</th><th>Shortcut</th><th>Description</th></tr>
-        <tr><td>Zoom In</td><td><kbd>Ctrl++</kbd></td><td>Increase zoom by 10%</td></tr>
-        <tr><td>Zoom Out</td><td><kbd>Ctrl+−</kbd></td><td>Decrease zoom by 10%</td></tr>
-        <tr><td>100%</td><td><kbd>Ctrl+0</kbd></td><td>Reset zoom to 100%</td></tr>
-        <tr><td>Fit Window</td><td><kbd>Ctrl+⇧0</kbd></td><td>Fit the whole diagram into the viewport</td></tr>
-        <tr><td>25% – 200%</td><td></td><td>Jump to a specific zoom preset</td></tr>
-      </table>
+                    <h3>View</h3>
+                    <table>
+                        <tr>
+                            <th>Item</th>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Zoom In</td>
+                            <td><kbd>Ctrl++</kbd></td>
+                            <td>Increase zoom by 10%</td>
+                        </tr>
+                        <tr>
+                            <td>Zoom Out</td>
+                            <td><kbd>Ctrl+−</kbd></td>
+                            <td>Decrease zoom by 10%</td>
+                        </tr>
+                        <tr>
+                            <td>100%</td>
+                            <td><kbd>Ctrl+0</kbd></td>
+                            <td>Reset zoom to 100%</td>
+                        </tr>
+                        <tr>
+                            <td>Fit Window</td>
+                            <td><kbd>Ctrl+⇧0</kbd></td>
+                            <td>Fit the whole diagram into the viewport</td>
+                        </tr>
+                        <tr>
+                            <td>25% – 200%</td>
+                            <td></td>
+                            <td>Jump to a specific zoom preset</td>
+                        </tr>
+                    </table>
 
-      <h3>Arrange</h3>
-      <table>
-        <tr><th>Item</th><th>Description</th></tr>
-        <tr><td>Bring to Front</td><td>Move selected elements above all others</td></tr>
-        <tr><td>Send to Back</td><td>Move selected elements behind all others</td></tr>
-        <tr><td>Align Left / Center / Right / Top / Middle / Bottom</td><td>Align selected elements (≥ 2 required)</td></tr>
-        <tr><td>Distribute Horizontally / Vertically</td><td>Equal spacing between elements (≥ 3 required)</td></tr>
-        <tr><td>Same Width</td><td>Resize all selected shapes to match the last-selected width (≥ 2 required)</td></tr>
-        <tr><td>Same Height</td><td>Resize all selected shapes to match the last-selected height (≥ 2 required)</td></tr>
-      </table>
-    </section>
+                    <h3>Arrange</h3>
+                    <table>
+                        <tr>
+                            <th>Item</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Bring to Front</td>
+                            <td>Move selected elements above all others</td>
+                        </tr>
+                        <tr>
+                            <td>Send to Back</td>
+                            <td>Move selected elements behind all others</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Align Left / Center / Right / Top / Middle /
+                                Bottom
+                            </td>
+                            <td>Align selected elements (≥ 2 required)</td>
+                        </tr>
+                        <tr>
+                            <td>Distribute Horizontally / Vertically</td>
+                            <td>
+                                Equal spacing between elements (≥ 3 required)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Same Width</td>
+                            <td>
+                                Resize all selected shapes to match the
+                                last-selected width (≥ 2 required)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Same Height</td>
+                            <td>
+                                Resize all selected shapes to match the
+                                last-selected height (≥ 2 required)
+                            </td>
+                        </tr>
+                    </table>
+                </section>
 
-    <!-- ── Tabs ───────────────────────────────────────────── -->
-    <section id="tabs">
-      <h2>Tabs</h2>
-      <p>Each diagram file can contain multiple <strong>tabs</strong> — independent pages with their own shapes, connectors, annotations, undo history, and zoom level. The tab bar sits at the bottom of the canvas.</p>
-      <table>
-        <tr><th>Action</th><th>How</th></tr>
-        <tr><td>Switch tab</td><td>Click a tab</td></tr>
-        <tr><td>Add tab</td><td>Click <strong>+</strong> next to the last tab</td></tr>
-        <tr><td>Rename tab</td><td>Double-click the tab label, type a new name, press <kbd>Enter</kbd></td></tr>
-        <tr><td>Close tab</td><td>Hover over a tab to reveal <strong>×</strong>, then click (hidden when only one tab exists)</td></tr>
-      </table>
-      <p><strong>Per-tab:</strong> shapes, connectors, lines, annotations, undo/redo history, zoom, pan position.</p>
-      <p><strong>Shared across tabs:</strong> clipboard, diagram name, current drawing tool.</p>
-      <p><strong>Saving</strong> writes all tabs to a single <code>.json</code> file. <strong>Export</strong> exports only the currently active tab.</p>
-      <div class="note"><strong>Note:</strong> Opening a diagram saved before tabs were introduced loads its content as a single <code>tab-1</code>.</div>
-    </section>
+                <!-- ── Tabs ───────────────────────────────────────────── -->
+                <section id="tabs">
+                    <h2>Tabs</h2>
+                    <p>
+                        Each diagram file can contain multiple
+                        <strong>tabs</strong> — independent pages with their own
+                        shapes, connectors, annotations, undo history, and zoom
+                        level. The tab bar sits at the bottom of the canvas.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Action</th>
+                            <th>How</th>
+                        </tr>
+                        <tr>
+                            <td>Switch tab</td>
+                            <td>Click a tab</td>
+                        </tr>
+                        <tr>
+                            <td>Add tab</td>
+                            <td>
+                                Click <strong>+</strong> next to the last tab
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Rename tab</td>
+                            <td>
+                                Double-click the tab label, type a new name,
+                                press <kbd>Enter</kbd>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Close tab</td>
+                            <td>
+                                Hover over a tab to reveal <strong>×</strong>,
+                                then click (hidden when only one tab exists)
+                            </td>
+                        </tr>
+                    </table>
+                    <p>
+                        <strong>Per-tab:</strong> shapes, connectors, lines,
+                        annotations, undo/redo history, zoom, pan position.
+                    </p>
+                    <p>
+                        <strong>Shared across tabs:</strong> clipboard, diagram
+                        name, current drawing tool.
+                    </p>
+                    <p>
+                        <strong>Saving</strong> writes all tabs to a single
+                        <code>.json</code> file. <strong>Export</strong> exports
+                        only the currently active tab.
+                    </p>
+                    <div class="note">
+                        <strong>Note:</strong> Opening a diagram saved before
+                        tabs were introduced loads its content as a single
+                        <code>tab-1</code>.
+                    </div>
+                </section>
 
-    <!-- ── Drawing Tools ──────────────────────────────────── -->
-    <section id="drawing-tools">
-      <h2>Drawing Tools</h2>
-      <table>
-        <tr><th>Button</th><th>Key</th><th>Action</th></tr>
-        <tr><td><strong>Select</strong></td><td><kbd>S</kbd></td><td>Select, move, and resize elements</td></tr>
-        <tr><td><strong>Shape</strong></td><td><kbd>B</kbd></td><td>Click and drag to draw a new shape</td></tr>
-        <tr><td><strong>Connect</strong></td><td><kbd>C</kbd></td><td>Drag from one shape to another to draw a connector</td></tr>
-        <tr><td><strong>Line</strong></td><td><kbd>L</kbd></td><td>Click and drag to draw a free-floating line</td></tr>
-        <tr><td><strong>Text</strong></td><td><kbd>T</kbd></td><td>Click on the canvas to place a text annotation</td></tr>
-        <tr><td><strong>Icons</strong></td><td><kbd>I</kbd></td><td>Toggle the icon library panel</td></tr>
-      </table>
-    </section>
+                <!-- ── Drawing Tools ──────────────────────────────────── -->
+                <section id="drawing-tools">
+                    <h2>Drawing Tools</h2>
+                    <table>
+                        <tr>
+                            <th>Button</th>
+                            <th>Key</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Select</strong></td>
+                            <td><kbd>S</kbd></td>
+                            <td>Select, move, and resize elements</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Shape</strong></td>
+                            <td><kbd>B</kbd></td>
+                            <td>Click and drag to draw a new shape</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Connect</strong></td>
+                            <td><kbd>C</kbd></td>
+                            <td>
+                                Drag from one shape to another to draw a
+                                connector
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Line</strong></td>
+                            <td><kbd>L</kbd></td>
+                            <td>Click and drag to draw a free-floating line</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Text</strong></td>
+                            <td><kbd>T</kbd></td>
+                            <td>
+                                Click on the canvas to place a text annotation
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Icons</strong></td>
+                            <td><kbd>I</kbd></td>
+                            <td>Toggle the icon library panel</td>
+                        </tr>
+                    </table>
+                </section>
 
-    <!-- ── Shapes ─────────────────────────────────────────── -->
-    <section id="shapes">
-      <h2>Shapes</h2>
-      <p>Pick a shape type from the shape picker in the left toolbar before drawing, or change an existing shape's type in the Properties panel.</p>
-      <table>
-        <tr><th>Shape</th><th>Description</th></tr>
-        <tr><td>Box</td><td>Rectangle</td></tr>
-        <tr><td>Circle</td><td>Perfect circle (ellipse with equal axes)</td></tr>
-        <tr><td>Oval</td><td>Horizontal ellipse</td></tr>
-        <tr><td>Diamond</td><td>Rotated square</td></tr>
-        <tr><td>Triangle</td><td>Upward-pointing triangle</td></tr>
-        <tr><td>Parallelogram</td><td>Skewed rectangle</td></tr>
-      </table>
-    </section>
+                <!-- ── Shapes ─────────────────────────────────────────── -->
+                <section id="shapes">
+                    <h2>Shapes</h2>
+                    <p>
+                        Pick a shape type from the shape picker in the left
+                        toolbar before drawing, or change an existing shape's
+                        type in the Properties panel.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Shape</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Box</td>
+                            <td>Rectangle</td>
+                        </tr>
+                        <tr>
+                            <td>Circle</td>
+                            <td>Perfect circle (ellipse with equal axes)</td>
+                        </tr>
+                        <tr>
+                            <td>Oval</td>
+                            <td>Horizontal ellipse</td>
+                        </tr>
+                        <tr>
+                            <td>Diamond</td>
+                            <td>Rotated square</td>
+                        </tr>
+                        <tr>
+                            <td>Triangle</td>
+                            <td>Upward-pointing triangle</td>
+                        </tr>
+                        <tr>
+                            <td>Parallelogram</td>
+                            <td>Skewed rectangle</td>
+                        </tr>
+                    </table>
+                </section>
 
-    <!-- ── Connectors ─────────────────────────────────────── -->
-    <section id="connectors">
-      <h2>Connectors</h2>
-      <ol>
-        <li>Select the <strong>Connect</strong> tool</li>
-        <li>Drag from the edge of a source shape to a target shape</li>
-        <li>A connector with an arrowhead is created</li>
-      </ol>
+                <!-- ── Connectors ─────────────────────────────────────── -->
+                <section id="connectors">
+                    <h2>Connectors</h2>
+                    <ol>
+                        <li>Select the <strong>Connect</strong> tool</li>
+                        <li>
+                            Drag from the edge of a source shape to a target
+                            shape
+                        </li>
+                        <li>A connector with an arrowhead is created</li>
+                    </ol>
 
-      <h3>Direction options</h3>
-      <table>
-        <tr><th>Option</th><th>Appearance</th></tr>
-        <tr><td>→ Forward</td><td>Arrow pointing to target</td></tr>
-        <tr><td>← Backward</td><td>Arrow pointing to source</td></tr>
-        <tr><td>↔ Both</td><td>Arrows at both ends</td></tr>
-        <tr><td>— None</td><td>Plain line, no arrows</td></tr>
-      </table>
+                    <h3>Direction options</h3>
+                    <table>
+                        <tr>
+                            <th>Option</th>
+                            <th>Appearance</th>
+                        </tr>
+                        <tr>
+                            <td>→ Forward</td>
+                            <td>Arrow pointing to target</td>
+                        </tr>
+                        <tr>
+                            <td>← Backward</td>
+                            <td>Arrow pointing to source</td>
+                        </tr>
+                        <tr>
+                            <td>↔ Both</td>
+                            <td>Arrows at both ends</td>
+                        </tr>
+                        <tr>
+                            <td>— None</td>
+                            <td>Plain line, no arrows</td>
+                        </tr>
+                    </table>
 
-      <h3>Curved connectors</h3>
-      <p>Connectors can be rendered as smooth curves instead of straight lines:</p>
-      <ol>
-        <li>Select a connector</li>
-        <li>Open the <strong>Properties panel</strong></li>
-        <li>Change the <strong>Connector</strong> dropdown from <strong>Straight</strong> to <strong>Curved</strong></li>
-      </ol>
-      <p>In curved mode, waypoints act as curve-pull handles — dragging a waypoint reshapes the curve smoothly through that point rather than creating a sharp corner.</p>
+                    <h3>Curved connectors</h3>
+                    <p>
+                        Connectors can be rendered as smooth curves instead of
+                        straight lines:
+                    </p>
+                    <ol>
+                        <li>Select a connector</li>
+                        <li>Open the <strong>Properties panel</strong></li>
+                        <li>
+                            Change the <strong>Connector</strong> dropdown from
+                            <strong>Straight</strong> to <strong>Curved</strong>
+                        </li>
+                    </ol>
+                    <p>
+                        In curved mode, waypoints act as curve-pull handles —
+                        dragging a waypoint reshapes the curve smoothly through
+                        that point rather than creating a sharp corner.
+                    </p>
 
-      <h3>Waypoints (corners / curves)</h3>
-      <ol>
-        <li>Select the <strong>Select</strong> tool</li>
-        <li><strong>Double-click</strong> anywhere on an existing connector — a waypoint handle appears</li>
-        <li><strong>Drag the handle</strong> to pull the connector into a corner or angle (straight) or to reshape the curve (curved)</li>
-        <li>Add as many waypoints as needed</li>
-        <li><strong>Click a waypoint handle</strong> to focus it, then press <kbd>Delete</kbd> to remove it</li>
-      </ol>
-    </section>
+                    <h3>Waypoints (corners / curves)</h3>
+                    <ol>
+                        <li>Select the <strong>Select</strong> tool</li>
+                        <li>
+                            <strong>Double-click</strong> anywhere on an
+                            existing connector — a waypoint handle appears
+                        </li>
+                        <li>
+                            <strong>Drag the handle</strong> to pull the
+                            connector into a corner or angle (straight) or to
+                            reshape the curve (curved)
+                        </li>
+                        <li>Add as many waypoints as needed</li>
+                        <li>
+                            <strong>Click a waypoint handle</strong> to focus
+                            it, then press <kbd>Delete</kbd> to remove it
+                        </li>
+                    </ol>
+                </section>
 
-    <!-- ── Lines ──────────────────────────────────────────── -->
-    <section id="lines">
-      <h2>Lines</h2>
-      <p>Free-floating lines not attached to any shape. Unlike connectors, lines have no direction or arrowhead.</p>
-      <ol>
-        <li>Select the <strong>Line</strong> tool (<kbd>L</kbd>)</li>
-        <li>Click and drag anywhere on the canvas to draw the line</li>
-      </ol>
-      <p><strong>End symbols</strong> (Properties panel): each end can independently show <strong>None</strong>, <strong>Dot</strong>, or <strong>Square</strong>.</p>
-      <table>
-        <tr><th>Feature</th><th>How</th></tr>
-        <tr><td>Move line</td><td>Select it and drag</td></tr>
-        <tr><td>Reposition endpoint</td><td>Drag the endpoint handle</td></tr>
-        <tr><td>Add a corner/waypoint</td><td>Double-click anywhere on a selected line</td></tr>
-        <tr><td>Remove a waypoint</td><td>Click the handle, then press <kbd>Delete</kbd></td></tr>
-        <tr><td>Connector type</td><td>Straight or Curved (Properties panel)</td></tr>
-        <tr><td>Line style</td><td>Solid / Dashed / Dotted (Properties panel)</td></tr>
-        <tr><td>Stroke colour</td><td>Colour picker (Properties panel)</td></tr>
-        <tr><td>Label</td><td>Text along the midpoint (Properties panel)</td></tr>
-      </table>
-    </section>
+                <!-- ── Lines ──────────────────────────────────────────── -->
+                <section id="lines">
+                    <h2>Lines</h2>
+                    <p>
+                        Free-floating lines not attached to any shape. Unlike
+                        connectors, lines have no direction or arrowhead.
+                    </p>
+                    <ol>
+                        <li>
+                            Select the <strong>Line</strong> tool (<kbd>L</kbd>)
+                        </li>
+                        <li>
+                            Click and drag anywhere on the canvas to draw the
+                            line
+                        </li>
+                    </ol>
+                    <p>
+                        <strong>End symbols</strong> (Properties panel): each
+                        end can independently show <strong>None</strong>,
+                        <strong>Dot</strong>, or <strong>Square</strong>.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Feature</th>
+                            <th>How</th>
+                        </tr>
+                        <tr>
+                            <td>Move line</td>
+                            <td>Select it and drag</td>
+                        </tr>
+                        <tr>
+                            <td>Reposition endpoint</td>
+                            <td>Drag the endpoint handle</td>
+                        </tr>
+                        <tr>
+                            <td>Add a corner/waypoint</td>
+                            <td>Double-click anywhere on a selected line</td>
+                        </tr>
+                        <tr>
+                            <td>Remove a waypoint</td>
+                            <td>
+                                Click the handle, then press <kbd>Delete</kbd>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Connector type</td>
+                            <td>Straight or Curved (Properties panel)</td>
+                        </tr>
+                        <tr>
+                            <td>Line style</td>
+                            <td>Solid / Dashed / Dotted (Properties panel)</td>
+                        </tr>
+                        <tr>
+                            <td>Stroke colour</td>
+                            <td>Colour picker (Properties panel)</td>
+                        </tr>
+                        <tr>
+                            <td>Label</td>
+                            <td>Text along the midpoint (Properties panel)</td>
+                        </tr>
+                    </table>
+                </section>
 
-    <!-- ── Text Annotations ───────────────────────────────── -->
-    <section id="text-annotations">
-      <h2>Text Annotations</h2>
-      <p>Free-floating text labels not attached to any shape. Place them by clicking on an empty area of the canvas with the <strong>Text</strong> tool.</p>
-      <ul>
-        <li><strong>Multi-line:</strong> press Enter in the inline editor for a new line (<kbd>Ctrl+Enter</kbd> to confirm)</li>
-        <li><strong>Word wrap:</strong> long text wraps automatically within the text box width (default max 300 px)</li>
-        <li><strong>Resize:</strong> select a text annotation — eight resize handles appear; drag to change size</li>
-        <li><strong>Alignment:</strong> left / centre / right (Properties panel)</li>
-        <li><strong>Formatting:</strong> font size, bold, italic, underline, text colour, background fill, background opacity, border (Properties panel)</li>
-      </ul>
-    </section>
+                <!-- ── Text Annotations ───────────────────────────────── -->
+                <section id="text-annotations">
+                    <h2>Text Annotations</h2>
+                    <p>
+                        Free-floating text labels not attached to any shape.
+                        Place them by clicking on an empty area of the canvas
+                        with the <strong>Text</strong> tool.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Multi-line:</strong> press Enter in the
+                            inline editor for a new line (<kbd>Ctrl+Enter</kbd>
+                            to confirm)
+                        </li>
+                        <li>
+                            <strong>Word wrap:</strong> long text wraps
+                            automatically within the text box width (default max
+                            300 px)
+                        </li>
+                        <li>
+                            <strong>Resize:</strong> select a text annotation —
+                            eight resize handles appear; drag to change size
+                        </li>
+                        <li>
+                            <strong>Alignment:</strong> left / centre / right
+                            (Properties panel)
+                        </li>
+                        <li>
+                            <strong>Formatting:</strong> font size, bold,
+                            italic, underline, text colour, background fill,
+                            background opacity, border (Properties panel)
+                        </li>
+                    </ul>
+                </section>
 
-    <!-- ── Icon Library ───────────────────────────────────── -->
-    <section id="icon-library">
-      <h2>Icon Library</h2>
-      <p>Press <kbd>I</kbd> or click the <strong>Icons</strong> button to open the icon library panel. The library contains <strong>1,241 SVG icons</strong> across three cloud providers.</p>
-      <table>
-        <tr><th>Provider</th><th>Icons</th><th>Layout</th></tr>
-        <tr><td><strong>AWS</strong></td><td>~615 across 26 categories</td><td><code>icons/AWS/&lt;Category&gt;/</code></td></tr>
-        <tr><td><strong>Azure</strong></td><td>~410 across 29 categories</td><td><code>icons/Azure/&lt;Category&gt;/</code></td></tr>
-        <tr><td><strong>GCP</strong></td><td>216 icons</td><td><code>icons/GCP/</code></td></tr>
-      </table>
-      <p>Use the <strong>search box</strong> at the top to filter icons by name. <strong>Drag</strong> an icon onto the canvas to place it as a 64×64 resizable symbol node.</p>
-      <p>Icon nodes behave like regular shapes: they can be moved, resized, labelled, connected, copied, and exported.</p>
-    </section>
+                <!-- ── Icon Library ───────────────────────────────────── -->
+                <section id="icon-library">
+                    <h2>Icon Library</h2>
+                    <p>
+                        Press <kbd>I</kbd> or click the
+                        <strong>Icons</strong> button to open the icon library
+                        panel. The library contains
+                        <strong>1,241 SVG icons</strong> across three cloud
+                        providers.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Icons</th>
+                            <th>Layout</th>
+                        </tr>
+                        <tr>
+                            <td><strong>AWS</strong></td>
+                            <td>~615 across 26 categories</td>
+                            <td><code>icons/AWS/&lt;Category&gt;/</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Azure</strong></td>
+                            <td>~410 across 29 categories</td>
+                            <td><code>icons/Azure/&lt;Category&gt;/</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GCP</strong></td>
+                            <td>216 icons</td>
+                            <td><code>icons/GCP/</code></td>
+                        </tr>
+                    </table>
+                    <p>
+                        Use the <strong>search box</strong> at the top to filter
+                        icons by name. <strong>Drag</strong> an icon onto the
+                        canvas to place it as a 64×64 resizable symbol node.
+                    </p>
+                    <p>
+                        Icon nodes behave like regular shapes: they can be
+                        moved, resized, labelled, connected, copied, and
+                        exported.
+                    </p>
+                </section>
 
-    <!-- ── Zoom & Pan ─────────────────────────────────────── -->
-    <section id="zoom-pan">
-      <h2>Zoom &amp; Pan</h2>
-      <table>
-        <tr><th>Control</th><th>Action</th></tr>
-        <tr><td><strong>🔍−</strong> button</td><td>Zoom out 10%</td></tr>
-        <tr><td><strong>Dropdown</strong></td><td>Jump to a preset: 25%, 50%, 75%, 100%, 125%, 150%, 200%, or Fit</td></tr>
-        <tr><td><strong>🔍+</strong> button</td><td>Zoom in 10%</td></tr>
-        <tr><td><kbd>Ctrl+=</kbd> / <kbd>Ctrl++</kbd></td><td>Zoom in 10%</td></tr>
-        <tr><td><kbd>Ctrl+-</kbd></td><td>Zoom out 10%</td></tr>
-        <tr><td><kbd>Ctrl+0</kbd></td><td>Reset to 100%</td></tr>
-        <tr><td><kbd>Ctrl+Shift+0</kbd></td><td>Fit diagram to window</td></tr>
-        <tr><td><kbd>Ctrl+Scroll</kbd></td><td>Zoom centred on pointer</td></tr>
-      </table>
-      <p>Zoom range: 10%–400%. <strong>Right-click and drag</strong> on the canvas to pan.</p>
-    </section>
+                <!-- ── Zoom & Pan ─────────────────────────────────────── -->
+                <section id="zoom-pan">
+                    <h2>Zoom &amp; Pan</h2>
+                    <table>
+                        <tr>
+                            <th>Control</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td><strong>🔍−</strong> button</td>
+                            <td>Zoom out 10%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dropdown</strong></td>
+                            <td>
+                                Jump to a preset: 25%, 50%, 75%, 100%, 125%,
+                                150%, 200%, or Fit
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔍+</strong> button</td>
+                            <td>Zoom in 10%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+=</kbd> / <kbd>Ctrl++</kbd></td>
+                            <td>Zoom in 10%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+-</kbd></td>
+                            <td>Zoom out 10%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+0</kbd></td>
+                            <td>Reset to 100%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Shift+0</kbd></td>
+                            <td>Fit diagram to window</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Scroll</kbd></td>
+                            <td>Zoom centred on pointer</td>
+                        </tr>
+                    </table>
+                    <p>
+                        Zoom range: 10%–400%.
+                        <strong>Right-click and drag</strong> on the canvas to
+                        pan.
+                    </p>
+                </section>
 
-    <!-- ── Editing Elements ───────────────────────────────── -->
-    <section id="editing-elements">
-      <h2>Editing Elements</h2>
-      <h3>Moving</h3>
-      <p>Select an element with the <strong>Select</strong> tool and drag it.</p>
+                <!-- ── Editing Elements ───────────────────────────────── -->
+                <section id="editing-elements">
+                    <h2>Editing Elements</h2>
+                    <h3>Moving</h3>
+                    <p>
+                        Select an element with the <strong>Select</strong> tool
+                        and drag it.
+                    </p>
 
-      <h3>Resizing</h3>
-      <p>Select a shape — eight resize handles appear around it. Drag any handle to resize.</p>
+                    <h3>Resizing</h3>
+                    <p>
+                        Select a shape — eight resize handles appear around it.
+                        Drag any handle to resize.
+                    </p>
 
-      <h3>Editing Labels</h3>
-      <p><strong>Double-click</strong> any shape, annotation, or icon to edit its label inline. Press <kbd>Enter</kbd> or click elsewhere to confirm; <kbd>Escape</kbd> to cancel.</p>
-      <div class="note"><strong>Note:</strong> Double-clicking a connector or line inserts a waypoint corner — use the Properties panel to edit their labels.</div>
+                    <h3>Editing Labels</h3>
+                    <p>
+                        <strong>Double-click</strong> any shape, annotation, or
+                        icon to edit its label inline. Press <kbd>Enter</kbd> or
+                        click elsewhere to confirm; <kbd>Escape</kbd> to cancel.
+                    </p>
+                    <div class="note">
+                        <strong>Note:</strong> Double-clicking a connector or
+                        line inserts a waypoint corner — use the Properties
+                        panel to edit their labels.
+                    </div>
 
-      <h3>Deleting</h3>
-      <ul>
-        <li>Select one or more elements and press <kbd>Delete</kbd> or <kbd>Backspace</kbd>.</li>
-        <li>To remove a waypoint: click its handle to focus it, then press <kbd>Delete</kbd>.</li>
-      </ul>
+                    <h3>Deleting</h3>
+                    <ul>
+                        <li>
+                            Select one or more elements and press
+                            <kbd>Delete</kbd> or <kbd>Backspace</kbd>.
+                        </li>
+                        <li>
+                            To remove a waypoint: click its handle to focus it,
+                            then press <kbd>Delete</kbd>.
+                        </li>
+                    </ul>
 
-      <h3>Selecting Multiple Elements</h3>
-      <p>Hold <kbd>Shift</kbd> and click to add to the selection, or drag a selection box over multiple elements on an empty area of the canvas.</p>
-    </section>
+                    <h3>Selecting Multiple Elements</h3>
+                    <p>
+                        Hold <kbd>Shift</kbd> and click to add to the selection,
+                        or drag a selection box over multiple elements on an
+                        empty area of the canvas.
+                    </p>
+                </section>
 
-    <!-- ── Properties Panel ───────────────────────────────── -->
-    <section id="properties-panel">
-      <h2>Properties Panel</h2>
+                <!-- ── Properties Panel ───────────────────────────────── -->
+                <section id="properties-panel">
+                    <h2>Properties Panel</h2>
 
-      <h3>Shape properties</h3>
-      <table>
-        <tr><th>Property</th><th>Description</th></tr>
-        <tr><td>Shape</td><td>Change the shape type</td></tr>
-        <tr><td>Label</td><td>Text displayed inside the shape</td></tr>
-        <tr><td>Label pos</td><td>3×3 picker — place the label at any corner, edge midpoint, or centre</td></tr>
-        <tr><td>Font</td><td>Size, Bold, Italic, Underline</td></tr>
-        <tr><td>Fill</td><td>Fill colour (colour picker + reset)</td></tr>
-        <tr><td>Stroke</td><td>Border colour (colour picker + reset)</td></tr>
-        <tr><td>Line style</td><td>Solid / Dashed / Dotted border</td></tr>
-        <tr><td>Opacity</td><td>Fill opacity 0–100%</td></tr>
-        <tr><td>X / Y</td><td>Position on canvas</td></tr>
-        <tr><td>Width / Height</td><td>Size</td></tr>
-      </table>
+                    <h3>Shape properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Shape</td>
+                            <td>Change the shape type</td>
+                        </tr>
+                        <tr>
+                            <td>Label</td>
+                            <td>Text displayed inside the shape</td>
+                        </tr>
+                        <tr>
+                            <td>Label pos</td>
+                            <td>
+                                3×3 picker — place the label at any corner, edge
+                                midpoint, or centre
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Font</td>
+                            <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                        <tr>
+                            <td>Fill</td>
+                            <td>Fill colour (colour picker + reset)</td>
+                        </tr>
+                        <tr>
+                            <td>Stroke</td>
+                            <td>Border colour (colour picker + reset)</td>
+                        </tr>
+                        <tr>
+                            <td>Line style</td>
+                            <td>Solid / Dashed / Dotted border</td>
+                        </tr>
+                        <tr>
+                            <td>Opacity</td>
+                            <td>Fill opacity 0–100%</td>
+                        </tr>
+                        <tr>
+                            <td>X / Y</td>
+                            <td>Position on canvas</td>
+                        </tr>
+                        <tr>
+                            <td>Width / Height</td>
+                            <td>Size</td>
+                        </tr>
+                    </table>
 
-      <h3>Icon (symbol) properties</h3>
-      <table>
-        <tr><th>Property</th><th>Description</th></tr>
-        <tr><td>Icon</td><td>Icon name (read-only)</td></tr>
-        <tr><td>Label</td><td>Text relative to the icon (multi-line with <code>\n</code>)</td></tr>
-        <tr><td>Label pos</td><td>3×3 picker — default is bottom-centre</td></tr>
-        <tr><td>Font</td><td>Size, Bold, Italic, Underline</td></tr>
-        <tr><td>X / Y</td><td>Position on canvas</td></tr>
-        <tr><td>Width / Height</td><td>Size</td></tr>
-      </table>
+                    <h3>Icon (symbol) properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Icon</td>
+                            <td>Icon name (read-only)</td>
+                        </tr>
+                        <tr>
+                            <td>Label</td>
+                            <td>
+                                Text relative to the icon (multi-line with
+                                <code>\n</code>)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Label pos</td>
+                            <td>3×3 picker — default is bottom-centre</td>
+                        </tr>
+                        <tr>
+                            <td>Font</td>
+                            <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                        <tr>
+                            <td>X / Y</td>
+                            <td>Position on canvas</td>
+                        </tr>
+                        <tr>
+                            <td>Width / Height</td>
+                            <td>Size</td>
+                        </tr>
+                    </table>
 
-      <h3>Connector properties</h3>
-      <table>
-        <tr><th>Property</th><th>Description</th></tr>
-        <tr><td>Direction</td><td>→ Forward / ← Backward / ↔ Both / — None</td></tr>
-        <tr><td>Connector</td><td>Straight (default) or Curved — switches between polyline and smooth spline</td></tr>
-        <tr><td>Line style</td><td>Solid / Dashed / Dotted</td></tr>
-        <tr><td>Stroke</td><td>Line colour</td></tr>
-        <tr><td>Label</td><td>Text along the connector</td></tr>
-        <tr><td>Label Font</td><td>Size, Bold, Italic, Underline</td></tr>
-      </table>
+                    <h3>Connector properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Direction</td>
+                            <td>→ Forward / ← Backward / ↔ Both / — None</td>
+                        </tr>
+                        <tr>
+                            <td>Connector</td>
+                            <td>
+                                Straight (default) or Curved — switches between
+                                polyline and smooth spline
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Line style</td>
+                            <td>Solid / Dashed / Dotted</td>
+                        </tr>
+                        <tr>
+                            <td>Stroke</td>
+                            <td>Line colour</td>
+                        </tr>
+                        <tr>
+                            <td>Label</td>
+                            <td>Text along the connector</td>
+                        </tr>
+                        <tr>
+                            <td>Label Font</td>
+                            <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                    </table>
 
-      <h3>Line properties</h3>
-      <table>
-        <tr><th>Property</th><th>Description</th></tr>
-        <tr><td>Connector</td><td>Straight (default) or Curved</td></tr>
-        <tr><td>Stroke</td><td>Line colour</td></tr>
-        <tr><td>Line style</td><td>Solid / Dashed / Dotted</td></tr>
-        <tr><td>Start</td><td>End symbol at start: None / Dot / Square</td></tr>
-        <tr><td>End</td><td>End symbol at end: None / Dot / Square</td></tr>
-        <tr><td>Label</td><td>Text at the midpoint</td></tr>
-        <tr><td>Label Font</td><td>Size, Bold, Italic, Underline</td></tr>
-      </table>
+                    <h3>Line properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Connector</td>
+                            <td>Straight (default) or Curved</td>
+                        </tr>
+                        <tr>
+                            <td>Stroke</td>
+                            <td>Line colour</td>
+                        </tr>
+                        <tr>
+                            <td>Line style</td>
+                            <td>Solid / Dashed / Dotted</td>
+                        </tr>
+                        <tr>
+                            <td>Start</td>
+                            <td>End symbol at start: None / Dot / Square</td>
+                        </tr>
+                        <tr>
+                            <td>End</td>
+                            <td>End symbol at end: None / Dot / Square</td>
+                        </tr>
+                        <tr>
+                            <td>Label</td>
+                            <td>Text at the midpoint</td>
+                        </tr>
+                        <tr>
+                            <td>Label Font</td>
+                            <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                    </table>
 
-      <h3>Annotation properties</h3>
-      <table>
-        <tr><th>Property</th><th>Description</th></tr>
-        <tr><td>Text</td><td>The annotation text (Enter = newline, Ctrl+Enter = confirm)</td></tr>
-        <tr><td>Align</td><td>Left / Centre / Right</td></tr>
-        <tr><td>Font</td><td>Size, Bold, Italic, Underline</td></tr>
-        <tr><td>Color</td><td>Text colour</td></tr>
-        <tr><td>Background</td><td>Fill colour</td></tr>
-        <tr><td>Bg opacity</td><td>Background fill opacity 0–100%</td></tr>
-        <tr><td>Border</td><td>Stroke colour and style</td></tr>
-        <tr><td>X / Y</td><td>Anchor position</td></tr>
-        <tr><td>Width / Height</td><td>Explicit box size</td></tr>
-      </table>
-    </section>
+                    <h3>Annotation properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Text</td>
+                            <td>
+                                The annotation text (Enter = newline, Ctrl+Enter
+                                = confirm)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Align</td>
+                            <td>Left / Centre / Right</td>
+                        </tr>
+                        <tr>
+                            <td>Font</td>
+                            <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                        <tr>
+                            <td>Color</td>
+                            <td>Text colour</td>
+                        </tr>
+                        <tr>
+                            <td>Background</td>
+                            <td>Fill colour</td>
+                        </tr>
+                        <tr>
+                            <td>Bg opacity</td>
+                            <td>Background fill opacity 0–100%</td>
+                        </tr>
+                        <tr>
+                            <td>Border</td>
+                            <td>Stroke colour and style</td>
+                        </tr>
+                        <tr>
+                            <td>X / Y</td>
+                            <td>Anchor position</td>
+                        </tr>
+                        <tr>
+                            <td>Width / Height</td>
+                            <td>Explicit box size</td>
+                        </tr>
+                    </table>
+                </section>
 
-    <!-- ── Z-Order ────────────────────────────────────────── -->
-    <section id="z-order">
-      <h2>Z-Order (Bring to Front / Send to Back)</h2>
-      <table>
-        <tr><th>Button</th><th>Action</th></tr>
-        <tr><td><strong>Front</strong></td><td>Move selected element(s) above all others</td></tr>
-        <tr><td><strong>Back</strong></td><td>Move selected element(s) behind all others</td></tr>
-      </table>
-      <ul>
-        <li><strong>Shapes and connectors</strong> share the same rendering layer. A connector's Z-position follows the topmost node it connects to.</li>
-        <li><strong>Text annotations (default)</strong> render above all shapes and connectors.</li>
-        <li><strong>Text annotations (sent to back)</strong> move to a background layer — ideal for region boxes in architecture diagrams.</li>
-      </ul>
-    </section>
+                <!-- ── Z-Order ────────────────────────────────────────── -->
+                <section id="z-order">
+                    <h2>Z-Order (Bring to Front / Send to Back)</h2>
+                    <table>
+                        <tr>
+                            <th>Button</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Front</strong></td>
+                            <td>Move selected element(s) above all others</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Back</strong></td>
+                            <td>Move selected element(s) behind all others</td>
+                        </tr>
+                    </table>
+                    <ul>
+                        <li>
+                            <strong>Shapes and connectors</strong> share the
+                            same rendering layer. A connector's Z-position
+                            follows the topmost node it connects to.
+                        </li>
+                        <li>
+                            <strong>Text annotations (default)</strong> render
+                            above all shapes and connectors.
+                        </li>
+                        <li>
+                            <strong>Text annotations (sent to back)</strong>
+                            move to a background layer — ideal for region boxes
+                            in architecture diagrams.
+                        </li>
+                    </ul>
+                </section>
 
-    <!-- ── Align & Distribute ─────────────────────────────── -->
-    <section id="align-distribute">
-      <h2>Align &amp; Distribute</h2>
-      <p>Click the <strong>Align</strong> icon button in the top toolbar to open a floating popup. The Align button is enabled when 2 or more shapes/annotations are selected.</p>
-      <table>
-        <tr><th>Button</th><th>Action</th><th>Min. selection</th></tr>
-        <tr><td>Align Left</td><td>Flush left edges to the leftmost element</td><td>2</td></tr>
-        <tr><td>Align Center H</td><td>Center all on the same vertical axis</td><td>2</td></tr>
-        <tr><td>Align Right</td><td>Flush right edges to the rightmost element</td><td>2</td></tr>
-        <tr><td>Align Top</td><td>Flush top edges to the topmost element</td><td>2</td></tr>
-        <tr><td>Align Center V</td><td>Center all on the same horizontal axis</td><td>2</td></tr>
-        <tr><td>Align Bottom</td><td>Flush bottom edges to the bottommost element</td><td>2</td></tr>
-        <tr><td>Distribute H</td><td>Equal horizontal gaps</td><td>3</td></tr>
-        <tr><td>Distribute V</td><td>Equal vertical gaps</td><td>3</td></tr>
-        <tr><td>Same Width</td><td>Match width of the last-selected shape</td><td>2</td></tr>
-        <tr><td>Same Height</td><td>Match height of the last-selected shape</td><td>2</td></tr>
-      </table>
-    </section>
+                <!-- ── Align & Distribute ─────────────────────────────── -->
+                <section id="align-distribute">
+                    <h2>Align &amp; Distribute</h2>
+                    <p>
+                        Click the <strong>Align</strong> icon button in the top
+                        toolbar to open a floating popup. The Align button is
+                        enabled when 2 or more shapes/annotations are selected.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Button</th>
+                            <th>Action</th>
+                            <th>Min. selection</th>
+                        </tr>
+                        <tr>
+                            <td>Align Left</td>
+                            <td>Flush left edges to the leftmost element</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Align Center H</td>
+                            <td>Center all on the same vertical axis</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Align Right</td>
+                            <td>Flush right edges to the rightmost element</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Align Top</td>
+                            <td>Flush top edges to the topmost element</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Align Center V</td>
+                            <td>Center all on the same horizontal axis</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Align Bottom</td>
+                            <td>
+                                Flush bottom edges to the bottommost element
+                            </td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Distribute H</td>
+                            <td>Equal horizontal gaps</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>Distribute V</td>
+                            <td>Equal vertical gaps</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>Same Width</td>
+                            <td>Match width of the last-selected shape</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Same Height</td>
+                            <td>Match height of the last-selected shape</td>
+                            <td>2</td>
+                        </tr>
+                    </table>
+                </section>
 
-    <!-- ── Copy, Cut, Paste ───────────────────────────────── -->
-    <section id="copy-paste">
-      <h2>Copy, Cut, Paste &amp; Duplicate</h2>
-      <table>
-        <tr><th>Action</th><th>Keyboard</th></tr>
-        <tr><td>Copy</td><td><kbd>Ctrl+C</kbd></td></tr>
-        <tr><td>Cut</td><td><kbd>Ctrl+X</kbd></td></tr>
-        <tr><td>Paste</td><td><kbd>Ctrl+V</kbd></td></tr>
-        <tr><td>Duplicate</td><td><kbd>Ctrl+D</kbd></td></tr>
-      </table>
-      <p>Pasted elements appear offset by 20 px each time. When both ends of a connector are copied, paste creates a new connector between the new copies. Clipboard is shared across tabs.</p>
-    </section>
+                <!-- ── Copy, Cut, Paste ───────────────────────────────── -->
+                <section id="copy-paste">
+                    <h2>Copy, Cut, Paste &amp; Duplicate</h2>
+                    <table>
+                        <tr>
+                            <th>Action</th>
+                            <th>Keyboard</th>
+                        </tr>
+                        <tr>
+                            <td>Copy</td>
+                            <td><kbd>Ctrl+C</kbd></td>
+                        </tr>
+                        <tr>
+                            <td>Cut</td>
+                            <td><kbd>Ctrl+X</kbd></td>
+                        </tr>
+                        <tr>
+                            <td>Paste</td>
+                            <td><kbd>Ctrl+V</kbd></td>
+                        </tr>
+                        <tr>
+                            <td>Duplicate</td>
+                            <td><kbd>Ctrl+D</kbd></td>
+                        </tr>
+                    </table>
+                    <p>
+                        Pasted elements appear offset by 20 px each time. When
+                        both ends of a connector are copied, paste creates a new
+                        connector between the new copies. Clipboard is shared
+                        across tabs.
+                    </p>
+                </section>
 
-    <!-- ── Group & Ungroup ───────────────────────────────── -->
-    <section id="group-ungroup">
-      <h2>Group &amp; Ungroup</h2>
-      <p>Select two or more shapes (shift-click or rubber-band), then use the <strong>Group</strong> toolbar button or <kbd>Ctrl+G</kbd> to lock them together as a single unit.</p>
-      <table>
-        <tr><th>Action</th><th>Keyboard</th><th>Description</th></tr>
-        <tr><td>Group</td><td><kbd>Ctrl+G</kbd></td><td>Group 2+ selected shapes into one unit</td></tr>
-        <tr><td>Ungroup</td><td><kbd>Ctrl+Shift+G</kbd></td><td>Dissolve a selected group back to individual shapes</td></tr>
-      </table>
-      <p><strong>While grouped:</strong></p>
-      <ul>
-        <li>Clicking any member selects the whole group</li>
-        <li>Dragging the group moves all members together</li>
-        <li>The Properties panel shows <em>"Group (N shapes)"</em> with an <strong>Ungroup</strong> button</li>
-        <li>Individual shape properties (colour, font, size) are not editable while grouped</li>
-        <li>A purple dashed border outlines the group bounding box</li>
-        <li>Connectors attached to grouped shapes continue to work normally</li>
-        <li>Groups are preserved when saving, and copy/paste preserves group structure</li>
-      </ul>
-    </section>
+                <!-- ── Group & Ungroup ───────────────────────────────── -->
+                <section id="group-ungroup">
+                    <h2>Group &amp; Ungroup</h2>
+                    <p>
+                        Select two or more shapes (shift-click or rubber-band),
+                        then use the <strong>Group</strong> toolbar button or
+                        <kbd>Ctrl+G</kbd> to lock them together as a single
+                        unit.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Action</th>
+                            <th>Keyboard</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Group</td>
+                            <td><kbd>Ctrl+G</kbd></td>
+                            <td>Group 2+ selected shapes into one unit</td>
+                        </tr>
+                        <tr>
+                            <td>Ungroup</td>
+                            <td><kbd>Ctrl+Shift+G</kbd></td>
+                            <td>
+                                Dissolve a selected group back to individual
+                                shapes
+                            </td>
+                        </tr>
+                    </table>
+                    <p><strong>While grouped:</strong></p>
+                    <ul>
+                        <li>Clicking any member selects the whole group</li>
+                        <li>Dragging the group moves all members together</li>
+                        <li>
+                            The Properties panel shows
+                            <em>"Group (N shapes)"</em> with an
+                            <strong>Ungroup</strong> button
+                        </li>
+                        <li>
+                            Individual shape properties (colour, font, size) are
+                            not editable while grouped
+                        </li>
+                        <li>
+                            A purple dashed border outlines the group bounding
+                            box
+                        </li>
+                        <li>
+                            Connectors attached to grouped shapes continue to
+                            work normally
+                        </li>
+                        <li>
+                            Groups are preserved when saving, and copy/paste
+                            preserves group structure
+                        </li>
+                    </ul>
+                </section>
 
-    <!-- ── Open, Save & Export ────────────────────────────── -->
-    <section id="open-save-export">
-      <h2>Open, Save &amp; Export</h2>
-      <table>
-        <tr><th>Button</th><th>Description</th></tr>
-        <tr><td><strong>New</strong></td><td>Clear the canvas and start a fresh diagram (prompts to confirm)</td></tr>
-        <tr><td><strong>Open</strong></td><td>Open a <code>.json</code> file — sets the diagram name from the filename</td></tr>
-        <tr><td><strong>Open from Google Drive</strong></td><td>Browse Google Drive folders, select a <code>.json</code> diagram file, validate and load it</td></tr>
-        <tr><td><strong>Save</strong></td><td>Native OS save dialog (Chrome/Edge); browser download fallback (Firefox/Safari). Saves all tabs.</td></tr>
-        <tr><td><strong>Save to Google Drive</strong></td><td>Save the diagram to Google Drive. Sign in with Google, choose a destination folder, confirm the filename. Overwrites the file if one with the same name already exists in that folder.</td></tr>
-        <tr><td><strong>SVG</strong></td><td>Export current tab as a self-contained SVG with embedded icon data URIs</td></tr>
-        <tr><td><strong>PNG</strong></td><td>Export current tab as a PNG at device pixel ratio (crisp on HiDPI)</td></tr>
-      </table>
-      <p>The diagram name is shown in the title bar. It reads <strong>"Untitled diagram"</strong> until first saved or opened.</p>
+                <!-- ── Open, Save & Export ────────────────────────────── -->
+                <section id="open-save-export">
+                    <h2>Open, Save &amp; Export</h2>
+                    <table>
+                        <tr>
+                            <th>Button</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td><strong>New</strong></td>
+                            <td>
+                                Clear the canvas and start a fresh diagram
+                                (prompts to confirm)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Open</strong></td>
+                            <td>
+                                Open a <code>.json</code> file — sets the
+                                diagram name from the filename
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Open from Google Drive</strong></td>
+                            <td>
+                                Browse Google Drive folders, select a
+                                <code>.json</code> diagram file, validate and
+                                load it
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Save</strong></td>
+                            <td>
+                                Native OS save dialog (Chrome/Edge); browser
+                                download fallback (Firefox/Safari). Saves all
+                                tabs.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Save to Google Drive</strong></td>
+                            <td>
+                                Save the diagram to Google Drive. Sign in with
+                                Google, choose a destination folder, confirm the
+                                filename. Overwrites the file if one with the
+                                same name already exists in that folder.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>SVG</strong></td>
+                            <td>
+                                Export current tab as a self-contained SVG with
+                                embedded icon data URIs
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>PNG</strong></td>
+                            <td>
+                                Export current tab as a PNG at device pixel
+                                ratio (crisp on HiDPI)
+                            </td>
+                        </tr>
+                    </table>
+                    <p>
+                        The diagram name is shown in the title bar. It reads
+                        <strong>"Untitled diagram"</strong> until first saved or
+                        opened.
+                    </p>
 
-      <h3>Open from Google Drive</h3>
-      <p>Choose <strong>File → Open from Google Drive…</strong> to open a diagram previously saved to your Google Drive.</p>
-      <ol>
-        <li>A Google sign-in popup appears the first time — sign in and grant access when prompted.</li>
-        <li>A dialog opens showing your Google Drive folders and <code>.json</code> diagram files.</li>
-        <li>Navigate to the desired folder — click a folder to enter it; use the breadcrumb to go back up.</li>
-        <li>Click a file to select it, or double-click to open it immediately.</li>
-        <li>Click <strong>Open</strong>. The file is downloaded, validated, and loaded into the editor.</li>
-      </ol>
-      <div class="note"><strong>Invalid files:</strong> If the selected file is not a valid diagram, an error is shown in the dialog — your current diagram is not affected.</div>
-      <div class="note"><strong>Privacy:</strong> The app uses the <code>drive.file</code> scope — it can only see files it has saved itself. Files created by other applications are not visible.</div>
+                    <h3>Open from Google Drive</h3>
+                    <p>
+                        Choose
+                        <strong>File → Open from Google Drive…</strong> to open
+                        a diagram previously saved to your Google Drive.
+                    </p>
+                    <ol>
+                        <li>
+                            A Google sign-in popup appears the first time — sign
+                            in and grant access when prompted.
+                        </li>
+                        <li>
+                            A dialog opens showing your Google Drive folders and
+                            <code>.json</code> diagram files.
+                        </li>
+                        <li>
+                            Navigate to the desired folder — click a folder to
+                            enter it; use the breadcrumb to go back up.
+                        </li>
+                        <li>
+                            Click a file to select it, or double-click to open
+                            it immediately.
+                        </li>
+                        <li>
+                            Click <strong>Open</strong>. The file is downloaded,
+                            validated, and loaded into the editor.
+                        </li>
+                    </ol>
+                    <div class="note">
+                        <strong>Invalid files:</strong> If the selected file is
+                        not a valid diagram, an error is shown in the dialog —
+                        your current diagram is not affected.
+                    </div>
+                    <div class="note">
+                        <strong>Privacy:</strong> The app uses the
+                        <code>drive.file</code> scope — it can only see files it
+                        has saved itself. Files created by other applications
+                        are not visible.
+                    </div>
 
-      <h3>Save to Google Drive</h3>
-      <p>Click the <strong>Google Drive icon</strong> in the toolbar (or choose <strong>File → Save to Google Drive…</strong>) to save your diagram directly to Google Drive.</p>
-      <ol>
-        <li>A Google sign-in popup appears the first time — sign in and grant access when prompted.</li>
-        <li>A dialog opens with the filename pre-filled (current diagram name + <code>.json</code>).</li>
-        <li>Browse to the desired folder — click a folder to enter it; use the breadcrumb to navigate back up.</li>
-        <li>Click <strong>Save</strong>. If a file with the same name already exists in the chosen folder it is overwritten; otherwise a new file is created.</li>
-        <li>A confirmation toast appears and the diagram name is updated.</li>
-      </ol>
-      <div class="note"><strong>Privacy:</strong> The app uses the <code>drive.file</code> scope — it can only access files it has created itself. It cannot read or modify other content in your Drive.</div>
-    </section>
+                    <h3>Save to Google Drive</h3>
+                    <p>
+                        Click the <strong>Google Drive icon</strong> in the
+                        toolbar (or choose
+                        <strong>File → Save to Google Drive…</strong>) to save
+                        your diagram directly to Google Drive.
+                    </p>
+                    <ol>
+                        <li>
+                            A Google sign-in popup appears the first time — sign
+                            in and grant access when prompted.
+                        </li>
+                        <li>
+                            A dialog opens with the filename pre-filled (current
+                            diagram name + <code>.json</code>).
+                        </li>
+                        <li>
+                            Browse to the desired folder — click a folder to
+                            enter it; use the breadcrumb to navigate back up.
+                        </li>
+                        <li>
+                            Click <strong>Save</strong>. If a file with the same
+                            name already exists in the chosen folder it is
+                            overwritten; otherwise a new file is created.
+                        </li>
+                        <li>
+                            A confirmation toast appears and the diagram name is
+                            updated.
+                        </li>
+                    </ol>
+                    <div class="note">
+                        <strong>Privacy:</strong> The app uses the
+                        <code>drive.file</code> scope — it can only access files
+                        it has created itself. It cannot read or modify other
+                        content in your Drive.
+                    </div>
+                </section>
 
-    <!-- ── Undo & Redo ────────────────────────────────────── -->
-    <section id="undo-redo">
-      <h2>Undo &amp; Redo</h2>
-      <table>
-        <tr><th>Action</th><th>Keyboard</th><th>Button</th></tr>
-        <tr><td>Undo</td><td><kbd>Ctrl+Z</kbd></td><td>↩</td></tr>
-        <tr><td>Redo</td><td><kbd>Ctrl+Y</kbd></td><td>↪</td></tr>
-      </table>
-      <p>Up to 100 undo steps are retained per tab. Every edit — drawing, moving, resizing, label changes, colour, opacity, line style, paste, align — is undoable.</p>
-    </section>
+                <!-- ── Undo & Redo ────────────────────────────────────── -->
+                <section id="undo-redo">
+                    <h2>Undo &amp; Redo</h2>
+                    <table>
+                        <tr>
+                            <th>Action</th>
+                            <th>Keyboard</th>
+                            <th>Button</th>
+                        </tr>
+                        <tr>
+                            <td>Undo</td>
+                            <td><kbd>Ctrl+Z</kbd></td>
+                            <td>↩</td>
+                        </tr>
+                        <tr>
+                            <td>Redo</td>
+                            <td><kbd>Ctrl+Y</kbd></td>
+                            <td>↪</td>
+                        </tr>
+                    </table>
+                    <p>
+                        Up to 100 undo steps are retained per tab. Every edit —
+                        drawing, moving, resizing, label changes, colour,
+                        opacity, line style, paste, align — is undoable.
+                    </p>
+                </section>
 
-    <!-- ── Keyboard Shortcuts ─────────────────────────────── -->
-    <section id="keyboard-shortcuts">
-      <h2>Keyboard Shortcuts</h2>
-      <table>
-        <tr><th>Key</th><th>Action</th></tr>
-        <tr><td><kbd>S</kbd></td><td>Select tool</td></tr>
-        <tr><td><kbd>B</kbd></td><td>Shape tool</td></tr>
-        <tr><td><kbd>C</kbd></td><td>Connector tool</td></tr>
-        <tr><td><kbd>L</kbd></td><td>Line tool</td></tr>
-        <tr><td><kbd>T</kbd></td><td>Text tool</td></tr>
-        <tr><td><kbd>I</kbd></td><td>Toggle icon library panel</td></tr>
-        <tr><td><kbd>Delete</kbd> / <kbd>Backspace</kbd></td><td>Delete selected elements (or remove focused waypoint)</td></tr>
-        <tr><td><kbd>Escape</kbd></td><td>Cancel current operation / deselect</td></tr>
-        <tr><td><kbd>Ctrl+N</kbd></td><td>New diagram</td></tr>
-        <tr><td><kbd>Ctrl+O</kbd></td><td>Open file</td></tr>
-        <tr><td><kbd>Ctrl+S</kbd></td><td>Save diagram</td></tr>
-        <tr><td><kbd>Ctrl+Z</kbd></td><td>Undo</td></tr>
-        <tr><td><kbd>Ctrl+Y</kbd></td><td>Redo</td></tr>
-        <tr><td><kbd>Ctrl+C</kbd></td><td>Copy selected</td></tr>
-        <tr><td><kbd>Ctrl+X</kbd></td><td>Cut selected</td></tr>
-        <tr><td><kbd>Ctrl+V</kbd></td><td>Paste clipboard</td></tr>
-        <tr><td><kbd>Ctrl+D</kbd></td><td>Duplicate selected</td></tr>
-        <tr><td><kbd>Ctrl+G</kbd></td><td>Group selected shapes</td></tr>
-        <tr><td><kbd>Ctrl+Shift+G</kbd></td><td>Ungroup selected group</td></tr>
-        <tr><td><kbd>Ctrl+=</kbd> / <kbd>Ctrl++</kbd></td><td>Zoom in 10%</td></tr>
-        <tr><td><kbd>Ctrl+-</kbd></td><td>Zoom out 10%</td></tr>
-        <tr><td><kbd>Ctrl+0</kbd></td><td>Reset zoom to 100%</td></tr>
-        <tr><td><kbd>Ctrl+Shift+0</kbd></td><td>Fit diagram to window</td></tr>
-        <tr><td><kbd>Ctrl+Scroll</kbd></td><td>Zoom centred on pointer</td></tr>
-        <tr><td>Right-click drag</td><td>Pan canvas</td></tr>
-        <tr><td>Dbl-click shape/icon</td><td>Edit label inline</td></tr>
-        <tr><td>Dbl-click connector/line</td><td>Add waypoint corner at click point</td></tr>
-      </table>
-    </section>
+                <!-- ── Keyboard Shortcuts ─────────────────────────────── -->
+                <section id="keyboard-shortcuts">
+                    <h2>Keyboard Shortcuts</h2>
+                    <table>
+                        <tr>
+                            <th>Key</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td><kbd>S</kbd></td>
+                            <td>Select tool</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>B</kbd></td>
+                            <td>Shape tool</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>C</kbd></td>
+                            <td>Connector tool</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>L</kbd></td>
+                            <td>Line tool</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>T</kbd></td>
+                            <td>Text tool</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>I</kbd></td>
+                            <td>Toggle icon library panel</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Delete</kbd> / <kbd>Backspace</kbd></td>
+                            <td>
+                                Delete selected elements (or remove focused
+                                waypoint)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Escape</kbd></td>
+                            <td>Cancel current operation / deselect</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+N</kbd></td>
+                            <td>New diagram</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+O</kbd></td>
+                            <td>Open file</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+S</kbd></td>
+                            <td>Save diagram</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Z</kbd></td>
+                            <td>Undo</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Y</kbd></td>
+                            <td>Redo</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+C</kbd></td>
+                            <td>Copy selected</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+X</kbd></td>
+                            <td>Cut selected</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+V</kbd></td>
+                            <td>Paste clipboard</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+D</kbd></td>
+                            <td>Duplicate selected</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+G</kbd></td>
+                            <td>Group selected shapes</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Shift+G</kbd></td>
+                            <td>Ungroup selected group</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+=</kbd> / <kbd>Ctrl++</kbd></td>
+                            <td>Zoom in 10%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+-</kbd></td>
+                            <td>Zoom out 10%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+0</kbd></td>
+                            <td>Reset zoom to 100%</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Shift+0</kbd></td>
+                            <td>Fit diagram to window</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Scroll</kbd></td>
+                            <td>Zoom centred on pointer</td>
+                        </tr>
+                        <tr>
+                            <td>Right-click drag</td>
+                            <td>Pan canvas</td>
+                        </tr>
+                        <tr>
+                            <td>Dbl-click shape/icon</td>
+                            <td>Edit label inline</td>
+                        </tr>
+                        <tr>
+                            <td>Dbl-click connector/line</td>
+                            <td>Add waypoint corner at click point</td>
+                        </tr>
+                    </table>
+                </section>
+            </main>
+        </div>
 
-  </main>
-</div>
+        <script>
+            // Populate version from opener window if available, or from app-version element
+            window.addEventListener('DOMContentLoaded', () => {
+                let ver = 'dev';
+                try {
+                    if (window.opener && window.opener.document) {
+                        const el =
+                            window.opener.document.getElementById(
+                                'app-version',
+                            );
+                        if (el) ver = el.textContent;
+                    }
+                } catch (_) {}
+                const el = document.getElementById('help-version');
+                if (el && ver !== 'dev') el.textContent = ver;
 
-<script>
-  // Populate version from opener window if available, or from app-version element
-  window.addEventListener('DOMContentLoaded', () => {
-    let ver = 'dev';
-    try {
-      if (window.opener && window.opener.document) {
-        const el = window.opener.document.getElementById('app-version');
-        if (el) ver = el.textContent;
-      }
-    } catch (_) {}
-    const el = document.getElementById('help-version');
-    if (el && ver !== 'dev') el.textContent = ver;
+                // Highlight active nav link on scroll
+                const sections = document.querySelectorAll('section[id]');
+                const navLinks = document.querySelectorAll('#help-nav a');
+                const content = document.getElementById('help-content');
 
-    // Highlight active nav link on scroll
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('#help-nav a');
-    const content = document.getElementById('help-content');
+                function onScroll() {
+                    let current = '';
+                    sections.forEach((sec) => {
+                        if (content.scrollTop >= sec.offsetTop - 60)
+                            current = sec.id;
+                    });
+                    navLinks.forEach((a) => {
+                        a.classList.toggle(
+                            'active',
+                            a.getAttribute('href') === '#' + current,
+                        );
+                    });
+                }
 
-    function onScroll() {
-      let current = '';
-      sections.forEach(sec => {
-        if (content.scrollTop >= sec.offsetTop - 60) current = sec.id;
-      });
-      navLinks.forEach(a => {
-        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-      });
-    }
+                content.addEventListener('scroll', onScroll, { passive: true });
+                onScroll();
 
-    content.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-
-    // Smooth scroll nav clicks
-    navLinks.forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth' });
-      });
-    });
-  });
-</script>
-</body>
+                // Smooth scroll nav clicks
+                navLinks.forEach((a) => {
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const target = document.querySelector(
+                            a.getAttribute('href'),
+                        );
+                        if (target)
+                            target.scrollIntoView({ behavior: 'smooth' });
+                    });
+                });
+            });
+        </script>
+    </body>
 </html>

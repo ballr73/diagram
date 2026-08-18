@@ -1,58 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diagram Editor — Blog</title>
-  <link rel="stylesheet" href="css/blog.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
-       crossorigin="anonymous"></script>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Diagram Editor — Blog</title>
+        <link rel="stylesheet" href="css/blog.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="blog-header">
+            <h1>Diagram Editor — Blog</h1>
+            <span id="blog-version">dev</span>
+        </div>
 
-  <div id="blog-header">
-    <h1>Diagram Editor — Blog</h1>
-    <span id="blog-version">dev</span>
-  </div>
+        <div id="blog-content">
+            <h2>Blog</h2>
+            <p class="subtitle">
+                Updates, articles, and thoughts on Diagram Editor.
+            </p>
 
-  <div id="blog-content">
+            <!-- Article 1 -->
+            <div class="article-card">
+                <div class="article-meta">
+                    <span class="article-date">15 August 2026</span>
+                    <span class="article-tag">Behind the Build</span>
+                </div>
+                <h3>
+                    Why I Built Diagram Editor: A Free, Lightweight, and Private
+                    Tool for Cloud Architecture Diagrams
+                </h3>
+                <p class="article-excerpt">
+                    Cloud architecture diagrams are essential for planning
+                    systems, communicating ideas, and documenting
+                    infrastructure. But most diagramming tools today feel
+                    heavier than they need to be — packed with features you
+                    don't use, locked behind subscriptions, or slow to load when
+                    you just want to sketch an idea. Diagram Editor was created
+                    to solve that problem.
+                </p>
+                <a href="blog-why-i-built.html" class="read-more">
+                    Read article <span class="arrow">→</span>
+                </a>
+            </div>
 
-    <h2>Blog</h2>
-    <p class="subtitle">Updates, articles, and thoughts on Diagram Editor.</p>
+            <hr class="divider" />
 
-    <!-- Article 1 -->
-    <div class="article-card">
-      <div class="article-meta">
-        <span class="article-date">15 August 2026</span>
-        <span class="article-tag">Behind the Build</span>
-      </div>
-      <h3>Why I Built Diagram Editor: A Free, Lightweight, and Private Tool for Cloud Architecture Diagrams</h3>
-      <p class="article-excerpt">Cloud architecture diagrams are essential for planning systems, communicating ideas, and documenting infrastructure. But most diagramming tools today feel heavier than they need to be — packed with features you don't use, locked behind subscriptions, or slow to load when you just want to sketch an idea. Diagram Editor was created to solve that problem.</p>
-      <a href="blog-why-i-built.html" class="read-more">
-        Read article <span class="arrow">→</span>
-      </a>
-    </div>
+            <div class="footer-links">
+                <a
+                    href="#"
+                    onclick="
+                        window.open(
+                            'help.html',
+                            'diagram-help',
+                            'width=1000,height=720,resizable=yes',
+                        );
+                        return false;
+                    "
+                    >Help</a
+                >
+                <a
+                    href="#"
+                    onclick="
+                        window.open(
+                            'faq.html',
+                            'diagram-faq',
+                            'width=800,height=700,resizable=yes',
+                        );
+                        return false;
+                    "
+                    >FAQ</a
+                >
+                <a
+                    href="https://github.com/ballr73/diagram"
+                    target="_blank"
+                    rel="noopener"
+                    >GitHub</a
+                >
+            </div>
+        </div>
 
-    <hr class="divider">
-
-    <div class="footer-links">
-      <a href="#" onclick="window.open('help.html','diagram-help','width=1000,height=720,resizable=yes'); return false;">Help</a>
-      <a href="#" onclick="window.open('faq.html','diagram-faq','width=800,height=700,resizable=yes'); return false;">FAQ</a>
-      <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub</a>
-    </div>
-
-  </div>
-
-  <script>
-    try {
-      const ver = window.opener &&
-                  window.opener.document &&
-                  window.opener.document.getElementById('app-version');
-      if (ver) {
-        document.getElementById('blog-version').textContent = ver.textContent;
-      }
-    } catch (_) {}
-  </script>
-
-</body>
+        <script>
+            try {
+                const ver =
+                    window.opener &&
+                    window.opener.document &&
+                    window.opener.document.getElementById('app-version');
+                if (ver) {
+                    document.getElementById('blog-version').textContent =
+                        ver.textContent;
+                }
+            } catch (_) {}
+        </script>
+    </body>
 </html>
