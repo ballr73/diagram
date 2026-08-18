@@ -94,7 +94,9 @@
         <tr><th>Item</th><th>Shortcut</th><th>Description</th></tr>
         <tr><td>New</td><td><kbd>Ctrl+N</kbd></td><td>Clear the canvas and start a fresh diagram</td></tr>
         <tr><td>Open…</td><td><kbd>Ctrl+O</kbd></td><td>Open a <code>.json</code> diagram file</td></tr>
+        <tr><td>Open from Google Drive…</td><td></td><td>Open a diagram previously saved to Google Drive — browse folders and select a file</td></tr>
         <tr><td>Save</td><td><kbd>Ctrl+S</kbd></td><td>Save the diagram — opens a native save dialog on Chrome/Edge; browser download on Firefox/Safari</td></tr>
+        <tr><td>Save to Google Drive…</td><td></td><td>Save the diagram to Google Drive — choose a folder and save; overwrites if the file already exists</td></tr>
         <tr><td>Export PNG</td><td></td><td>Export the current tab as a PNG image</td></tr>
         <tr><td>Export SVG</td><td></td><td>Export the current tab as a self-contained SVG</td></tr>
       </table>
@@ -449,11 +451,36 @@
         <tr><th>Button</th><th>Description</th></tr>
         <tr><td><strong>New</strong></td><td>Clear the canvas and start a fresh diagram (prompts to confirm)</td></tr>
         <tr><td><strong>Open</strong></td><td>Open a <code>.json</code> file — sets the diagram name from the filename</td></tr>
+        <tr><td><strong>Open from Google Drive</strong></td><td>Browse Google Drive folders, select a <code>.json</code> diagram file, validate and load it</td></tr>
         <tr><td><strong>Save</strong></td><td>Native OS save dialog (Chrome/Edge); browser download fallback (Firefox/Safari). Saves all tabs.</td></tr>
+        <tr><td><strong>Save to Google Drive</strong></td><td>Save the diagram to Google Drive. Sign in with Google, choose a destination folder, confirm the filename. Overwrites the file if one with the same name already exists in that folder.</td></tr>
         <tr><td><strong>SVG</strong></td><td>Export current tab as a self-contained SVG with embedded icon data URIs</td></tr>
         <tr><td><strong>PNG</strong></td><td>Export current tab as a PNG at device pixel ratio (crisp on HiDPI)</td></tr>
       </table>
       <p>The diagram name is shown in the title bar. It reads <strong>"Untitled diagram"</strong> until first saved or opened.</p>
+
+      <h3>Open from Google Drive</h3>
+      <p>Choose <strong>File → Open from Google Drive…</strong> to open a diagram previously saved to your Google Drive.</p>
+      <ol>
+        <li>A Google sign-in popup appears the first time — sign in and grant access when prompted.</li>
+        <li>A dialog opens showing your Google Drive folders and <code>.json</code> diagram files.</li>
+        <li>Navigate to the desired folder — click a folder to enter it; use the breadcrumb to go back up.</li>
+        <li>Click a file to select it, or double-click to open it immediately.</li>
+        <li>Click <strong>Open</strong>. The file is downloaded, validated, and loaded into the editor.</li>
+      </ol>
+      <div class="note"><strong>Invalid files:</strong> If the selected file is not a valid diagram, an error is shown in the dialog — your current diagram is not affected.</div>
+      <div class="note"><strong>Privacy:</strong> The app uses the <code>drive.file</code> scope — it can only see files it has saved itself. Files created by other applications are not visible.</div>
+
+      <h3>Save to Google Drive</h3>
+      <p>Click the <strong>Google Drive icon</strong> in the toolbar (or choose <strong>File → Save to Google Drive…</strong>) to save your diagram directly to Google Drive.</p>
+      <ol>
+        <li>A Google sign-in popup appears the first time — sign in and grant access when prompted.</li>
+        <li>A dialog opens with the filename pre-filled (current diagram name + <code>.json</code>).</li>
+        <li>Browse to the desired folder — click a folder to enter it; use the breadcrumb to navigate back up.</li>
+        <li>Click <strong>Save</strong>. If a file with the same name already exists in the chosen folder it is overwritten; otherwise a new file is created.</li>
+        <li>A confirmation toast appears and the diagram name is updated.</li>
+      </ol>
+      <div class="note"><strong>Privacy:</strong> The app uses the <code>drive.file</code> scope — it can only access files it has created itself. It cannot read or modify other content in your Drive.</div>
     </section>
 
     <!-- ── Undo & Redo ────────────────────────────────────── -->

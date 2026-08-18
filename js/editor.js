@@ -329,6 +329,21 @@ async function saveDiagram() {
 async function _doSave(baseName) {
   flushTabState();
   const filename = baseName + '.json';
+  const blob = buildDiagramBlob();
+
+  const savedName = await saveBlob(blob, filename, [
+    { description: 'JSON Diagram', accept: { 'application/json': ['.json'] } },
+  ]);
+  if (savedName === null) return; // cancelled
+
+  state.diagramName = savedName.replace(/\.json$/i, '');
+  state.dirty = false;
+  updateTitleDisplay();
+  saveToLocalStorage();
+}
+
+function buildDiagramBlob() {
+  flushTabState();
   const data = {
     version: 2,
     tabs: state.tabs.map(tab => ({
@@ -343,18 +358,7 @@ async function _doSave(baseName) {
       viewCenterY: tab.viewCenterY,
     })),
   };
-  const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-
-  const savedName = await saveBlob(blob, filename, [
-    { description: 'JSON Diagram', accept: { 'application/json': ['.json'] } },
-  ]);
-  if (savedName === null) return; // cancelled
-
-  state.diagramName = savedName.replace(/\.json$/i, '');
-  state.dirty = false;
-  updateTitleDisplay();
-  saveToLocalStorage();
+  return new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
 }
 
 function importDiagram(file) {
@@ -362,58 +366,63 @@ function importDiagram(file) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if (typeof data.version === 'undefined') throw new Error('Missing version field');
-      const loadTabData = (tab, td) => {
-        (td.nodes || []).forEach(n => tab.nodes.set(n.id, { ...n }));
-        (td.edges || []).forEach(e => tab.edges.set(e.id, {
-          ...e,
-          waypoints: (e.waypoints || []).map(wp => ({ ...wp })),
-        }));
-        (td.lines || []).forEach(l => tab.lines.set(l.id, {
-          ...l,
-          waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
-        }));
-        (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
-        (td.groups || []).forEach(g => tab.groups.set(g.id, { ...g, memberIds: [...(g.memberIds || [])] }));
-        const allNums = [...tab.nodes.keys(), ...tab.edges.keys(), ...tab.lines.keys(), ...tab.annotations.keys()]
-          .map(id => parseInt(id.replace('id-', ''), 10))
-          .filter(n => !isNaN(n));
-        tab.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
-        if (td.zoom != null) tab.zoom = td.zoom;
-        if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
-        if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
-      };
-
-      if (data.tabs) {
-        state.tabs = data.tabs.map((td, i) => {
-          const tab = createTab(td.name || `tab-${i + 1}`);
-          loadTabData(tab, td);
-          return tab;
-        });
-        if (!state.tabs.length) state.tabs = [createTab('tab-1')];
-        loadTabToLiveState(0);
-      } else {
-        const tab = createTab('tab-1');
-        loadTabData(tab, data);
-        state.tabs = [tab];
-        loadTabToLiveState(0);
-      }
-
-      state.diagramName = file.name.replace(/\.json$/i, '');
-      updateTitleDisplay();
-      pushHistory();
-      state.dirty = false;
-      render();
-      updateViewBox();
-      syncZoomSelect();
-      updatePropertiesPanel();
-      updateToolbarStatus();
-      renderTabBar();
+      importDiagramData(data, file.name);
     } catch (err) {
       alert('Import failed: ' + err.message);
     }
   };
   reader.readAsText(file);
+}
+
+function importDiagramData(data, filename) {
+  if (typeof data.version === 'undefined') throw new Error('Missing version field');
+  const loadTabData = (tab, td) => {
+    (td.nodes || []).forEach(n => tab.nodes.set(n.id, { ...n }));
+    (td.edges || []).forEach(e => tab.edges.set(e.id, {
+      ...e,
+      waypoints: (e.waypoints || []).map(wp => ({ ...wp })),
+    }));
+    (td.lines || []).forEach(l => tab.lines.set(l.id, {
+      ...l,
+      waypoints: (l.waypoints || []).map(wp => ({ ...wp })),
+    }));
+    (td.annotations || []).forEach(a => tab.annotations.set(a.id, { ...a }));
+    (td.groups || []).forEach(g => tab.groups.set(g.id, { ...g, memberIds: [...(g.memberIds || [])] }));
+    const allNums = [...tab.nodes.keys(), ...tab.edges.keys(), ...tab.lines.keys(), ...tab.annotations.keys()]
+      .map(id => parseInt(id.replace('id-', ''), 10))
+      .filter(n => !isNaN(n));
+    tab.nextId = allNums.length > 0 ? Math.max(...allNums) + 1 : 1;
+    if (td.zoom != null) tab.zoom = td.zoom;
+    if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
+    if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
+  };
+
+  if (data.tabs) {
+    state.tabs = data.tabs.map((td, i) => {
+      const tab = createTab(td.name || `tab-${i + 1}`);
+      loadTabData(tab, td);
+      return tab;
+    });
+    if (!state.tabs.length) state.tabs = [createTab('tab-1')];
+    loadTabToLiveState(0);
+  } else {
+    const tab = createTab('tab-1');
+    loadTabData(tab, data);
+    state.tabs = [tab];
+    loadTabToLiveState(0);
+  }
+
+  state.diagramName = (typeof filename === 'string' ? filename : (filename && filename.name) || 'diagram')
+    .replace(/\.json$/i, '');
+  updateTitleDisplay();
+  pushHistory();
+  state.dirty = false;
+  render();
+  updateViewBox();
+  syncZoomSelect();
+  updatePropertiesPanel();
+  updateToolbarStatus();
+  renderTabBar();
 }
 
 // ============================================================
@@ -3959,7 +3968,9 @@ function initMenuBar() {
   const menuActions = {
     'new':            () => newDiagram(),
     'open':           () => document.getElementById('file-input')?.click(),
+    'open-gdrive':    () => window.openFromGoogleDrive && window.openFromGoogleDrive(),
     'save':           () => saveDiagram(),
+    'save-gdrive':    () => window.saveToGoogleDrive && window.saveToGoogleDrive(),
     'export-png':     () => exportPNG(),
     'export-svg':     () => exportSVG(),
     'undo':           () => undo(),
@@ -4110,6 +4121,7 @@ function init() {
   // Open / Save / Export
   on('btn-new',     'click', newDiagram);
   on('btn-save',    'click', saveDiagram);
+  on('btn-gdrive-save', 'click', () => window.saveToGoogleDrive && window.saveToGoogleDrive());
   on('btn-open',       'click', () => document.getElementById('file-input')?.click());
   on('btn-export-svg', 'click', exportSVG);
   on('btn-export-png', 'click', exportPNG);
@@ -4205,6 +4217,19 @@ function init() {
   updateToolbarStatus();
   updateEditButtons();
   renderTabBar();
+
+  // Expose internals for gdrive.js (set after state is fully initialised)
+  window._editorState        = state;
+  window._updateTitleDisplay = updateTitleDisplay;
+  window._saveToLocalStorage = saveToLocalStorage;
+  window._importDiagramData  = importDiagramData;
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// Expose internals for gdrive.js
+window._editorState          = null; // set after DOMContentLoaded via init
+window._buildDiagramBlob     = buildDiagramBlob;
+window._importDiagramData    = null; // set after DOMContentLoaded via init
+window._updateTitleDisplay   = null;
+window._saveToLocalStorage   = null;

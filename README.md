@@ -392,7 +392,9 @@ A standard application menu bar sits between the diagram name and the icon toolb
 |------|----------|-------------|
 | New | `Ctrl+N` | Clear the canvas and start a fresh diagram |
 | Open… | `Ctrl+O` | Open a `.json` diagram file |
+| Open from Google Drive… | | Open a diagram previously saved to Google Drive |
 | Save | `Ctrl+S` | Save the diagram — opens a native save dialog to choose filename and location |
+| Save to Google Drive… | | Save the diagram to Google Drive with folder chooser |
 | Export PNG | | Export the diagram as a PNG image |
 | Export SVG | | Export the diagram as a self-contained SVG |
 
@@ -459,7 +461,9 @@ Opening a diagram file that was saved before tabs were introduced loads its cont
 |--------|-------------|
 | **New** | Clear the canvas and start a fresh diagram (prompts to confirm if content exists) |
 | **Open** | Open a previously saved `.json` file — sets the diagram name from the filename |
+| **Open from Google Drive** | Open a diagram previously saved to Google Drive — browse folders, select a file, validate and load |
 | **Save** | Opens a native OS save dialog (Chrome/Edge) to choose filename and location; falls back to a browser download prompt on Firefox and Safari |
+| **Save to Google Drive** | Save the diagram to Google Drive — sign in with Google, choose a folder, then save. Overwrites the existing file if one with the same name already exists in the chosen folder. |
 | **SVG** | Export a self-contained `<name>.svg` — icons are embedded as data URIs |
 | **PNG** | Export a `<name>.png` rasterised at device pixel ratio (crisp on HiDPI screens) |
 
@@ -468,6 +472,32 @@ Opening a diagram file that was saved before tabs were introduced loads its cont
 The current diagram name is shown in the slim bar above the menu bar. It reads **"Untitled diagram"** until the file is saved or opened. The name is taken from whatever the user types in the save dialog.
 
 Icon images are embedded as base64 data URIs in SVG and PNG exports, so exported files are fully self-contained.
+
+### Open from Google Drive
+
+Choose **File → Open from Google Drive…** to open a diagram that was previously saved to your Google Drive by this app.
+
+1. A Google sign-in popup appears the first time. Sign in and grant access when prompted.
+2. A dialog opens showing your Google Drive contents — folders and `.json` diagram files.
+3. Navigate to the desired folder by clicking it; use the breadcrumb to go back up.
+4. Click a file to select it (or double-click to open immediately).
+5. Click **Open**. The file is downloaded, validated, and loaded into the editor.
+
+If the selected file is not a valid diagram, an error is shown inside the dialog — no changes are made to the current diagram.
+
+> **Note:** The app uses the `drive.file` scope — it can only see files it has saved itself. Files created by other applications are not visible.
+
+### Save to Google Drive
+
+Click the **Google Drive icon** in the toolbar (or choose **File → Save to Google Drive…**) to save the current diagram to your Google Drive.
+
+1. A Google sign-in popup appears the first time. Sign in and grant access when prompted.
+2. A dialog opens with the filename pre-filled (current diagram name + `.json`).
+3. Use the folder browser to navigate to the desired destination — click a folder to enter it, use the breadcrumb to go back up.
+4. Click **Save**. If a file with the same name already exists in the chosen folder it is overwritten; otherwise a new file is created.
+5. A confirmation toast appears and the diagram name is updated.
+
+The app uses the `drive.file` scope — it can only read or modify files it has created itself; it cannot access other Drive content.
 
 ---
 
