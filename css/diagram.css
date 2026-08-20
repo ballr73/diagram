@@ -889,7 +889,6 @@ input.inline-input {
     background: #fff;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
 }
 
 #properties-header {
@@ -907,6 +906,8 @@ input.inline-input {
 #properties-content {
     padding: 12px;
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .no-selection {

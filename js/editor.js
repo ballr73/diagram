@@ -3763,6 +3763,29 @@ function colorRow(id, currentValue, defaultValue) {
   </div>`;
 }
 
+/** Generate a layer <select> dropdown pre-selected to the element's current layer. */
+function layerDropdownHtml(element) {
+    const opts = (state.layers || [])
+        .map(
+            (l) =>
+                `<option value="${l.id}"${element.layerId === l.id ? ' selected' : ''}>${esc(l.name)}</option>`,
+        )
+        .join('');
+    return `<select id="p-layer">${opts}</select>`;
+}
+
+/** Wire the layer dropdown to move the element to the chosen layer. */
+function bindLayerDropdown(element) {
+    const sel = document.getElementById('p-layer');
+    if (!sel) return;
+    sel.addEventListener('change', () => {
+        element.layerId = sel.value;
+        pushHistory();
+        render();
+        renderLayersPanel();
+    });
+}
+
 function bindColorInput(id, defaultValue, setter) {
     const input = document.getElementById(id);
     const hex = document.getElementById(`${id}-hex`);
@@ -3838,6 +3861,7 @@ function renderSymbolProps(container, node) {
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
     <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
+    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(node)}</div>
   `;
     bindFontControls(node, { size: 11 });
     bindPropInput('p-label', (v) => {
@@ -3872,6 +3896,7 @@ function renderSymbolProps(container, node) {
         },
         true,
     );
+    bindLayerDropdown(node);
 }
 
 function renderNodeProps(container, node) {
@@ -3918,6 +3943,7 @@ function renderNodeProps(container, node) {
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
     <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
+    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(node)}</div>
   `;
     document.getElementById('p-shape').addEventListener('change', (e) => {
         node.shape = e.target.value;
@@ -3979,6 +4005,7 @@ function renderNodeProps(container, node) {
         },
         true,
     );
+    bindLayerDropdown(node);
 }
 
 function renderEdgeProps(container, edge) {
@@ -4026,6 +4053,7 @@ function renderEdgeProps(container, edge) {
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
     <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>
+    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(edge)}</div>
   `;
     document.getElementById('p-dir').addEventListener('change', (e) => {
         edge.direction = e.target.value;
@@ -4051,6 +4079,7 @@ function renderEdgeProps(container, edge) {
         edge.label = v;
     });
     bindFontControls(edge, { size: 11 });
+    bindLayerDropdown(edge);
 }
 
 function renderLineProps(container, line) {
@@ -4094,6 +4123,7 @@ function renderLineProps(container, line) {
     <div class="prop-group"><label>End</label><select id="p-end-sym">${symOpts('endSymbol')}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>
+    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(line)}</div>
   `;
     document.getElementById('p-curve-style').addEventListener('change', (e) => {
         line.curveStyle = e.target.value;
@@ -4124,6 +4154,7 @@ function renderLineProps(container, line) {
         line.label = v;
     });
     bindFontControls(line, { size: 11 });
+    bindLayerDropdown(line);
 }
 
 function renderAnnProps(container, ann) {
@@ -4168,6 +4199,7 @@ function renderAnnProps(container, ann) {
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(ann.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-ann-w" value="${Math.round(ann.width || annBBox(ann).w)}" min="40"></div>
     <div class="prop-group"><label>Height</label><input type="number" id="p-ann-h" value="${Math.round(ann.height || annBBox(ann).h)}" min="10"></div>
+    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(ann)}</div>
   `;
 
     // Text (textarea works with bindPropInput since it fires 'input' and 'change')
@@ -4253,6 +4285,7 @@ function renderAnnProps(container, ann) {
         },
         true,
     );
+    bindLayerDropdown(ann);
 }
 
 function bindPropInput(id, setter, isNumber) {
