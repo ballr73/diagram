@@ -568,37 +568,177 @@
                 </div>
                 <!-- Snap to Grid toggle -->
                 <div class="tool-group toolbar-separator">
-                    <button id="btn-snap" title="Snap to grid (toggle)" aria-pressed="false">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <button
+                        id="btn-snap"
+                        title="Snap to grid (toggle)"
+                        aria-pressed="false"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                        >
                             <!-- Off state: plain dot grid -->
                             <g class="snap-icon-off">
-                                <circle cx="3"  cy="3"  r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="8"  cy="3"  r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="13" cy="3"  r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="3"  cy="8"  r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="8"  cy="8"  r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="13" cy="8"  r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="3"  cy="13" r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="8"  cy="13" r="1" fill="currentColor" opacity="0.5"/>
-                                <circle cx="13" cy="13" r="1" fill="currentColor" opacity="0.5"/>
+                                <circle
+                                    cx="3"
+                                    cy="3"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="8"
+                                    cy="3"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="13"
+                                    cy="3"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="3"
+                                    cy="8"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="8"
+                                    cy="8"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="13"
+                                    cy="8"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="3"
+                                    cy="13"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="8"
+                                    cy="13"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
+                                <circle
+                                    cx="13"
+                                    cy="13"
+                                    r="1"
+                                    fill="currentColor"
+                                    opacity="0.5"
+                                />
                             </g>
                             <!-- On state: dot grid + crosshair on centre dot -->
                             <g class="snap-icon-on">
-                                <circle cx="3"  cy="3"  r="1" fill="currentColor"/>
-                                <circle cx="8"  cy="3"  r="1" fill="currentColor"/>
-                                <circle cx="13" cy="3"  r="1" fill="currentColor"/>
-                                <circle cx="3"  cy="8"  r="1" fill="currentColor"/>
-                                <circle cx="13" cy="8"  r="1" fill="currentColor"/>
-                                <circle cx="3"  cy="13" r="1" fill="currentColor"/>
-                                <circle cx="8"  cy="13" r="1" fill="currentColor"/>
-                                <circle cx="13" cy="13" r="1" fill="currentColor"/>
+                                <circle
+                                    cx="3"
+                                    cy="3"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="8"
+                                    cy="3"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="13"
+                                    cy="3"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="3"
+                                    cy="8"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="13"
+                                    cy="8"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="3"
+                                    cy="13"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="8"
+                                    cy="13"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                                <circle
+                                    cx="13"
+                                    cy="13"
+                                    r="1"
+                                    fill="currentColor"
+                                />
                                 <!-- Highlighted centre dot (larger) -->
-                                <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                                <circle
+                                    cx="8"
+                                    cy="8"
+                                    r="2"
+                                    fill="currentColor"
+                                />
                                 <!-- Crosshair lines through centre -->
-                                <line x1="8" y1="4.5" x2="8" y2="6"   stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                <line x1="8" y1="10"  x2="8" y2="11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                <line x1="4.5" y1="8" x2="6"   y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                <line x1="10"  y1="8" x2="11.5" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                <line
+                                    x1="8"
+                                    y1="4.5"
+                                    x2="8"
+                                    y2="6"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                />
+                                <line
+                                    x1="8"
+                                    y1="10"
+                                    x2="8"
+                                    y2="11.5"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                />
+                                <line
+                                    x1="4.5"
+                                    y1="8"
+                                    x2="6"
+                                    y2="8"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                />
+                                <line
+                                    x1="10"
+                                    y1="8"
+                                    x2="11.5"
+                                    y2="8"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                />
                             </g>
                         </svg>
                     </button>
@@ -1309,14 +1449,42 @@
                     <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <!-- Grid patterns: minor every 20px, major every 100px -->
-                            <pattern id="grid-minor" x="0" y="0" width="20" height="20"
-                                     patternUnits="userSpaceOnUse">
-                                <circle cx="0" cy="0" r="0.6" fill="var(--grid-dot-minor, #94a3b8)" opacity="0.5"/>
+                            <pattern
+                                id="grid-minor"
+                                x="0"
+                                y="0"
+                                width="20"
+                                height="20"
+                                patternUnits="userSpaceOnUse"
+                            >
+                                <circle
+                                    cx="0"
+                                    cy="0"
+                                    r="0.6"
+                                    fill="var(--grid-dot-minor, #94a3b8)"
+                                    opacity="0.5"
+                                />
                             </pattern>
-                            <pattern id="grid-major" x="0" y="0" width="100" height="100"
-                                     patternUnits="userSpaceOnUse">
-                                <rect width="100" height="100" fill="url(#grid-minor)"/>
-                                <circle cx="0" cy="0" r="1.2" fill="var(--grid-dot-major, #64748b)" opacity="0.7"/>
+                            <pattern
+                                id="grid-major"
+                                x="0"
+                                y="0"
+                                width="100"
+                                height="100"
+                                patternUnits="userSpaceOnUse"
+                            >
+                                <rect
+                                    width="100"
+                                    height="100"
+                                    fill="url(#grid-minor)"
+                                />
+                                <circle
+                                    cx="0"
+                                    cy="0"
+                                    r="1.2"
+                                    fill="var(--grid-dot-major, #64748b)"
+                                    opacity="0.7"
+                                />
                             </pattern>
                             <marker
                                 id="arrowhead"
@@ -1443,8 +1611,15 @@
                             </marker>
                         </defs>
                         <!-- Grid background — covers infinite canvas, pointer-events:none so it doesn't block interaction -->
-                        <rect id="grid-bg" x="-1000000" y="-1000000" width="2000000" height="2000000"
-                              fill="url(#grid-major)" pointer-events="none"/>
+                        <rect
+                            id="grid-bg"
+                            x="-1000000"
+                            y="-1000000"
+                            width="2000000"
+                            height="2000000"
+                            fill="url(#grid-major)"
+                            pointer-events="none"
+                        />
                         <g id="bg-annotations-layer"></g>
                         <g id="shapes-layer"></g>
                         <g id="lines-layer"></g>
@@ -1455,36 +1630,41 @@
                 </div>
 
                 <div id="right-panel">
-                <div id="properties-panel">
-                    <div id="properties-header">Properties</div>
-                    <div id="properties-content">
-                        <p class="no-selection">Nothing selected</p>
+                    <div id="properties-panel">
+                        <div id="properties-header">Properties</div>
+                        <div id="properties-content">
+                            <p class="no-selection">Nothing selected</p>
+                        </div>
                     </div>
-                    <div id="properties-hint">
-                        <p>Keyboard shortcuts:</p>
-                        <ul>
-                            <li><kbd>S</kbd> Select tool</li>
-                            <li><kbd>B</kbd> Box tool</li>
-                            <li><kbd>C</kbd> Connector tool</li>
-                            <li><kbd>L</kbd> Line tool</li>
-                            <li><kbd>T</kbd> Text tool</li>
-                            <li><kbd>Del</kbd> Delete selected</li>
-                            <li><kbd>Ctrl+Z</kbd> Undo</li>
-                            <li><kbd>Ctrl+Y</kbd> Redo</li>
-                            <li><kbd>Dbl-click</kbd> Edit label</li>
-                        </ul>
-                    </div>
-                </div>
 
-                <div id="layers-panel">
-                    <div id="layers-header">
-                        <span>Layers</span>
-                        <button id="btn-add-layer" title="Add layer">
-                            <svg viewBox="0 0 16 16" width="14" height="14"><line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        </button>
+                    <div id="layers-panel">
+                        <div id="layers-header">
+                            <span>Layers</span>
+                            <button id="btn-add-layer" title="Add layer">
+                                <svg viewBox="0 0 16 16" width="14" height="14">
+                                    <line
+                                        x1="8"
+                                        y1="2"
+                                        x2="8"
+                                        y2="14"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    />
+                                    <line
+                                        x1="2"
+                                        y1="8"
+                                        x2="14"
+                                        y2="8"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="layers-list"></div>
                     </div>
-                    <div id="layers-list"></div>
-                </div>
                 </div>
             </div>
         </div>
