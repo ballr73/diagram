@@ -874,11 +874,19 @@ input.inline-input {
 /* ============================================================
    Properties panel
    ============================================================ */
-#properties-panel {
+#right-panel {
+    display: flex;
+    flex-direction: column;
     width: 210px;
     flex-shrink: 0;
-    background: #fff;
     border-left: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+#properties-panel {
+    flex: 1;
+    min-height: 0;
+    background: #fff;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -986,6 +994,163 @@ kbd {
     font-family: monospace;
     color: #475569;
     white-space: nowrap;
+}
+
+/* ============================================================
+   Layers Panel
+   ============================================================ */
+#layers-panel {
+    flex-shrink: 0;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    min-height: 120px;
+    max-height: 30%;
+    overflow: hidden;
+}
+
+#layers-header {
+    padding: 8px 14px 7px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#layers-header button {
+    background: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 2px 5px;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+#layers-header button:hover {
+    background: #f1f5f9;
+    color: #2563eb;
+    border-color: #93c5fd;
+}
+
+#layers-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.layer-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 1px 4px;
+    font-size: 12px;
+    color: #1e293b;
+    transition: background 0.1s;
+    user-select: none;
+}
+
+.layer-row:hover {
+    background: #f1f5f9;
+}
+
+.layer-row.layer-active {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.layer-row.layer-hidden {
+    color: #94a3b8;
+}
+
+.layer-eye {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.layer-eye:hover {
+    color: #2563eb;
+}
+
+.layer-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.layer-rename-input {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    font-family: inherit;
+    padding: 1px 4px;
+    border: 1px solid #93c5fd;
+    border-radius: 3px;
+    outline: none;
+    background: #fff;
+    color: #1e293b;
+}
+
+.layer-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.1s, color 0.1s;
+}
+
+.layer-row:hover .layer-delete {
+    opacity: 1;
+}
+
+.layer-delete:hover {
+    color: #ef4444;
+}
+
+.layer-delete:disabled {
+    opacity: 0 !important;
+    cursor: default;
+}
+
+.active-layer-hint {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 6px;
+    padding: 4px 6px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.active-layer-hint strong {
+    color: #1d4ed8;
 }
 
 /* ============================================================

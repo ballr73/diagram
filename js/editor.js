@@ -9,6 +9,8 @@ const state = {
     lines: new Map(), // id → {id, x1, y1, x2, y2, waypoints, label, stroke, ...}
     annotations: new Map(), // id → {id, x, y, text}
     groups: new Map(), // id → {id, memberIds:[]}
+    layers: [], // [{id, name, visible}] — per-tab layer stack
+    activeLayerId: null, // id of the layer new shapes are placed on
     tabs: [],
     activeTabIndex: 0,
     selected: new Set(),
@@ -41,6 +43,8 @@ function createTab(name) {
         lines: new Map(),
         annotations: new Map(),
         groups: new Map(),
+        layers: [{ id: 'layer-1', name: 'Background', visible: true }],
+        activeLayerId: 'layer-1',
         history: [],
         historyIndex: -1,
         nextId: 1,
@@ -61,6 +65,8 @@ function flushTabState() {
     tab.viewCenterX = state.viewCenterX;
     tab.viewCenterY = state.viewCenterY;
     tab.selectedWaypoint = state.selectedWaypoint;
+    tab.layers = state.layers;
+    tab.activeLayerId = state.activeLayerId;
 }
 
 function loadTabToLiveState(index) {
@@ -72,6 +78,8 @@ function loadTabToLiveState(index) {
     state.lines = tab.lines;
     state.annotations = tab.annotations;
     state.groups = tab.groups;
+    state.layers = tab.layers;
+    state.activeLayerId = tab.activeLayerId;
     state.history = tab.history;
     state.historyIndex = tab.historyIndex;
     state.nextId = tab.nextId;
@@ -80,10 +88,52 @@ function loadTabToLiveState(index) {
     state.viewCenterY = tab.viewCenterY;
     state.selected = tab.selected;
     state.selectedWaypoint = tab.selectedWaypoint;
+    renderLayersPanel();
 }
 
 function genId() {
     return `id-${state.nextId++}`;
+}
+
+/**
+ * Ensures a tab has a valid layers array and that every element has a layerId.
+ * Called after loading any tab data (localStorage, file open, import).
+ * @param {object} tab - The tab object to fix up.
+ * @param {Array|null} savedLayers - Layers array from the saved data (may be null/undefined).
+ * @param {string|null} savedActiveLayerId - Active layer ID from saved data.
+ */
+function ensureLayerIds(tab, savedLayers, savedActiveLayerId) {
+    if (savedLayers && savedLayers.length > 0) {
+        tab.layers = savedLayers.map((l) => ({ ...l }));
+        tab.activeLayerId =
+            savedActiveLayerId &&
+            tab.layers.some((l) => l.id === savedActiveLayerId)
+                ? savedActiveLayerId
+                : tab.layers[0].id;
+    } else {
+        tab.layers = [{ id: 'layer-1', name: 'Background', visible: true }];
+        tab.activeLayerId = 'layer-1';
+    }
+    const defaultId = tab.layers[0].id;
+    // Assign default layer to any element that doesn't have one
+    for (const node of tab.nodes.values()) {
+        if (!node.layerId) node.layerId = defaultId;
+    }
+    for (const edge of tab.edges.values()) {
+        if (!edge.layerId) edge.layerId = defaultId;
+    }
+    for (const line of tab.lines.values()) {
+        if (!line.layerId) line.layerId = defaultId;
+    }
+    for (const ann of tab.annotations.values()) {
+        if (!ann.layerId) ann.layerId = defaultId;
+    }
+}
+
+/** Returns true if the layer with the given id is visible (defaults true if layer not found). */
+function isLayerVisible(layerId) {
+    const layer = state.layers.find((l) => l.id === layerId);
+    return layer ? layer.visible : true;
 }
 
 // ============================================================
@@ -120,6 +170,8 @@ function snapshot() {
             ]),
         ),
         nextId: state.nextId,
+        layers: state.layers.map((l) => ({ ...l })),
+        activeLayerId: state.activeLayerId,
     };
 }
 
@@ -158,6 +210,8 @@ function saveToLocalStorage() {
                 lines: [...tab.lines.values()],
                 annotations: [...tab.annotations.values()],
                 groups: [...tab.groups.values()],
+                layers: tab.layers || [],
+                activeLayerId: tab.activeLayerId || null,
                 nextId: tab.nextId,
                 zoom: tab.zoom,
                 viewCenterX: tab.viewCenterX,
@@ -206,6 +260,7 @@ function loadFromLocalStorage() {
                 if (td.zoom != null) tab.zoom = td.zoom;
                 if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
                 if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
+                ensureLayerIds(tab, td.layers, td.activeLayerId);
                 return tab;
             });
             if (!state.tabs.length) state.tabs = [createTab('tab-1')];
@@ -240,6 +295,7 @@ function loadFromLocalStorage() {
                 tab.annotations.set(a.id, { ...a }),
             );
             if (data.nextId) tab.nextId = data.nextId;
+            ensureLayerIds(tab, null, null);
             loadTabToLiveState(0);
         }
         if (data.diagramName) state.diagramName = data.diagramName;
@@ -299,6 +355,14 @@ function restoreSnapshot(snap) {
         state.groups.set(k, { ...v, memberIds: [...(v.memberIds || [])] }),
     );
     state.nextId = snap.nextId;
+    if (snap.layers) {
+        state.layers = snap.layers.map((l) => ({ ...l }));
+        state.activeLayerId = snap.activeLayerId;
+        if (state.tabs[state.activeTabIndex]) {
+            state.tabs[state.activeTabIndex].layers = state.layers;
+            state.tabs[state.activeTabIndex].activeLayerId = state.activeLayerId;
+        }
+    }
     if (state.tabs[state.activeTabIndex]) {
         state.tabs[state.activeTabIndex].nextId = state.nextId;
         state.tabs[state.activeTabIndex].selectedWaypoint = null;
@@ -306,6 +370,7 @@ function restoreSnapshot(snap) {
     state.selected.clear();
     state.selectedWaypoint = null;
     render();
+    renderLayersPanel();
     updatePropertiesPanel();
 }
 
@@ -429,6 +494,8 @@ function buildDiagramBlob() {
             lines: [...tab.lines.values()],
             annotations: [...tab.annotations.values()],
             groups: [...tab.groups.values()],
+            layers: tab.layers || [],
+            activeLayerId: tab.activeLayerId || null,
             zoom: tab.zoom,
             viewCenterX: tab.viewCenterX,
             viewCenterY: tab.viewCenterY,
@@ -493,6 +560,7 @@ function importDiagramData(data, filename) {
         state.tabs = data.tabs.map((td, i) => {
             const tab = createTab(td.name || `tab-${i + 1}`);
             loadTabData(tab, td);
+            ensureLayerIds(tab, td.layers, td.activeLayerId);
             return tab;
         });
         if (!state.tabs.length) state.tabs = [createTab('tab-1')];
@@ -500,6 +568,7 @@ function importDiagramData(data, filename) {
     } else {
         const tab = createTab('tab-1');
         loadTabData(tab, data);
+        ensureLayerIds(tab, null, null);
         state.tabs = [tab];
         loadTabToLiveState(0);
     }
@@ -846,6 +915,7 @@ function getNodeAt(x, y) {
     const entries = [...state.nodes.entries()];
     for (let i = entries.length - 1; i >= 0; i--) {
         const [, node] = entries[i];
+        if (!isLayerVisible(node.layerId)) continue;
         if (
             x >= node.x &&
             x <= node.x + node.width &&
@@ -862,6 +932,7 @@ function getAnnotationAt(x, y, layer = null) {
     const entries = [...state.annotations.entries()];
     for (let i = entries.length - 1; i >= 0; i--) {
         const [, ann] = entries[i];
+        if (!isLayerVisible(ann.layerId)) continue;
         if (layer !== null) {
             const annLayer = ann.zLayer === 'bg' ? 'bg' : 'fg';
             if (annLayer !== layer) continue;
@@ -941,6 +1012,7 @@ function annBBox(ann) {
 
 function getEdgeAt(x, y, threshold = 8) {
     for (const edge of state.edges.values()) {
+        if (!isLayerVisible(edge.layerId)) continue;
         const pts = edgePoints(edge);
         if (!pts) continue;
         for (let i = 0; i < pts.length - 1; i++) {
@@ -1538,12 +1610,14 @@ function renderShapes() {
     let z = 0;
     for (const node of state.nodes.values()) nodeZ.set(node.id, z++);
 
-    // Build combined item list
+    // Build combined item list (skip elements on hidden layers)
     const items = [];
     for (const node of state.nodes.values()) {
+        if (!isLayerVisible(node.layerId)) continue;
         items.push({ kind: 'node', item: node, z: nodeZ.get(node.id) });
     }
     for (const edge of state.edges.values()) {
+        if (!isLayerVisible(edge.layerId)) continue;
         const fz = nodeZ.get(edge.from) ?? 0;
         const tz = nodeZ.get(edge.to) ?? 0;
         items.push({ kind: 'edge', item: edge, z: Math.max(fz, tz) });
@@ -1571,6 +1645,7 @@ function linePoints(line) {
 
 function getLineAt(x, y, threshold = 8) {
     for (const line of state.lines.values()) {
+        if (!isLayerVisible(line.layerId)) continue;
         const pts = linePoints(line);
         for (let i = 0; i < pts.length - 1; i++) {
             if (
@@ -1592,6 +1667,7 @@ function getLineAt(x, y, threshold = 8) {
 function renderLines() {
     linesLayer.innerHTML = '';
     for (const line of state.lines.values()) {
+        if (!isLayerVisible(line.layerId)) continue;
         const sel = state.selected.has(line.id);
         const curved = line.curveStyle === 'curved';
         const pts = linePoints(line);
@@ -1734,6 +1810,7 @@ function renderAnnotations() {
     annotationsLayer.innerHTML = '';
     bgAnnotationsLayer.innerHTML = '';
     for (const ann of state.annotations.values()) {
+        if (!isLayerVisible(ann.layerId)) continue;
         const targetLayer =
             ann.zLayer === 'bg' ? bgAnnotationsLayer : annotationsLayer;
         const sel = state.selected.has(ann.id);
@@ -2230,7 +2307,7 @@ function textMouseDown(p, hit) {
     }
     // Create annotation on canvas
     const id = genId();
-    state.annotations.set(id, { id, x: p.x, y: p.y + 5, text: 'Text' });
+    state.annotations.set(id, { id, x: p.x, y: p.y + 5, text: 'Text', layerId: state.activeLayerId });
     state.selected.clear();
     state.selected.add(id);
     render();
@@ -2536,6 +2613,7 @@ function dragEnd(p) {
             height: h,
             label: defaultLabels[shape] || 'Shape',
             shape,
+            layerId: state.activeLayerId,
         });
         state.selected.clear();
         state.selected.add(id);
@@ -2558,6 +2636,7 @@ function dragEnd(p) {
             to: target.id,
             label: '',
             direction: 'forward',
+            layerId: state.activeLayerId,
         });
         state.selected.clear();
         state.selected.add(id);
@@ -2582,6 +2661,7 @@ function dragEnd(p) {
             startSymbol: 'none',
             endSymbol: 'none',
             label: '',
+            layerId: state.activeLayerId,
         });
         state.selected.clear();
         state.selected.add(id);
@@ -3498,7 +3578,7 @@ function pasteClipboard() {
     for (const node of cb.nodes) {
         const newId = genId();
         idMap.set(node.id, newId);
-        const pasted = { ...node, id: newId, x: node.x + off, y: node.y + off };
+        const pasted = { ...node, id: newId, x: node.x + off, y: node.y + off, layerId: state.activeLayerId };
         delete pasted.groupId; // will be reassigned below
         state.nodes.set(newId, pasted);
         if (!groupMemberOldIds.has(node.id)) newIds.push(newId);
@@ -3511,6 +3591,7 @@ function pasteClipboard() {
             id: newId,
             from: idMap.get(edge.from) || edge.from,
             to: idMap.get(edge.to) || edge.to,
+            layerId: state.activeLayerId,
             waypoints: (edge.waypoints || []).map((wp) => ({
                 ...wp,
                 id: genId(),
@@ -3528,6 +3609,7 @@ function pasteClipboard() {
             y1: line.y1 + off,
             x2: line.x2 + off,
             y2: line.y2 + off,
+            layerId: state.activeLayerId,
             waypoints: (line.waypoints || []).map((wp) => ({
                 ...wp,
                 id: genId(),
@@ -3541,7 +3623,7 @@ function pasteClipboard() {
     for (const ann of cb.annotations) {
         const newId = genId();
         idMap.set(ann.id, newId);
-        const pasted = { ...ann, id: newId, x: ann.x + off, y: ann.y + off };
+        const pasted = { ...ann, id: newId, x: ann.x + off, y: ann.y + off, layerId: state.activeLayerId };
         delete pasted.groupId;
         state.annotations.set(newId, pasted);
         if (!groupMemberOldIds.has(ann.id)) newIds.push(newId);
@@ -3622,7 +3704,9 @@ function updatePropertiesPanel() {
     const content = document.getElementById('properties-content');
 
     if (state.selected.size === 0) {
-        content.innerHTML = '<p class="no-selection">Nothing selected</p>';
+        const activeLayer = (state.layers || []).find((l) => l.id === state.activeLayerId);
+        const layerName = activeLayer ? activeLayer.name : 'Background';
+        content.innerHTML = `<p class="no-selection">Nothing selected</p><p class="active-layer-hint">Active layer: <strong>${layerName}</strong></p>`;
         return;
     }
     if (state.selected.size > 1) {
@@ -4737,6 +4821,7 @@ function initIconLibrary() {
             y: diagramPt.y - SIZE / 2,
             width: SIZE,
             height: SIZE,
+            layerId: state.activeLayerId,
         });
         // Pre-cache the icon's data URI for export
         loadIconAsDataURI(iconPath);
@@ -4746,6 +4831,175 @@ function initIconLibrary() {
         render();
         updatePropertiesPanel();
         updateToolbarStatus();
+    });
+}
+
+// ============================================================
+// Layers Panel
+// ============================================================
+
+function renderLayersPanel() {
+    const list = document.getElementById('layers-list');
+    if (!list) return;
+    list.innerHTML = '';
+    const layers = state.layers || [];
+    // Display in reverse order so top of list = most recently added / frontmost
+    for (let i = layers.length - 1; i >= 0; i--) {
+        const layer = layers[i];
+        const isActive = layer.id === state.activeLayerId;
+        const row = document.createElement('div');
+        row.className = 'layer-row' + (isActive ? ' layer-active' : '') + (!layer.visible ? ' layer-hidden' : '');
+        row.dataset.layerId = layer.id;
+
+        // Eye toggle
+        const eye = document.createElement('button');
+        eye.className = 'layer-eye';
+        eye.title = layer.visible ? 'Hide layer' : 'Show layer';
+        eye.innerHTML = layer.visible
+            ? '<svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5S11.5 3 8 3zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>'
+            : '<svg viewBox="0 0 16 16" width="14" height="14"><path d="M13.36 2.64 2.64 13.36M8 3C4.5 3 1.5 8 1.5 8s3 5 6.5 5 6.5-5 6.5-5S11.5 3 8 3z" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="1.2"/></svg>';
+        eye.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleLayerVisibility(layer.id);
+        });
+
+        // Layer name
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'layer-name';
+        nameSpan.textContent = layer.name;
+        nameSpan.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            startLayerRename(layer.id);
+        });
+
+        // Delete button
+        const del = document.createElement('button');
+        del.className = 'layer-delete';
+        del.title = 'Delete layer';
+        del.innerHTML = '<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 4h10M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>';
+        del.disabled = layers.length <= 1;
+        del.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteLayer(layer.id);
+        });
+
+        row.appendChild(eye);
+        row.appendChild(nameSpan);
+        row.appendChild(del);
+        row.addEventListener('click', () => setActiveLayer(layer.id));
+        list.appendChild(row);
+    }
+}
+
+function setActiveLayer(layerId) {
+    if (!state.layers.find((l) => l.id === layerId)) return;
+    state.activeLayerId = layerId;
+    if (state.tabs[state.activeTabIndex]) {
+        state.tabs[state.activeTabIndex].activeLayerId = layerId;
+    }
+    renderLayersPanel();
+    updatePropertiesPanel();
+}
+
+function toggleLayerVisibility(layerId) {
+    const layer = state.layers.find((l) => l.id === layerId);
+    if (!layer) return;
+    layer.visible = !layer.visible;
+    // Deselect elements on hidden layer
+    if (!layer.visible) {
+        for (const id of [...state.selected]) {
+            const el = state.nodes.get(id) || state.edges.get(id) || state.lines.get(id) || state.annotations.get(id);
+            if (el && el.layerId === layerId) state.selected.delete(id);
+        }
+    }
+    render();
+    renderLayersPanel();
+    updatePropertiesPanel();
+    saveToLocalStorage();
+}
+
+function addLayer() {
+    const newLayer = {
+        id: `layer-${Date.now()}`,
+        name: `Layer ${state.layers.length + 1}`,
+        visible: true,
+    };
+    state.layers.push(newLayer);
+    state.activeLayerId = newLayer.id;
+    if (state.tabs[state.activeTabIndex]) {
+        state.tabs[state.activeTabIndex].layers = state.layers;
+        state.tabs[state.activeTabIndex].activeLayerId = state.activeLayerId;
+    }
+    renderLayersPanel();
+    saveToLocalStorage();
+}
+
+function deleteLayer(layerId) {
+    if (state.layers.length <= 1) return;
+    const idx = state.layers.findIndex((l) => l.id === layerId);
+    if (idx === -1) return;
+    // Remove all elements on this layer
+    for (const [id, node] of state.nodes) {
+        if (node.layerId === layerId) state.nodes.delete(id);
+    }
+    for (const [id, edge] of state.edges) {
+        if (edge.layerId === layerId) state.edges.delete(id);
+    }
+    for (const [id, line] of state.lines) {
+        if (line.layerId === layerId) state.lines.delete(id);
+    }
+    for (const [id, ann] of state.annotations) {
+        if (ann.layerId === layerId) state.annotations.delete(id);
+    }
+    state.layers.splice(idx, 1);
+    // If active layer was deleted, switch to first available
+    if (state.activeLayerId === layerId) {
+        state.activeLayerId = state.layers[0].id;
+    }
+    if (state.tabs[state.activeTabIndex]) {
+        state.tabs[state.activeTabIndex].layers = state.layers;
+        state.tabs[state.activeTabIndex].activeLayerId = state.activeLayerId;
+    }
+    state.selected.clear();
+    pushHistory();
+    render();
+    renderLayersPanel();
+    updatePropertiesPanel();
+}
+
+function renameLayer(layerId, newName) {
+    const layer = state.layers.find((l) => l.id === layerId);
+    if (!layer) return;
+    const trimmed = newName.trim();
+    if (trimmed) layer.name = trimmed;
+    renderLayersPanel();
+    updatePropertiesPanel();
+    saveToLocalStorage();
+}
+
+function startLayerRename(layerId) {
+    // Find the current nameSpan from the live DOM (the single-click may have
+    // triggered renderLayersPanel() before dblclick fired, detaching the old span)
+    const row = document.querySelector(`.layer-row[data-layer-id="${layerId}"]`);
+    if (!row) return;
+    const nameSpan = row.querySelector('.layer-name');
+    if (!nameSpan) return;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = nameSpan.textContent;
+    input.className = 'layer-rename-input';
+    nameSpan.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const commit = () => {
+        renameLayer(layerId, input.value);
+    };
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        if (e.key === 'Escape') { input.removeEventListener('blur', commit); renderLayersPanel(); }
     });
 }
 
@@ -5117,6 +5371,9 @@ function init() {
     initTab.viewCenterY = state.viewCenterY;
     initTab.selected = state.selected;
     initTab.selectedWaypoint = state.selectedWaypoint;
+    // layers already set by createTab default
+    state.layers = initTab.layers;
+    state.activeLayerId = initTab.activeLayerId;
     state.tabs = [initTab];
     state.activeTabIndex = 0;
 
@@ -5238,6 +5495,7 @@ function init() {
         updateSnapButton();
         saveToLocalStorage();
     });
+    on('btn-add-layer', 'click', addLayer);
     on('zoom-select', 'change', (e) => {
         const val = e.target.value;
         if (val === 'fit') {
@@ -5320,6 +5578,7 @@ function init() {
     loadFromLocalStorage();
     updateTitleDisplay();
     updateSnapButton();
+    renderLayersPanel();
 
     // Pre-cache data URIs for any symbol icons loaded from localStorage
     cacheAllSymbolIcons();
