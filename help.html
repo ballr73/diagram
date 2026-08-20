@@ -35,6 +35,7 @@
                 <div class="nav-section">Editing</div>
                 <a href="#zoom-pan">Zoom &amp; Pan</a>
                 <a href="#grid-snap">Grid &amp; Snap</a>
+                <a href="#layers">Layers</a>
                 <a href="#editing-elements">Editing Elements</a>
                 <a href="#properties-panel">Properties Panel</a>
                 <a href="#z-order">Z-Order</a>
@@ -758,6 +759,63 @@
                     <div class="note">The snap preference is saved automatically and restored the next time you open the editor.</div>
                 </section>
 
+                <!-- ── Layers ─────────────────────────────────────────── -->
+                <section id="layers">
+                    <h2>Layers</h2>
+                    <p>
+                        Each tab has its own <strong>Layers panel</strong> below the Properties panel.
+                        By default every diagram starts with a single <strong>Background</strong> layer.
+                    </p>
+
+                    <h3>Layers Panel</h3>
+                    <table>
+                        <tr><th>Control</th><th>Action</th></tr>
+                        <tr>
+                            <td>Click a layer row</td>
+                            <td>Make it the active layer — new shapes are placed on this layer</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Eye icon</strong></td>
+                            <td>Toggle layer visibility on/off</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Double-click</strong> layer name</td>
+                            <td>Rename the layer inline (Enter to confirm, Escape to cancel)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>＋ button</strong> (panel header)</td>
+                            <td>Add a new layer (automatically becomes active)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trash icon</strong></td>
+                            <td>Delete the layer and all its shapes (disabled when only one layer exists)</td>
+                        </tr>
+                    </table>
+
+                    <h3>Active Layer</h3>
+                    <p>
+                        The active layer name is shown in the Properties panel when nothing is selected.
+                        All new shapes, connectors, lines, and annotations are placed on the active layer.
+                    </p>
+
+                    <h3>Visibility</h3>
+                    <p>
+                        Hidden layers are excluded from the canvas and are not selectable.
+                        All layers — visible or hidden — are included in SVG and PNG exports.
+                    </p>
+
+                    <h3>Moving a Shape to a Different Layer</h3>
+                    <p>
+                        Select a shape and use the <strong>Layer</strong> dropdown at the bottom of the
+                        Properties panel to move it to any layer.
+                    </p>
+
+                    <div class="note">
+                        Diagrams created before the layers feature was added are automatically assigned
+                        to the Background layer when opened.
+                    </div>
+                </section>
+
                 <!-- ── Editing Elements ───────────────────────────────── -->
                 <section id="editing-elements">
                     <h2>Editing Elements</h2>
@@ -858,6 +916,10 @@
                             <td>Width / Height</td>
                             <td>Size</td>
                         </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the shape to a different layer</td>
+                        </tr>
                     </table>
 
                     <h3>Icon (symbol) properties</h3>
@@ -892,6 +954,10 @@
                         <tr>
                             <td>Width / Height</td>
                             <td>Size</td>
+                        </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the icon to a different layer</td>
                         </tr>
                     </table>
 
@@ -928,6 +994,10 @@
                             <td>Label Font</td>
                             <td>Size, Bold, Italic, Underline</td>
                         </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the connector to a different layer</td>
+                        </tr>
                     </table>
 
                     <h3>Line properties</h3>
@@ -963,6 +1033,10 @@
                         <tr>
                             <td>Label Font</td>
                             <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the line to a different layer</td>
                         </tr>
                     </table>
 
@@ -1010,6 +1084,10 @@
                         <tr>
                             <td>Width / Height</td>
                             <td>Explicit box size</td>
+                        </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the annotation to a different layer</td>
                         </tr>
                     </table>
                 </section>

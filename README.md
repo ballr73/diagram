@@ -247,6 +247,38 @@ The snap preference is saved automatically and restored the next time you open t
 
 ---
 
+## Layers
+
+Each tab has its own **Layers panel** (below the Properties panel on the right). By default every diagram starts with a single **Background** layer.
+
+### Layers panel
+
+| Control | Action |
+|---------|--------|
+| Click a layer row | Make it the active layer — new shapes are placed on this layer |
+| **Eye icon** | Toggle layer visibility on/off |
+| **Double-click** layer name | Rename the layer inline (Enter to confirm, Escape to cancel) |
+| **＋ button** (panel header) | Add a new layer (automatically becomes active) |
+| **Trash icon** | Delete the layer and all its shapes (disabled when only one layer exists) |
+
+### Active layer
+
+The active layer name is shown in the Properties panel when nothing is selected ("Active layer: **Name**"). All new shapes, connectors, lines, and annotations are created on the active layer.
+
+### Visibility
+
+Hidden layers are removed from the canvas and are not selectable. All layers — visible or hidden — are included in SVG and PNG exports.
+
+### Moving a shape to a different layer
+
+Select a shape and use the **Layer** dropdown in the Properties panel to move it to any layer.
+
+### Backward compatibility
+
+Diagrams created before the layers feature was added are automatically assigned to the Background layer when opened.
+
+---
+
 ## Editing Elements
 
 ### Moving
@@ -287,6 +319,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Opacity | Fill opacity 0–100% (stroke and label stay fully opaque) |
 | X / Y | Position on canvas |
 | Width / Height | Size |
+| Layer | Move the shape to a different layer |
 
 ### Icon (symbol) properties
 
@@ -298,6 +331,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Font | Size, Bold, Italic, Underline |
 | X / Y | Position on canvas |
 | Width / Height | Size |
+| Layer | Move the icon to a different layer |
 
 ### Connector properties
 
@@ -309,6 +343,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Stroke | Line colour |
 | Label | Text displayed along the connector |
 | Label Font | Size, Bold, Italic, Underline |
+| Layer | Move the connector to a different layer |
 
 ### Line properties
 
@@ -321,6 +356,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | End | End symbol at end point: None / Dot / Square |
 | Label | Text displayed at the midpoint |
 | Label Font | Size, Bold, Italic, Underline |
+| Layer | Move the line to a different layer |
 
 ### Annotation properties
 
@@ -335,6 +371,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Border | Stroke colour and style (Solid/Dashed/Dotted) |
 | X / Y | Anchor position on canvas |
 | Width / Height | Explicit box size; drag resize handles to set visually |
+| Layer | Move the annotation to a different layer |
 
 ---
 
