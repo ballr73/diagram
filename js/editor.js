@@ -25,7 +25,13 @@ const state = {
     viewCenterY: 0,
     diagramName: null, // null = unsaved/new; string = last saved filename (without .json)
     dirty: false, // true when there are unsaved changes
+    snapToGrid: false, // snap shapes to grid when dragging
 };
+
+/** Snap a value to the nearest grid point (only when snap is enabled). */
+function snapVal(v) {
+    return state.snapToGrid ? Math.round(v / GRID_SIZE) * GRID_SIZE : v;
+}
 
 function createTab(name) {
     return {
@@ -143,6 +149,7 @@ function saveToLocalStorage() {
         const data = {
             version: 2,
             diagramName: state.diagramName,
+            snapToGrid: state.snapToGrid,
             activeTabIndex: state.activeTabIndex,
             tabs: state.tabs.map((tab) => ({
                 name: tab.name,
@@ -236,6 +243,7 @@ function loadFromLocalStorage() {
             loadTabToLiveState(0);
         }
         if (data.diagramName) state.diagramName = data.diagramName;
+        if (data.snapToGrid != null) state.snapToGrid = data.snapToGrid;
         state.dirty = false;
         return true;
     } catch (_) {
@@ -631,9 +639,10 @@ async function buildExportSVG() {
     const uiLayer = clone.querySelector('#ui-layer');
     if (uiLayer) uiLayer.innerHTML = '';
     clone.querySelectorAll('.resize-handle').forEach((el) => el.remove());
-    clone
-        .querySelectorAll('.line-endpoint-handle')
-        .forEach((el) => el.remove());
+    clone.querySelectorAll('.line-endpoint-handle').forEach((el) => el.remove());
+    // Remove grid background from exports
+    const gridBg = clone.querySelector('#grid-bg');
+    if (gridBg) gridBg.remove();
 
     // Replace icon <image> hrefs with embedded data URIs
     clone.querySelectorAll('image').forEach((imgEl) => {
@@ -2157,13 +2166,14 @@ function selectMouseDown(p, hit, e) {
 
 // --- Box tool ---
 function boxMouseDown(p) {
-    drag = { type: 'draw-box', startX: p.x, startY: p.y };
+    const sx = snapVal(p.x), sy = snapVal(p.y);
+    drag = { type: 'draw-box', startX: sx, startY: sy };
     uiLayer.appendChild(
         svgEl('rect', {
             id: 'tmp',
             class: 'temp-shape',
-            x: p.x,
-            y: p.y,
+            x: sx,
+            y: sy,
             width: 0,
             height: 0,
         }),
@@ -2300,8 +2310,8 @@ function dragMove(p) {
         for (const [id, orig] of Object.entries(drag.origins)) {
             const item = state.nodes.get(id) || state.annotations.get(id);
             if (item) {
-                item.x = orig.x + dx;
-                item.y = orig.y + dy;
+                item.x = snapVal(orig.x + dx);
+                item.y = snapVal(orig.y + dy);
             }
         }
         drag.moved = true;
@@ -2340,8 +2350,8 @@ function dragMove(p) {
         const dx = p.x - drag.startX,
             dy = p.y - drag.startY;
         const node = state.nodes.get(drag.nodeId);
-        node.x = drag.origX + dx;
-        node.y = drag.origY + dy;
+        node.x = snapVal(drag.origX + dx);
+        node.y = snapVal(drag.origY + dy);
         drag.moved = true;
         render();
         return;
@@ -2397,8 +2407,8 @@ function dragMove(p) {
         const dx = p.x - drag.startX,
             dy = p.y - drag.startY;
         const ann = state.annotations.get(drag.annId);
-        ann.x = drag.origX + dx;
-        ann.y = drag.origY + dy;
+        ann.x = snapVal(drag.origX + dx);
+        ann.y = snapVal(drag.origY + dy);
         drag.moved = true;
         render();
         return;
@@ -2421,10 +2431,11 @@ function dragMove(p) {
     if (drag.type === 'draw-box') {
         const tmp = document.getElementById('tmp');
         if (!tmp) return;
-        tmp.setAttribute('x', Math.min(p.x, drag.startX));
-        tmp.setAttribute('y', Math.min(p.y, drag.startY));
-        tmp.setAttribute('width', Math.abs(p.x - drag.startX));
-        tmp.setAttribute('height', Math.abs(p.y - drag.startY));
+        const px = snapVal(p.x), py = snapVal(p.y);
+        tmp.setAttribute('x', Math.min(px, drag.startX));
+        tmp.setAttribute('y', Math.min(py, drag.startY));
+        tmp.setAttribute('width', Math.abs(px - drag.startX));
+        tmp.setAttribute('height', Math.abs(py - drag.startY));
         return;
     }
 
@@ -2503,8 +2514,9 @@ function dragEnd(p) {
 
     if (d.type === 'draw-box') {
         uiLayer.innerHTML = '';
-        const w = Math.abs(p.x - d.startX);
-        const h = Math.abs(p.y - d.startY);
+        const px = snapVal(p.x), py = snapVal(p.y);
+        const w = Math.abs(px - d.startX);
+        const h = Math.abs(py - d.startY);
         if (w < 20 || h < 10) return;
         const id = genId();
         const shape = state.currentShape;
@@ -2518,8 +2530,8 @@ function dragEnd(p) {
         };
         state.nodes.set(id, {
             id,
-            x: Math.min(p.x, d.startX),
-            y: Math.min(p.y, d.startY),
+            x: Math.min(px, d.startX),
+            y: Math.min(py, d.startY),
             width: w,
             height: h,
             label: defaultLabels[shape] || 'Shape',
@@ -2614,16 +2626,18 @@ function applyResize(p) {
         ny = y,
         nw = w,
         nh = h;
-    if (handle.includes('e')) nw = Math.max(40, w + dx);
-    if (handle.includes('s')) nh = Math.max(20, h + dy);
+    if (handle.includes('e')) nw = Math.max(40, snapVal(w + dx));
+    if (handle.includes('s')) nh = Math.max(20, snapVal(h + dy));
     if (handle.includes('w')) {
-        nx = x + dx;
-        nw = Math.max(40, w - dx);
+        const snappedX = snapVal(x + dx);
+        nx = snappedX;
+        nw = Math.max(40, x + w - snappedX);
         if (nw === 40) nx = x + w - 40;
     }
     if (handle.includes('n')) {
-        ny = y + dy;
-        nh = Math.max(20, h - dy);
+        const snappedY = snapVal(y + dy);
+        ny = snappedY;
+        nh = Math.max(20, y + h - snappedY);
         if (nh === 20) ny = y + h - 20;
     }
 
@@ -4281,6 +4295,7 @@ function updateTitleDisplay() {
 const ZOOM_MIN = 0.1;
 const ZOOM_MAX = 4.0;
 const ZOOM_PRESETS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+const GRID_SIZE = 20;
 
 function getCanvasSize() {
     const canvas = document.getElementById('canvas');
@@ -4300,6 +4315,14 @@ function setZoom(z) {
     state.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
     updateViewBox();
     syncZoomSelect();
+}
+
+function updateSnapButton() {
+    const btn = document.getElementById('btn-snap');
+    if (!btn) return;
+    btn.classList.toggle('btn-active', state.snapToGrid);
+    btn.setAttribute('aria-pressed', String(state.snapToGrid));
+    btn.title = state.snapToGrid ? 'Snap to grid: ON (click to disable)' : 'Snap to grid: OFF (click to enable)';
 }
 
 function syncZoomSelect() {
@@ -5208,6 +5231,13 @@ function init() {
     // Zoom
     on('btn-zoom-in', 'click', zoomIn);
     on('btn-zoom-out', 'click', zoomOut);
+
+    // Snap to grid
+    on('btn-snap', 'click', () => {
+        state.snapToGrid = !state.snapToGrid;
+        updateSnapButton();
+        saveToLocalStorage();
+    });
     on('zoom-select', 'change', (e) => {
         const val = e.target.value;
         if (val === 'fit') {
@@ -5289,6 +5319,7 @@ function init() {
     // Restore last diagram from localStorage (before seeding history)
     loadFromLocalStorage();
     updateTitleDisplay();
+    updateSnapButton();
 
     // Pre-cache data URIs for any symbol icons loaded from localStorage
     cacheAllSymbolIcons();

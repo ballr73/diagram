@@ -214,6 +214,19 @@ body,
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
+/* Generic active toggle state for toolbar buttons (e.g. snap-to-grid) */
+#toolbar button.btn-active {
+    background: #d97706;
+    border-color: #f59e0b;
+    color: #fff;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+
+/* Snap button icon states */
+#btn-snap .snap-icon-on  { display: none; }
+#btn-snap.btn-active .snap-icon-off { display: none; }
+#btn-snap.btn-active .snap-icon-on  { display: inline; }
+
 #toolbar button:disabled {
     opacity: 0.35;
     cursor: not-allowed;

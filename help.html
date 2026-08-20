@@ -34,6 +34,7 @@
 
                 <div class="nav-section">Editing</div>
                 <a href="#zoom-pan">Zoom &amp; Pan</a>
+                <a href="#grid-snap">Grid &amp; Snap</a>
                 <a href="#editing-elements">Editing Elements</a>
                 <a href="#properties-panel">Properties Panel</a>
                 <a href="#z-order">Z-Order</a>
@@ -719,6 +720,42 @@
                         <strong>Right-click and drag</strong> on the canvas to
                         pan.
                     </p>
+                </section>
+
+                <!-- ── Grid & Snap ────────────────────────────────────── -->
+                <section id="grid-snap">
+                    <h2>Grid &amp; Snap</h2>
+                    <h3>Grid</h3>
+                    <p>
+                        The canvas displays a subtle <strong>dot grid</strong> at all times — minor dots every 20 px and slightly larger dots every 100 px.
+                        The grid is a visual guide only and is <strong>not included</strong> in SVG or PNG exports.
+                    </p>
+
+                    <h3>Snap to Grid</h3>
+                    <p>
+                        Click the <strong>Snap</strong> button in the top toolbar (the dot-grid icon between zoom controls and undo/redo) to toggle snapping on or off.
+                    </p>
+                    <table>
+                        <tr><th>State</th><th>Icon</th><th>Behaviour</th></tr>
+                        <tr>
+                            <td><strong>Off</strong> (default)</td>
+                            <td>Faint dot grid</td>
+                            <td>Elements move freely</td>
+                        </tr>
+                        <tr>
+                            <td><strong>On</strong></td>
+                            <td>Bold centre dot with crosshair marks, amber button</td>
+                            <td>Elements snap to the nearest 20 px grid point</td>
+                        </tr>
+                    </table>
+                    <p>When snap is enabled, the following actions snap to the grid:</p>
+                    <ul>
+                        <li>Dragging a node (single or multi-selection)</li>
+                        <li>Dragging a text annotation</li>
+                        <li>Drawing a new shape (start and end corners both snap)</li>
+                        <li>Resizing a shape via its handles</li>
+                    </ul>
+                    <div class="note">The snap preference is saved automatically and restored the next time you open the editor.</div>
                 </section>
 
                 <!-- ── Editing Elements ───────────────────────────────── -->

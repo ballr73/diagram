@@ -222,6 +222,31 @@ Zoom range: 10%–400%.
 
 ---
 
+## Grid & Snap
+
+### Grid
+
+The canvas always displays a subtle **dot grid** in the background — minor dots every 20 px and slightly larger dots every 100 px. The grid is for visual reference only and is not included in SVG or PNG exports.
+
+### Snap to Grid
+
+Click the **Snap** button in the top toolbar (the dot-grid icon, between the zoom controls and undo/redo) to toggle snapping on or off.
+
+| State | Icon | Behaviour |
+|-------|------|-----------|
+| **Off** (default) | Faint dot grid | Elements move freely |
+| **On** | Bold centre dot with crosshair marks, amber button | Elements snap to the nearest 20 px grid point |
+
+When snap is enabled, the following actions snap to the grid:
+- Dragging a node (single or multi-selection)
+- Dragging a text annotation
+- Drawing a new shape (start corner and end corner both snap)
+- Resizing a shape via its handles
+
+The snap preference is saved automatically and restored the next time you open the editor.
+
+---
+
 ## Editing Elements
 
 ### Moving
