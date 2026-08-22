@@ -1056,13 +1056,14 @@ kbd {
     align-items: center;
     gap: 6px;
     padding: 5px 10px;
-    cursor: pointer;
+    cursor: grab;
     border-radius: 4px;
     margin: 1px 4px;
     font-size: 12px;
     color: #1e293b;
     transition: background 0.1s;
     user-select: none;
+    border-top: 2px solid transparent;
 }
 
 .layer-row:hover {
@@ -1076,6 +1077,16 @@ kbd {
 
 .layer-row.layer-hidden {
     color: #94a3b8;
+}
+
+.layer-row.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.layer-row.drag-over {
+    border-top: 2px solid #2563eb;
+    background: #eff6ff;
 }
 
 .layer-eye {

@@ -1214,9 +1214,7 @@ function svgEl(tag, attrs, text) {
 }
 
 function render() {
-    renderShapes();
-    renderLines();
-    renderAnnotations();
+    renderAll();
     renderGroupSelection();
 }
 
@@ -1598,41 +1596,236 @@ function renderEdgeGroup(edge) {
 }
 
 /**
- * Render all nodes and edges into shapes-layer, interleaved by Z-order.
- * Edge Z = max(Z of from-node, Z of to-node), so connectors always sit
- * at the same depth as the topmost node they connect to.
+ * Unified render pass: sorts ALL visible elements (nodes, edges, lines,
+ * annotations) by (layerIndex, withinLayerZ) and appends them all to
+ * shapesLayer. Higher layer index = rendered on top. Within the same layer,
+ * Map insertion order determines Z. bg-annotations always render at the back
+ * of their layer; fg-annotations (default) render at the front.
+ *
+ * The old separate linesLayer / annotationsLayer / bgAnnotationsLayer <g>
+ * elements are cleared but no longer written to — all content goes into
+ * shapesLayer so that inter-layer ordering works correctly.
  */
-function renderShapes() {
+function renderAll() {
     shapesLayer.innerHTML = '';
+    linesLayer.innerHTML = '';
+    annotationsLayer.innerHTML = '';
+    bgAnnotationsLayer.innerHTML = '';
 
-    // Assign Z-values based on Map insertion order (back = 0, front = N-1)
-    const nodeZ = new Map();
-    let z = 0;
-    for (const node of state.nodes.values()) nodeZ.set(node.id, z++);
+    // Build layerIdx lookup (position in state.layers = Z priority; last = top)
+    const layerIndex = new Map();
+    (state.layers || []).forEach((l, i) => layerIndex.set(l.id, i));
+    const getLayerIdx = (layerId) => layerIndex.get(layerId) ?? 0;
 
-    // Build combined item list (skip elements on hidden layers)
+    // Per-layer, per-type counters for within-layer Z (Map insertion order)
+    const layerTypeCounter = new Map();
+    const nextZ = (layerId, type) => {
+        const key = `${layerId || 'layer-1'}:${type}`;
+        const z = layerTypeCounter.get(key) ?? 0;
+        layerTypeCounter.set(key, z + 1);
+        return z;
+    };
+
+    // Pre-compute per-layer node Z (edges need it to inherit their node's Z)
+    const nodeLayerZ = new Map();
+    for (const node of state.nodes.values()) {
+        nodeLayerZ.set(node.id, nextZ(node.layerId, 'node'));
+    }
+
     const items = [];
+
     for (const node of state.nodes.values()) {
         if (!isLayerVisible(node.layerId)) continue;
-        items.push({ kind: 'node', item: node, z: nodeZ.get(node.id) });
+        items.push({ kind: 'node', item: node,
+            layerIdx: getLayerIdx(node.layerId),
+            withinZ: nodeLayerZ.get(node.id) ?? 0 });
     }
     for (const edge of state.edges.values()) {
         if (!isLayerVisible(edge.layerId)) continue;
-        const fz = nodeZ.get(edge.from) ?? 0;
-        const tz = nodeZ.get(edge.to) ?? 0;
-        items.push({ kind: 'edge', item: edge, z: Math.max(fz, tz) });
+        const lid = edge.layerId || 'layer-1';
+        const fNode = state.nodes.get(edge.from);
+        const tNode = state.nodes.get(edge.to);
+        const fz = (fNode && (fNode.layerId || 'layer-1') === lid) ? (nodeLayerZ.get(edge.from) ?? 0) : 0;
+        const tz = (tNode && (tNode.layerId || 'layer-1') === lid) ? (nodeLayerZ.get(edge.to) ?? 0) : 0;
+        items.push({ kind: 'edge', item: edge,
+            layerIdx: getLayerIdx(lid),
+            withinZ: Math.max(fz, tz) });
+    }
+    for (const line of state.lines.values()) {
+        if (!isLayerVisible(line.layerId)) continue;
+        items.push({ kind: 'line', item: line,
+            layerIdx: getLayerIdx(line.layerId),
+            withinZ: nextZ(line.layerId, 'line') });
+    }
+    for (const ann of state.annotations.values()) {
+        if (!isLayerVisible(ann.layerId)) continue;
+        const isBg = ann.zLayer === 'bg';
+        items.push({ kind: 'annotation', item: ann,
+            layerIdx: getLayerIdx(ann.layerId),
+            withinZ: isBg ? -1 : nextZ(ann.layerId, 'ann'),
+            isBg });
     }
 
-    // Sort ascending by z; same z: edges render before their node (so node sits on top)
-    items.sort((a, b) =>
-        a.z !== b.z ? a.z - b.z : a.kind === 'edge' ? -1 : 1,
-    );
+    // Sort ascending: layerIdx (back→front), then withinZ, then type rank
+    // Type rank within same (layerIdx, withinZ): edge < node < line < fg-annotation
+    const typeRank = { edge: 0, node: 1, line: 2, annotation: 3 };
+    items.sort((a, b) => {
+        if (a.layerIdx !== b.layerIdx) return a.layerIdx - b.layerIdx;
+        if (a.withinZ !== b.withinZ) return a.withinZ - b.withinZ;
+        // bg annotations always before everything else in same layer/Z
+        if (a.isBg && !b.isBg) return -1;
+        if (!a.isBg && b.isBg) return 1;
+        return (typeRank[a.kind] ?? 1) - (typeRank[b.kind] ?? 1);
+    });
 
     for (const { kind, item } of items) {
-        const g =
-            kind === 'node' ? renderNodeGroup(item) : renderEdgeGroup(item);
+        let g;
+        if (kind === 'node') g = renderNodeGroup(item);
+        else if (kind === 'edge') g = renderEdgeGroup(item);
+        else if (kind === 'line') g = renderLineGroup(item);
+        else if (kind === 'annotation') g = renderAnnotationGroup(item);
         if (g) shapesLayer.appendChild(g);
     }
+}
+
+/** Build and return a <g> SVG element for a single line. */
+function renderLineGroup(line) {
+    const sel = state.selected.has(line.id);
+    const curved = line.curveStyle === 'curved';
+    const pts = linePoints(line);
+    const defaultStroke = '#64748b';
+    const selStroke = '#2563eb';
+    const strokeColor = sel ? selStroke : line.stroke || defaultStroke;
+    const strokeWidth = sel ? '2' : '1.5';
+
+    const startSym = line.startSymbol || 'none';
+    const endSym = line.endSymbol || 'none';
+
+    const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
+
+    if (curved) {
+        const pathD = buildPathD(pts, true);
+        g.appendChild(svgEl('path', { d: pathD, class: 'edge-hit' }));
+        const pathAttrs = {
+            d: pathD,
+            class: 'edge-line' + (sel ? ' selected' : ''),
+            fill: 'none',
+        };
+        if (startSym !== 'none')
+            pathAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+        if (endSym !== 'none')
+            pathAttrs['marker-end'] = sel ? `url(#${endSym}-marker-sel)` : `url(#${endSym}-marker)`;
+        const lineEl = svgEl('path', pathAttrs);
+        lineEl.style.stroke = strokeColor;
+        lineEl.style.strokeWidth = strokeWidth;
+        lineEl.style.color = strokeColor;
+        applyStrokeStyle(lineEl, line.strokeStyle);
+        g.appendChild(lineEl);
+        if (line.label) {
+            const mid = curvedMidpoint(pts);
+            const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, line.label);
+            applyFontStyle(lblEl, line, { size: 11 });
+            g.appendChild(lblEl);
+        }
+    } else {
+        const pointsStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
+        g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
+        const lineAttrs = {
+            points: pointsStr,
+            class: 'edge-line' + (sel ? ' selected' : ''),
+        };
+        if (startSym !== 'none')
+            lineAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+        if (endSym !== 'none')
+            lineAttrs['marker-end'] = sel ? `url(#${endSym}-marker-sel)` : `url(#${endSym}-marker)`;
+        const lineEl = svgEl('polyline', lineAttrs);
+        lineEl.style.stroke = strokeColor;
+        lineEl.style.strokeWidth = strokeWidth;
+        lineEl.style.color = strokeColor;
+        applyStrokeStyle(lineEl, line.strokeStyle);
+        g.appendChild(lineEl);
+        if (line.label) {
+            const mid = pathMidpoint(pts);
+            const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, line.label);
+            applyFontStyle(lblEl, line, { size: 11 });
+            g.appendChild(lblEl);
+        }
+    }
+
+    if (sel) {
+        if (line.waypoints && line.waypoints.length > 0) {
+            for (const wp of line.waypoints) {
+                g.appendChild(svgEl('circle', { cx: wp.x, cy: wp.y, r: 5, class: 'waypoint-handle', 'data-wp-id': wp.id }));
+            }
+        }
+        g.appendChild(svgEl('circle', { cx: line.x1, cy: line.y1, r: 5, class: 'line-endpoint-handle', 'data-which': 'start' }));
+        g.appendChild(svgEl('circle', { cx: line.x2, cy: line.y2, r: 5, class: 'line-endpoint-handle', 'data-which': 'end' }));
+    }
+    return g;
+}
+
+/** Build and return a <g> SVG element for a single annotation. */
+function renderAnnotationGroup(ann) {
+    const sel = state.selected.has(ann.id);
+    const fontSize = ann.fontSize || 13;
+    const lineHeight = fontSize * 1.4;
+    const align = ann.align || 'left';
+    const textAnchor = align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start';
+    const pad = 6;
+    const bb = annBBox(ann);
+
+    const g = svgEl('g', { 'data-id': ann.id, 'data-type': 'annotation' });
+
+    if (ann.fill || ann.stroke) {
+        const rect = svgEl('rect', {
+            x: bb.x - pad, y: bb.y - pad,
+            width: bb.w + pad * 2, height: bb.h + pad * 2,
+            rx: 3, ry: 3, class: 'annotation-bg',
+        });
+        if (ann.fill) {
+            rect.style.fill = ann.fill;
+            rect.style.fillOpacity = (ann.fillOpacity ?? 100) / 100;
+        }
+        if (ann.stroke) {
+            rect.style.stroke = ann.stroke;
+            rect.style.strokeWidth = '1.5';
+            applyStrokeStyle(rect, ann.strokeStyle);
+        }
+        g.appendChild(rect);
+    }
+
+    if (sel) {
+        g.appendChild(svgEl('rect', {
+            x: bb.x - pad, y: bb.y - pad,
+            width: bb.w + pad * 2, height: bb.h + pad * 2,
+            rx: 3, ry: 3, class: 'annotation-selection',
+        }));
+        const handles = [
+            { name: 'nw', x: bb.x - pad, y: bb.y - pad },
+            { name: 'n',  x: bb.x + bb.w / 2, y: bb.y - pad },
+            { name: 'ne', x: bb.x + bb.w + pad, y: bb.y - pad },
+            { name: 'e',  x: bb.x + bb.w + pad, y: bb.y + bb.h / 2 },
+            { name: 'se', x: bb.x + bb.w + pad, y: bb.y + bb.h + pad },
+            { name: 's',  x: bb.x + bb.w / 2, y: bb.y + bb.h + pad },
+            { name: 'sw', x: bb.x - pad, y: bb.y + bb.h + pad },
+            { name: 'w',  x: bb.x - pad, y: bb.y + bb.h / 2 },
+        ];
+        for (const h of handles) {
+            g.appendChild(svgEl('rect', { x: h.x - 4, y: h.y - 4, width: 8, height: 8, class: 'resize-handle', 'data-handle': h.name }));
+        }
+    }
+
+    const textEl = svgEl('text', { x: ann.x, y: ann.y, 'text-anchor': textAnchor, class: 'annotation-text' });
+    textEl.style.fill = ann.color || '#7c3aed';
+    applyFontStyle(textEl, ann, { size: 13, italic: true });
+
+    const wrappedLines = wrapTextToLines(ann.text || '', bb.w, fontSize);
+    wrappedLines.forEach((line, i) => {
+        const tspan = svgEl('tspan', { x: ann.x, dy: i === 0 ? '0' : `${lineHeight}` }, line || '\u200b');
+        textEl.appendChild(tspan);
+    });
+    g.appendChild(textEl);
+    return g;
 }
 
 /** Returns polyline points for a line: [start, ...waypoints, end]. */
@@ -1662,253 +1855,6 @@ function getLineAt(x, y, threshold = 8) {
         }
     }
     return null;
-}
-
-function renderLines() {
-    linesLayer.innerHTML = '';
-    for (const line of state.lines.values()) {
-        if (!isLayerVisible(line.layerId)) continue;
-        const sel = state.selected.has(line.id);
-        const curved = line.curveStyle === 'curved';
-        const pts = linePoints(line);
-        const defaultStroke = '#64748b';
-        const selStroke = '#2563eb';
-        const strokeColor = sel ? selStroke : line.stroke || defaultStroke;
-        const strokeWidth = sel ? '2' : '1.5';
-
-        const startSym = line.startSymbol || 'none';
-        const endSym = line.endSymbol || 'none';
-
-        const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
-
-        if (curved) {
-            const pathD = buildPathD(pts, true);
-
-            g.appendChild(svgEl('path', { d: pathD, class: 'edge-hit' }));
-
-            const pathAttrs = {
-                d: pathD,
-                class: 'edge-line' + (sel ? ' selected' : ''),
-                fill: 'none',
-            };
-            if (startSym !== 'none')
-                pathAttrs['marker-start'] = sel
-                    ? `url(#${startSym}-marker-sel)`
-                    : `url(#${startSym}-marker)`;
-            if (endSym !== 'none')
-                pathAttrs['marker-end'] = sel
-                    ? `url(#${endSym}-marker-sel)`
-                    : `url(#${endSym}-marker)`;
-
-            const lineEl = svgEl('path', pathAttrs);
-            lineEl.style.stroke = strokeColor;
-            lineEl.style.strokeWidth = strokeWidth;
-            lineEl.style.color = strokeColor;
-            applyStrokeStyle(lineEl, line.strokeStyle);
-            g.appendChild(lineEl);
-
-            if (line.label) {
-                const mid = curvedMidpoint(pts);
-                const lblEl = svgEl(
-                    'text',
-                    {
-                        x: mid.x,
-                        y: mid.y - 5,
-                        'text-anchor': 'middle',
-                        class: 'edge-label',
-                    },
-                    line.label,
-                );
-                applyFontStyle(lblEl, line, { size: 11 });
-                g.appendChild(lblEl);
-            }
-        } else {
-            const pointsStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
-
-            g.appendChild(
-                svgEl('polyline', { points: pointsStr, class: 'edge-hit' }),
-            );
-
-            const lineAttrs = {
-                points: pointsStr,
-                class: 'edge-line' + (sel ? ' selected' : ''),
-            };
-            if (startSym !== 'none')
-                lineAttrs['marker-start'] = sel
-                    ? `url(#${startSym}-marker-sel)`
-                    : `url(#${startSym}-marker)`;
-            if (endSym !== 'none')
-                lineAttrs['marker-end'] = sel
-                    ? `url(#${endSym}-marker-sel)`
-                    : `url(#${endSym}-marker)`;
-
-            const lineEl = svgEl('polyline', lineAttrs);
-            lineEl.style.stroke = strokeColor;
-            lineEl.style.strokeWidth = strokeWidth;
-            lineEl.style.color = strokeColor;
-            applyStrokeStyle(lineEl, line.strokeStyle);
-            g.appendChild(lineEl);
-
-            if (line.label) {
-                const mid = pathMidpoint(pts);
-                const lblEl = svgEl(
-                    'text',
-                    {
-                        x: mid.x,
-                        y: mid.y - 5,
-                        'text-anchor': 'middle',
-                        class: 'edge-label',
-                    },
-                    line.label,
-                );
-                applyFontStyle(lblEl, line, { size: 11 });
-                g.appendChild(lblEl);
-            }
-        }
-
-        if (sel) {
-            // Waypoint handles
-            if (line.waypoints && line.waypoints.length > 0) {
-                for (const wp of line.waypoints) {
-                    g.appendChild(
-                        svgEl('circle', {
-                            cx: wp.x,
-                            cy: wp.y,
-                            r: 5,
-                            class: 'waypoint-handle',
-                            'data-wp-id': wp.id,
-                        }),
-                    );
-                }
-            }
-            // Endpoint handles
-            g.appendChild(
-                svgEl('circle', {
-                    cx: line.x1,
-                    cy: line.y1,
-                    r: 5,
-                    class: 'line-endpoint-handle',
-                    'data-which': 'start',
-                }),
-            );
-            g.appendChild(
-                svgEl('circle', {
-                    cx: line.x2,
-                    cy: line.y2,
-                    r: 5,
-                    class: 'line-endpoint-handle',
-                    'data-which': 'end',
-                }),
-            );
-        }
-
-        linesLayer.appendChild(g);
-    }
-}
-
-function renderAnnotations() {
-    annotationsLayer.innerHTML = '';
-    bgAnnotationsLayer.innerHTML = '';
-    for (const ann of state.annotations.values()) {
-        if (!isLayerVisible(ann.layerId)) continue;
-        const targetLayer =
-            ann.zLayer === 'bg' ? bgAnnotationsLayer : annotationsLayer;
-        const sel = state.selected.has(ann.id);
-        const fontSize = ann.fontSize || 13;
-        const lineHeight = fontSize * 1.4;
-        const align = ann.align || 'left';
-        const textAnchor =
-            align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start';
-        const pad = 6;
-        const bb = annBBox(ann);
-
-        const g = svgEl('g', { 'data-id': ann.id, 'data-type': 'annotation' });
-
-        // Optional background fill / border rect
-        if (ann.fill || ann.stroke) {
-            const rect = svgEl('rect', {
-                x: bb.x - pad,
-                y: bb.y - pad,
-                width: bb.w + pad * 2,
-                height: bb.h + pad * 2,
-                rx: 3,
-                ry: 3,
-                class: 'annotation-bg',
-            });
-            if (ann.fill) {
-                rect.style.fill = ann.fill;
-                rect.style.fillOpacity = (ann.fillOpacity ?? 100) / 100;
-            }
-            if (ann.stroke) {
-                rect.style.stroke = ann.stroke;
-                rect.style.strokeWidth = '1.5';
-                applyStrokeStyle(rect, ann.strokeStyle);
-            }
-            g.appendChild(rect);
-        }
-
-        // Selection indicator (dashed blue rect)
-        if (sel) {
-            g.appendChild(
-                svgEl('rect', {
-                    x: bb.x - pad,
-                    y: bb.y - pad,
-                    width: bb.w + pad * 2,
-                    height: bb.h + pad * 2,
-                    rx: 3,
-                    ry: 3,
-                    class: 'annotation-selection',
-                }),
-            );
-
-            // Resize handles
-            const handles = [
-                { name: 'nw', x: bb.x - pad, y: bb.y - pad },
-                { name: 'n', x: bb.x + bb.w / 2, y: bb.y - pad },
-                { name: 'ne', x: bb.x + bb.w + pad, y: bb.y - pad },
-                { name: 'e', x: bb.x + bb.w + pad, y: bb.y + bb.h / 2 },
-                { name: 'se', x: bb.x + bb.w + pad, y: bb.y + bb.h + pad },
-                { name: 's', x: bb.x + bb.w / 2, y: bb.y + bb.h + pad },
-                { name: 'sw', x: bb.x - pad, y: bb.y + bb.h + pad },
-                { name: 'w', x: bb.x - pad, y: bb.y + bb.h / 2 },
-            ];
-            for (const h of handles) {
-                g.appendChild(
-                    svgEl('rect', {
-                        x: h.x - 4,
-                        y: h.y - 4,
-                        width: 8,
-                        height: 8,
-                        class: 'resize-handle',
-                        'data-handle': h.name,
-                    }),
-                );
-            }
-        }
-
-        // Text element with tspan per wrapped line
-        const textEl = svgEl('text', {
-            x: ann.x,
-            y: ann.y,
-            'text-anchor': textAnchor,
-            class: 'annotation-text',
-        });
-        textEl.style.fill = ann.color || '#7c3aed';
-        applyFontStyle(textEl, ann, { size: 13, italic: true });
-
-        const wrappedLines = wrapTextToLines(ann.text || '', bb.w, fontSize);
-        wrappedLines.forEach((line, i) => {
-            const tspan = svgEl(
-                'tspan',
-                { x: ann.x, dy: i === 0 ? '0' : `${lineHeight}` },
-                line || '\u200b',
-            );
-            textEl.appendChild(tspan);
-        });
-
-        g.appendChild(textEl);
-        targetLayer.appendChild(g);
-    }
 }
 
 // ============================================================
@@ -4876,13 +4822,16 @@ function renderLayersPanel() {
     if (!list) return;
     list.innerHTML = '';
     const layers = state.layers || [];
-    // Display in reverse order so top of list = most recently added / frontmost
+    let dragSrcId = null;
+
+    // Display in reverse order so top of list = frontmost (highest layerIdx)
     for (let i = layers.length - 1; i >= 0; i--) {
         const layer = layers[i];
         const isActive = layer.id === state.activeLayerId;
         const row = document.createElement('div');
         row.className = 'layer-row' + (isActive ? ' layer-active' : '') + (!layer.visible ? ' layer-hidden' : '');
         row.dataset.layerId = layer.id;
+        row.draggable = true;
 
         // Eye toggle
         const eye = document.createElement('button');
@@ -4920,6 +4869,54 @@ function renderLayersPanel() {
         row.appendChild(nameSpan);
         row.appendChild(del);
         row.addEventListener('click', () => setActiveLayer(layer.id));
+
+        // Drag-to-reorder events
+        row.addEventListener('dragstart', (e) => {
+            dragSrcId = layer.id;
+            row.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', layer.id);
+        });
+        row.addEventListener('dragend', () => {
+            row.classList.remove('dragging');
+            list.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
+        });
+        row.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            list.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
+            if (layer.id !== dragSrcId) row.classList.add('drag-over');
+        });
+        row.addEventListener('dragleave', () => {
+            row.classList.remove('drag-over');
+        });
+        row.addEventListener('drop', (e) => {
+            e.preventDefault();
+            row.classList.remove('drag-over');
+            const srcId = e.dataTransfer.getData('text/plain') || dragSrcId;
+            if (!srcId || srcId === layer.id) return;
+
+            // Reorder state.layers: the panel shows layers in reverse order
+            // so dropping "before" (top-border) of targetId means moving
+            // srcId to one position higher in the array than targetId
+            const layers = state.layers;
+            const srcIdx = layers.findIndex((l) => l.id === srcId);
+            const tgtIdx = layers.findIndex((l) => l.id === layer.id);
+            if (srcIdx < 0 || tgtIdx < 0) return;
+
+            // Determine insert position: dragging towards top of panel = higher array idx
+            // The panel is reversed, so a drop on a row means "place src where target is"
+            const moved = layers.splice(srcIdx, 1)[0];
+            const newTgt = layers.findIndex((l) => l.id === layer.id);
+            layers.splice(newTgt, 0, moved);
+
+            flushTabState();
+            render();
+            renderLayersPanel();
+            pushHistory();
+            saveToLocalStorage();
+        });
+
         list.appendChild(row);
     }
 }
