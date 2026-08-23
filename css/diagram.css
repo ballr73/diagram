@@ -1084,9 +1084,12 @@ kbd {
     cursor: grabbing;
 }
 
-.layer-row.drag-over {
+.layer-row.drag-over-above {
     border-top: 2px solid #2563eb;
-    background: #eff6ff;
+}
+
+.layer-row.drag-over-below {
+    border-bottom: 2px solid #2563eb;
 }
 
 .layer-eye {

@@ -4879,36 +4879,48 @@ function renderLayersPanel() {
         });
         row.addEventListener('dragend', () => {
             row.classList.remove('dragging');
-            list.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
+            list.querySelectorAll('.drag-over-above,.drag-over-below').forEach((el) => {
+                el.classList.remove('drag-over-above', 'drag-over-below');
+            });
         });
         row.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            list.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
-            if (layer.id !== dragSrcId) row.classList.add('drag-over');
+            if (layer.id === dragSrcId) return;
+            list.querySelectorAll('.drag-over-above,.drag-over-below').forEach((el) => {
+                el.classList.remove('drag-over-above', 'drag-over-below');
+            });
+            const rect = row.getBoundingClientRect();
+            const isAbove = e.clientY < rect.top + rect.height / 2;
+            row.classList.add(isAbove ? 'drag-over-above' : 'drag-over-below');
         });
-        row.addEventListener('dragleave', () => {
-            row.classList.remove('drag-over');
+        row.addEventListener('dragleave', (e) => {
+            // Only remove if leaving the row entirely (not entering a child)
+            if (!row.contains(e.relatedTarget)) {
+                row.classList.remove('drag-over-above', 'drag-over-below');
+            }
         });
         row.addEventListener('drop', (e) => {
             e.preventDefault();
-            row.classList.remove('drag-over');
+            const wasAbove = row.classList.contains('drag-over-above');
+            row.classList.remove('drag-over-above', 'drag-over-below');
             const srcId = e.dataTransfer.getData('text/plain') || dragSrcId;
             if (!srcId || srcId === layer.id) return;
 
-            // Reorder state.layers: the panel shows layers in reverse order
-            // so dropping "before" (top-border) of targetId means moving
-            // srcId to one position higher in the array than targetId
+            // Panel is reversed: top of panel = last element of state.layers
+            // 'above' in panel = higher position in array; 'below' = lower position
             const layers = state.layers;
             const srcIdx = layers.findIndex((l) => l.id === srcId);
             const tgtIdx = layers.findIndex((l) => l.id === layer.id);
             if (srcIdx < 0 || tgtIdx < 0) return;
 
-            // Determine insert position: dragging towards top of panel = higher array idx
-            // The panel is reversed, so a drop on a row means "place src where target is"
             const moved = layers.splice(srcIdx, 1)[0];
-            const newTgt = layers.findIndex((l) => l.id === layer.id);
-            layers.splice(newTgt, 0, moved);
+            // Recalculate tgtIdx after removing src
+            const newTgtIdx = layers.findIndex((l) => l.id === layer.id);
+            // wasAbove in panel = insert AFTER target in array (higher layerIdx)
+            // wasBelow in panel = insert BEFORE target in array (lower layerIdx)
+            const insertAt = wasAbove ? newTgtIdx + 1 : newTgtIdx;
+            layers.splice(insertAt, 0, moved);
 
             flushTabState();
             render();
