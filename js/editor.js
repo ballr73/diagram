@@ -2989,7 +2989,19 @@ function onKeyDown(e) {
         !e.altKey &&
         toolKeys[e.key.toLowerCase()]
     ) {
-        setTool(toolKeys[e.key.toLowerCase()]);
+        const targetTool = toolKeys[e.key.toLowerCase()];
+        if (targetTool === 'box') {
+            if (state.tool === 'box') {
+                // Already on box tool — toggle pop-out for shape type selection
+                if (isShapePopoutOpen()) closeShapePopout(); else openShapePopout();
+            } else {
+                setTool('box');
+                closeShapePopout();
+            }
+        } else {
+            closeShapePopout();
+            setTool(targetTool);
+        }
         return;
     }
 
@@ -4326,11 +4338,47 @@ function setTool(tool) {
     render();
 }
 
+// SVG inner markup for each shape type — used to update the Shape tool button icon
+const SHAPE_SVGS = {
+    box:           '<rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    circle:        '<ellipse cx="8" cy="8" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    oval:          '<ellipse cx="8" cy="8" rx="7" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    diamond:       '<polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    triangle:      '<polygon points="8,1 15,14 1,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    parallelogram: '<polygon points="4,3 15,3 12,13 1,13" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+};
+
 function setCurrentShape(shape) {
     state.currentShape = shape;
-    document.querySelectorAll('.shape-btn').forEach((btn) => {
+    // Update active state on pop-out buttons
+    document.querySelectorAll('.shape-popout-btn').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.shape === shape);
     });
+    // Update the Shape tool button icon to show the selected shape
+    const iconEl = document.getElementById('shape-tool-icon');
+    if (iconEl && SHAPE_SVGS[shape]) {
+        iconEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16">${SHAPE_SVGS[shape]}</svg>`;
+    }
+}
+
+function openShapePopout() {
+    const popout = document.getElementById('shape-popout');
+    const btn = document.getElementById('btn-shape-tool');
+    if (!popout || !btn) return;
+    const rect = btn.getBoundingClientRect();
+    popout.style.left = `${rect.right + 6}px`;
+    popout.style.top = `${rect.top}px`;
+    popout.classList.add('open');
+}
+
+function closeShapePopout() {
+    const popout = document.getElementById('shape-popout');
+    if (popout) popout.classList.remove('open');
+}
+
+function isShapePopoutOpen() {
+    const popout = document.getElementById('shape-popout');
+    return popout ? popout.classList.contains('open') : false;
 }
 
 function updateToolbarStatus() {
@@ -5421,18 +5469,43 @@ function init() {
 
     initSVG();
 
-    // Toolbar tool buttons
+    // Toolbar tool buttons — Shape button gets special pop-out handling
     document.querySelectorAll('.tool-btn').forEach((btn) => {
-        if (!btn.dataset.tool) return; // skip non-tool buttons (e.g. icon library toggle)
-        btn.addEventListener('click', () => setTool(btn.dataset.tool));
+        if (!btn.dataset.tool) return;
+        if (btn.id === 'btn-shape-tool') {
+            btn.addEventListener('click', () => {
+                setTool('box');
+                if (isShapePopoutOpen()) {
+                    closeShapePopout();
+                } else {
+                    openShapePopout();
+                }
+            });
+        } else {
+            btn.addEventListener('click', () => {
+                closeShapePopout();
+                setTool(btn.dataset.tool);
+            });
+        }
     });
 
-    // Shape picker buttons
-    document.querySelectorAll('.shape-btn').forEach((btn) => {
+    // Shape pop-out buttons
+    document.querySelectorAll('.shape-popout-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
             setCurrentShape(btn.dataset.shape);
-            setTool('box'); // auto-switch to shape tool
+            setTool('box');
+            closeShapePopout();
         });
+    });
+
+    // Close shape pop-out when clicking outside it
+    document.addEventListener('mousedown', (e) => {
+        const popout = document.getElementById('shape-popout');
+        const shapeBtn = document.getElementById('btn-shape-tool');
+        if (popout && isShapePopoutOpen() &&
+            !popout.contains(e.target) && e.target !== shapeBtn && !shapeBtn?.contains(e.target)) {
+            closeShapePopout();
+        }
     });
 
     // Undo / Redo
@@ -5621,6 +5694,7 @@ function init() {
     updateTitleDisplay();
     updateSnapButton();
     renderLayersPanel();
+    setCurrentShape(state.currentShape); // sync pop-out active state + tool icon
 
     // Pre-cache data URIs for any symbol icons loaded from localStorage
     cacheAllSymbolIcons();
