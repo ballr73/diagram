@@ -4964,7 +4964,7 @@ function renderLayersPanel() {
         del.className = 'layer-delete';
         del.title = 'Delete layer';
         del.innerHTML = '<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 4h10M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>';
-        del.disabled = layers.length <= 1;
+        del.disabled = layers.length <= 1 || layer.locked;
         del.addEventListener('click', (e) => {
             e.stopPropagation();
             deleteLayer(layer.id);
@@ -5103,6 +5103,7 @@ function addLayer() {
 
 function deleteLayer(layerId) {
     if (state.layers.length <= 1) return;
+    if (isLayerLocked(layerId)) return;
     const idx = state.layers.findIndex((l) => l.id === layerId);
     if (idx === -1) return;
     // Remove all elements on this layer
