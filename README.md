@@ -57,7 +57,7 @@ open index.html
 └──────┴──────────┴─────────────────────────────────┴─────────────────┘
 ```
 
-- **Left toolbar** — drawing tools, icon library toggle, shape picker, version number
+- **Left toolbar** — drawing tools (compact icon-only buttons) and icon library toggle
 - **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
 - **Diagram name bar** — slim bar above the menu bar showing the current diagram name ("Untitled diagram" until saved)
 - **Menu bar** — File, Edit, View, and Arrange menus with keyboard shortcuts shown on each item
@@ -81,7 +81,7 @@ open index.html
 
 ### Shapes
 
-Pick a shape type from the shape picker in the **left toolbar** before drawing, or change an existing shape's type in the Properties panel. Available shapes:
+Click the **Shape** button in the left toolbar to activate the draw tool. A small **triangle indicator** in the corner of the button shows that clicking it also opens the **shape type pop-out** — a floating panel where you can choose the shape type. The button icon updates to reflect the currently selected shape. You can also change an existing shape's type in the Properties panel. Available shapes:
 
 | Shape | Description |
 |-------|-------------|
@@ -258,8 +258,15 @@ Each tab has its own **Layers panel** (below the Properties panel on the right).
 | Click a layer row | Make it the active layer — new shapes are placed on this layer |
 | **Eye icon** | Toggle layer visibility on/off |
 | **Double-click** layer name | Rename the layer inline (Enter to confirm, Escape to cancel) |
+| **Drag a layer row** | Reorder layers — drag up to move a layer in front, down to move it behind |
 | **＋ button** (panel header) | Add a new layer (automatically becomes active) |
 | **Trash icon** | Delete the layer and all its shapes (disabled when only one layer exists) |
+
+### Layer Z-ordering
+
+Layers control rendering depth across the whole diagram. **Objects on higher layers always appear in front of objects on lower layers**, regardless of individual Bring to Front / Send to Back actions. The panel lists layers top-to-bottom from frontmost to backmost — drag rows to reorder.
+
+Within a single layer, use **Bring to Front** and **Send to Back** (Arrange menu or Z-order toolbar buttons) to adjust the stacking of elements. These actions are scoped to the layer — they cannot move an element in front of elements on a higher layer.
 
 ### Active layer
 
@@ -384,9 +391,10 @@ When one element is selected, the Properties panel on the right shows its editab
 
 ### How Z-order works
 
-- **Shapes and connectors** share the same rendering layer. A connector's Z-position automatically follows the topmost node it connects to — bring a node to front and its connectors come with it; send a node to back and its connectors recede behind shapes with higher Z.
-- **Text annotations (default)** render above all shapes and connectors. Use Bring to Front to move an annotation above other annotations.
-- **Text annotations (sent to back)** are moved to a separate background layer that renders *below* all shapes and connectors — ideal for region background boxes in architecture diagrams. Use Bring to Front to return them to the default layer.
+- **Layer order takes priority** — objects on higher layers always render in front of objects on lower layers. Bring to Front / Send to Back operate only within the element's own layer.
+- **Shapes and connectors** within the same layer share the same Z-space. A connector's Z-position automatically follows the topmost node it connects to — bring a node to front and its connectors come with it.
+- **Text annotations (default)** render above all shapes and connectors in the same layer.
+- **Text annotations (sent to back)** are placed on a background sub-layer that renders *below* all shapes and connectors — ideal for region background boxes in architecture diagrams.
 
 ---
 

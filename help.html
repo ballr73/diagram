@@ -90,8 +90,8 @@
                             buttons for the most common actions
                         </li>
                         <li>
-                            <strong>Left toolbar</strong> — drawing tools, icon
-                            library toggle, shape picker, version number
+                            <strong>Left toolbar</strong> — compact icon-only
+                            drawing tools and icon library toggle
                         </li>
                         <li>
                             <strong>Icon library panel</strong> — 1,241 AWS,
@@ -419,9 +419,11 @@
                 <section id="shapes">
                     <h2>Shapes</h2>
                     <p>
-                        Pick a shape type from the shape picker in the left
-                        toolbar before drawing, or change an existing shape's
-                        type in the Properties panel.
+                        Click the <strong>Shape</strong> button in the left toolbar to activate the draw tool.
+                        A small triangle indicator in the corner of the button shows that clicking it also
+                        opens the <strong>shape type pop-out</strong> — a floating panel where you can
+                        choose the shape type. The button icon updates to reflect the currently selected
+                        shape. You can also change an existing shape's type in the Properties panel.
                     </p>
                     <table>
                         <tr>
@@ -783,6 +785,10 @@
                             <td>Rename the layer inline (Enter to confirm, Escape to cancel)</td>
                         </tr>
                         <tr>
+                            <td><strong>Drag a layer row</strong></td>
+                            <td>Reorder layers — drag up to move a layer in front, down to move it behind. A blue line shows the drop position.</td>
+                        </tr>
+                        <tr>
                             <td><strong>＋ button</strong> (panel header)</td>
                             <td>Add a new layer (automatically becomes active)</td>
                         </tr>
@@ -791,6 +797,19 @@
                             <td>Delete the layer and all its shapes (disabled when only one layer exists)</td>
                         </tr>
                     </table>
+
+                    <h3>Layer Z-ordering</h3>
+                    <p>
+                        Layers control rendering depth across the whole diagram.
+                        <strong>Objects on higher layers always appear in front of objects on lower layers</strong>,
+                        regardless of individual Bring to Front / Send to Back actions.
+                        The panel lists layers top-to-bottom from frontmost to backmost — drag rows to reorder.
+                    </p>
+                    <p>
+                        Within a single layer, use <strong>Bring to Front</strong> and <strong>Send to Back</strong>
+                        (Arrange menu) to adjust the stacking of elements. These actions are scoped to
+                        the layer — they cannot move an element in front of elements on a higher layer.
+                    </p>
 
                     <h3>Active Layer</h3>
                     <p>
@@ -1102,26 +1121,30 @@
                         </tr>
                         <tr>
                             <td><strong>Front</strong></td>
-                            <td>Move selected element(s) above all others</td>
+                            <td>Move selected element(s) above all others <em>within the same layer</em></td>
                         </tr>
                         <tr>
                             <td><strong>Back</strong></td>
-                            <td>Move selected element(s) behind all others</td>
+                            <td>Move selected element(s) behind all others <em>within the same layer</em></td>
                         </tr>
                     </table>
                     <ul>
                         <li>
-                            <strong>Shapes and connectors</strong> share the
-                            same rendering layer. A connector's Z-position
-                            follows the topmost node it connects to.
+                            <strong>Layer order takes priority</strong> — objects on higher layers always
+                            render in front of objects on lower layers. Bring to Front / Send to Back
+                            operate only within the element's own layer.
+                        </li>
+                        <li>
+                            <strong>Shapes and connectors</strong> within the same layer share the
+                            same Z-space. A connector's Z-position follows the topmost node it connects to.
                         </li>
                         <li>
                             <strong>Text annotations (default)</strong> render
-                            above all shapes and connectors.
+                            above all shapes and connectors in the same layer.
                         </li>
                         <li>
                             <strong>Text annotations (sent to back)</strong>
-                            move to a background layer — ideal for region boxes
+                            move to a background sub-layer — ideal for region boxes
                             in architecture diagrams.
                         </li>
                     </ul>
