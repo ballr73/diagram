@@ -28,6 +28,7 @@ const state = {
     diagramName: null, // null = unsaved/new; string = last saved filename (without .json)
     dirty: false, // true when there are unsaved changes
     snapToGrid: false, // snap shapes to grid when dragging
+    presentationMode: false, // true while in presentation mode (read-only, chrome hidden)
 };
 
 /** Snap a value to the nearest grid point (only when snap is enabled). */
@@ -1972,7 +1973,7 @@ function hitTest(x, y) {
 }
 
 function onMouseDown(e) {
-    // Right-click: start pan
+    // Right-click: start pan (allowed even in presentation mode)
     if (e.button === 2) {
         e.preventDefault();
         panDrag = {
@@ -1984,6 +1985,9 @@ function onMouseDown(e) {
         svg.style.cursor = 'grabbing';
         return;
     }
+
+    // Block all left-click editing in presentation mode
+    if (state.presentationMode) return;
 
     if (e.button !== 0) return;
     e.preventDefault();
@@ -2992,6 +2996,22 @@ function onKeyDown(e) {
     const tag = document.activeElement && document.activeElement.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
+    // Presentation mode: only Escape (exit) and arrow keys (tab nav) allowed
+    if (state.presentationMode) {
+        if (e.key === 'Escape') { exitPresentationMode(); return; }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            const n = state.tabs.length;
+            if (n > 1) { switchToTab((state.activeTabIndex - 1 + n) % n); fitWindow(); updatePresentationLabel(); }
+            return;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            const n = state.tabs.length;
+            if (n > 1) { switchToTab((state.activeTabIndex + 1) % n); fitWindow(); updatePresentationLabel(); }
+            return;
+        }
+        return; // block all other shortcuts
+    }
+
     // Tool shortcuts
     const toolKeys = {
         s: 'select',
@@ -3025,6 +3045,12 @@ function onKeyDown(e) {
     // Icon library toggle
     if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'i') {
         document.getElementById('btn-toggle-icons').click();
+        return;
+    }
+
+    // Presentation mode toggle
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'p') {
+        enterPresentationMode();
         return;
     }
 
@@ -4578,6 +4604,50 @@ function initZoom() {
     ro.observe(document.getElementById('canvas-container'));
 }
 
+// ============================================================
+// Presentation Mode
+// ============================================================
+
+function updatePresentationLabel() {
+    const label = document.getElementById('pres-tab-label');
+    const prev = document.getElementById('pres-prev');
+    const next = document.getElementById('pres-next');
+    if (!label) return;
+    const n = state.tabs.length;
+    const i = state.activeTabIndex;
+    const name = state.tabs[i]?.name || `Tab ${i + 1}`;
+    if (n > 1) {
+        label.textContent = `${name} (${i + 1} / ${n})`;
+        if (prev) prev.style.visibility = '';
+        if (next) next.style.visibility = '';
+    } else {
+        label.textContent = name;
+        if (prev) prev.style.visibility = 'hidden';
+        if (next) next.style.visibility = 'hidden';
+    }
+}
+
+function enterPresentationMode() {
+    state.presentationMode = true;
+    // Close any open popouts
+    closeShapePopout();
+    const iconPanel = document.getElementById('icon-panel');
+    if (iconPanel) iconPanel.className = 'icon-panel-closed';
+    document.body.classList.add('presentation-mode');
+    updatePresentationLabel();
+    // Fit after layout reflow so canvas has its new full dimensions
+    requestAnimationFrame(() => {
+        updateViewBox();
+        fitWindow();
+    });
+}
+
+function exitPresentationMode() {
+    state.presentationMode = false;
+    document.body.classList.remove('presentation-mode');
+    requestAnimationFrame(() => updateViewBox());
+}
+
 function syncUndoRedoMenu() {
     const miUndo = document.getElementById('mi-undo');
     const miRedo = document.getElementById('mi-redo');
@@ -5681,6 +5751,22 @@ function init() {
     // Zoom
     on('btn-zoom-in', 'click', zoomIn);
     on('btn-zoom-out', 'click', zoomOut);
+
+    // Presentation mode
+    on('btn-present', 'click', enterPresentationMode);
+    on('pres-exit', 'click', exitPresentationMode);
+    on('pres-prev', 'click', () => {
+        const n = state.tabs.length;
+        switchToTab((state.activeTabIndex - 1 + n) % n);
+        fitWindow();
+        updatePresentationLabel();
+    });
+    on('pres-next', 'click', () => {
+        const n = state.tabs.length;
+        switchToTab((state.activeTabIndex + 1) % n);
+        fitWindow();
+        updatePresentationLabel();
+    });
 
     // Snap to grid
     on('btn-snap', 'click', () => {

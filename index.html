@@ -1195,6 +1195,16 @@
                     </button>
                 </div>
 
+                <div class="tool-group toolbar-separator" style="margin-left:auto">
+                    <button id="btn-present" title="Presentation mode (P)">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+                            <line x1="8" y1="12" x2="8" y2="15" stroke="currentColor" stroke-width="1.4"/>
+                            <line x1="5" y1="15" x2="11" y2="15" stroke="currentColor" stroke-width="1.4"/>
+                            <polygon points="6,5 11,7 6,9" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
                 <div id="toolbar-status"></div>
             </div>
 
@@ -1560,6 +1570,22 @@
                         <g id="ui-layer"></g>
                     </svg>
                     <div id="tab-bar"></div>
+                </div>
+
+                <!-- Presentation mode navigation overlay (shown via JS) -->
+                <div id="presentation-controls">
+                    <button id="pres-prev" title="Previous tab (←)">
+                        <svg width="14" height="14" viewBox="0 0 16 16"><polygon points="12,2 4,8 12,14" fill="currentColor"/></svg>
+                    </button>
+                    <span id="pres-tab-label"></span>
+                    <button id="pres-next" title="Next tab (→)">
+                        <svg width="14" height="14" viewBox="0 0 16 16"><polygon points="4,2 12,8 4,14" fill="currentColor"/></svg>
+                    </button>
+                    <div class="pres-sep"></div>
+                    <button id="pres-exit" title="Exit presentation (Esc)">
+                        <svg width="12" height="12" viewBox="0 0 16 16"><line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="2" x2="2" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        Exit
+                    </button>
                 </div>
 
                 <div id="right-panel">

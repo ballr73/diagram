@@ -1684,3 +1684,97 @@ kbd {
 .pos-btn.active::after {
     background: #3b82f6;
 }
+
+/* ============================================================
+   Presentation Mode
+   ============================================================ */
+
+/* Hide all chrome when in presentation mode */
+body.presentation-mode #menu-bar,
+body.presentation-mode #toolbar,
+body.presentation-mode #left-toolbar,
+body.presentation-mode #icon-panel,
+body.presentation-mode #right-panel,
+body.presentation-mode #tab-bar,
+body.presentation-mode #shape-popout {
+    display: none !important;
+}
+
+body.presentation-mode #main {
+    /* canvas fills the full viewport below the now-hidden toolbar */
+}
+
+body.presentation-mode #canvas-container {
+    flex: 1;
+    height: 100vh;
+}
+
+/* Presentation controls overlay */
+#presentation-controls {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000;
+    align-items: center;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 6px 10px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.presentation-mode #presentation-controls {
+    display: flex;
+}
+
+#presentation-controls button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    transition: background 0.1s;
+    user-select: none;
+}
+
+#presentation-controls button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+#presentation-controls button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+#pres-tab-label {
+    font-size: 12px;
+    color: #94a3b8;
+    padding: 0 6px;
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: center;
+}
+
+.pres-sep {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 4px;
+}
+
+#pres-exit {
+    color: #f87171 !important;
+}
+
+#pres-exit:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+}
