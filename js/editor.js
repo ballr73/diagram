@@ -43,7 +43,7 @@ function createTab(name) {
         lines: new Map(),
         annotations: new Map(),
         groups: new Map(),
-        layers: [{ id: 'layer-1', name: 'Background', visible: true }],
+        layers: [{ id: 'layer-1', name: 'Background', visible: true, locked: false }],
         activeLayerId: 'layer-1',
         history: [],
         historyIndex: -1,
@@ -111,9 +111,11 @@ function ensureLayerIds(tab, savedLayers, savedActiveLayerId) {
                 ? savedActiveLayerId
                 : tab.layers[0].id;
     } else {
-        tab.layers = [{ id: 'layer-1', name: 'Background', visible: true }];
+        tab.layers = [{ id: 'layer-1', name: 'Background', visible: true, locked: false }];
         tab.activeLayerId = 'layer-1';
     }
+    // Backward compat: ensure locked field exists on all layers
+    tab.layers.forEach((l) => { if (l.locked === undefined) l.locked = false; });
     const defaultId = tab.layers[0].id;
     // Assign default layer to any element that doesn't have one
     for (const node of tab.nodes.values()) {
@@ -134,6 +136,12 @@ function ensureLayerIds(tab, savedLayers, savedActiveLayerId) {
 function isLayerVisible(layerId) {
     const layer = state.layers.find((l) => l.id === layerId);
     return layer ? layer.visible : true;
+}
+
+/** Returns true if the layer with the given id is locked (defaults false if layer not found). */
+function isLayerLocked(layerId) {
+    const layer = state.layers.find((l) => l.id === layerId);
+    return layer ? !!layer.locked : false;
 }
 
 // ============================================================
@@ -916,6 +924,7 @@ function getNodeAt(x, y) {
     for (let i = entries.length - 1; i >= 0; i--) {
         const [, node] = entries[i];
         if (!isLayerVisible(node.layerId)) continue;
+        if (isLayerLocked(node.layerId)) continue;
         if (
             x >= node.x &&
             x <= node.x + node.width &&
@@ -933,6 +942,7 @@ function getAnnotationAt(x, y, layer = null) {
     for (let i = entries.length - 1; i >= 0; i--) {
         const [, ann] = entries[i];
         if (!isLayerVisible(ann.layerId)) continue;
+        if (isLayerLocked(ann.layerId)) continue;
         if (layer !== null) {
             const annLayer = ann.zLayer === 'bg' ? 'bg' : 'fg';
             if (annLayer !== layer) continue;
@@ -1013,6 +1023,7 @@ function annBBox(ann) {
 function getEdgeAt(x, y, threshold = 8) {
     for (const edge of state.edges.values()) {
         if (!isLayerVisible(edge.layerId)) continue;
+        if (isLayerLocked(edge.layerId)) continue;
         const pts = edgePoints(edge);
         if (!pts) continue;
         for (let i = 0; i < pts.length - 1; i++) {
@@ -1839,6 +1850,7 @@ function linePoints(line) {
 function getLineAt(x, y, threshold = 8) {
     for (const line of state.lines.values()) {
         if (!isLayerVisible(line.layerId)) continue;
+        if (isLayerLocked(line.layerId)) continue;
         const pts = linePoints(line);
         for (let i = 0; i < pts.length - 1; i++) {
             if (
@@ -2189,6 +2201,7 @@ function selectMouseDown(p, hit, e) {
 
 // --- Box tool ---
 function boxMouseDown(p) {
+    if (isLayerLocked(state.activeLayerId)) return;
     const sx = snapVal(p.x), sy = snapVal(p.y);
     drag = { type: 'draw-box', startX: sx, startY: sy };
     uiLayer.appendChild(
@@ -2205,6 +2218,7 @@ function boxMouseDown(p) {
 
 // --- Connector tool ---
 function connectorMouseDown(p, hit) {
+    if (isLayerLocked(state.activeLayerId)) return;
     const node = getNodeAt(p.x, p.y);
     if (!node) return;
     drag = { type: 'draw-edge', fromId: node.id, startX: p.x, startY: p.y };
@@ -2223,6 +2237,7 @@ function connectorMouseDown(p, hit) {
 
 // --- Line tool ---
 function lineMouseDown(p) {
+    if (isLayerLocked(state.activeLayerId)) return;
     drag = { type: 'draw-line', startX: p.x, startY: p.y };
     uiLayer.appendChild(
         svgEl('line', {
@@ -2252,6 +2267,7 @@ function textMouseDown(p, hit) {
         return;
     }
     // Create annotation on canvas
+    if (isLayerLocked(state.activeLayerId)) return;
     const id = genId();
     state.annotations.set(id, { id, x: p.x, y: p.y + 5, text: 'Text', layerId: state.activeLayerId });
     state.selected.clear();
@@ -2625,6 +2641,7 @@ function dragEnd(p) {
         const x2 = Math.max(p.x, d.startX),
             y2 = Math.max(p.y, d.startY);
         for (const node of state.nodes.values()) {
+            if (isLayerLocked(node.layerId)) continue;
             if (
                 node.x >= x1 &&
                 node.y >= y1 &&
@@ -3151,6 +3168,14 @@ function deleteSelected() {
     if (state.selected.size === 0) return;
     const toDelete = new Set(state.selected);
 
+    // Remove any elements that are on a locked layer
+    for (const id of [...toDelete]) {
+        const el = state.nodes.get(id) || state.edges.get(id) ||
+                   state.lines.get(id) || state.annotations.get(id);
+        if (el && isLayerLocked(el.layerId)) toDelete.delete(id);
+    }
+    if (toDelete.size === 0) return;
+
     // Expand group IDs: delete members and the group record
     for (const id of [...toDelete]) {
         const group = state.groups.get(id);
@@ -3429,6 +3454,7 @@ function bringToFront() {
         const map = mapForId(id);
         if (!map) continue;
         const item = map.get(id);
+        if (isLayerLocked(item?.layerId)) continue;
         if (state.annotations.has(id)) item.zLayer = 'fg';
         map.delete(id);
         map.set(id, item); // re-insert at end = rendered on top
@@ -3443,6 +3469,7 @@ function sendToBack() {
         const map = mapForId(id);
         if (!map) continue;
         const item = map.get(id);
+        if (isLayerLocked(item?.layerId)) continue;
         if (state.annotations.has(id)) item.zLayer = 'bg';
         map.delete(id);
         // Prepend by rebuilding the map
@@ -3511,6 +3538,7 @@ function cutSelected() {
 }
 
 function pasteClipboard() {
+    if (isLayerLocked(state.activeLayerId)) return;
     const cb = state.clipboard;
     if (
         !cb.nodes.length &&
@@ -3664,7 +3692,8 @@ function updatePropertiesPanel() {
     if (state.selected.size === 0) {
         const activeLayer = (state.layers || []).find((l) => l.id === state.activeLayerId);
         const layerName = activeLayer ? activeLayer.name : 'Background';
-        content.innerHTML = `<p class="no-selection">Nothing selected</p><p class="active-layer-hint">Active layer: <strong>${layerName}</strong></p>`;
+        const lockedTag = activeLayer?.locked ? ' <span style="color:#f59e0b;font-size:10px;">🔒 Locked</span>' : '';
+        content.innerHTML = `<p class="no-selection">Nothing selected</p><p class="active-layer-hint">Active layer: <strong>${layerName}</strong>${lockedTag}</p>`;
         return;
     }
     if (state.selected.size > 1) {
@@ -3696,6 +3725,21 @@ function updatePropertiesPanel() {
     const line = state.lines.get(id);
     const ann = state.annotations.get(id);
 
+    // If element is on a locked layer, show a read-only banner
+    const element = node || edge || line || ann;
+    if (element && isLayerLocked(element.layerId)) {
+        const lockedLayer = (state.layers || []).find((l) => l.id === element.layerId);
+        const lockedName = lockedLayer ? lockedLayer.name : 'this layer';
+        content.innerHTML = `<div class="locked-layer-banner">
+            <svg width="14" height="14" viewBox="0 0 16 16" style="flex-shrink:0">
+                <rect x="3" y="7" width="10" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span><strong>${lockedName}</strong> is locked. Unlock the layer to edit properties.</span>
+        </div>`;
+        return;
+    }
+
     if (node) {
         if (node.type === 'symbol') {
             renderSymbolProps(content, node);
@@ -3726,7 +3770,7 @@ function layerDropdownHtml(element) {
     const opts = (state.layers || [])
         .map(
             (l) =>
-                `<option value="${l.id}"${element.layerId === l.id ? ' selected' : ''}>${esc(l.name)}</option>`,
+                `<option value="${l.id}"${element.layerId === l.id ? ' selected' : ''}${l.locked && element.layerId !== l.id ? ' disabled' : ''}>${esc(l.name)}${l.locked ? ' 🔒' : ''}</option>`,
         )
         .join('');
     return `<select id="p-layer">${opts}</select>`;
@@ -4877,7 +4921,7 @@ function renderLayersPanel() {
         const layer = layers[i];
         const isActive = layer.id === state.activeLayerId;
         const row = document.createElement('div');
-        row.className = 'layer-row' + (isActive ? ' layer-active' : '') + (!layer.visible ? ' layer-hidden' : '');
+        row.className = 'layer-row' + (isActive ? ' layer-active' : '') + (!layer.visible ? ' layer-hidden' : '') + (layer.locked ? ' layer-locked' : '');
         row.dataset.layerId = layer.id;
         row.draggable = true;
 
@@ -4891,6 +4935,19 @@ function renderLayersPanel() {
         eye.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleLayerVisibility(layer.id);
+        });
+
+        // Lock toggle
+        const lock = document.createElement('button');
+        lock.className = 'layer-lock';
+        lock.title = layer.locked ? 'Unlock layer' : 'Lock layer';
+        // Closed padlock = locked; open padlock = unlocked
+        lock.innerHTML = layer.locked
+            ? '<svg viewBox="0 0 16 16" width="13" height="13"><rect x="3" y="7" width="10" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
+            : '<svg viewBox="0 0 16 16" width="13" height="13"><rect x="3" y="7" width="10" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+        lock.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleLayerLock(layer.id);
         });
 
         // Layer name
@@ -4914,6 +4971,7 @@ function renderLayersPanel() {
         });
 
         row.appendChild(eye);
+        row.appendChild(lock);
         row.appendChild(nameSpan);
         row.appendChild(del);
         row.addEventListener('click', () => setActiveLayer(layer.id));
@@ -5008,11 +5066,30 @@ function toggleLayerVisibility(layerId) {
     saveToLocalStorage();
 }
 
+function toggleLayerLock(layerId) {
+    const layer = state.layers.find((l) => l.id === layerId);
+    if (!layer) return;
+    layer.locked = !layer.locked;
+    // Deselect elements on newly locked layer
+    if (layer.locked) {
+        for (const id of [...state.selected]) {
+            const el = state.nodes.get(id) || state.edges.get(id) || state.lines.get(id) || state.annotations.get(id);
+            if (el && el.layerId === layerId) state.selected.delete(id);
+        }
+    }
+    flushTabState();
+    render();
+    renderLayersPanel();
+    updatePropertiesPanel();
+    saveToLocalStorage();
+}
+
 function addLayer() {
     const newLayer = {
         id: `layer-${Date.now()}`,
         name: `Layer ${state.layers.length + 1}`,
         visible: true,
+        locked: false,
     };
     state.layers.push(newLayer);
     state.activeLayerId = newLayer.id;
