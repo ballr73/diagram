@@ -4627,6 +4627,23 @@ function updatePresentationLabel() {
     }
 }
 
+function requestBrowserFullscreen() {
+    const el = document.documentElement;
+    try {
+        const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        if (fn) fn.call(el);
+    } catch (_) { /* unsupported or blocked — continue without native fullscreen */ }
+}
+
+function exitBrowserFullscreen() {
+    try {
+        const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (fn && (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement)) {
+            fn.call(document);
+        }
+    } catch (_) { /* ignore */ }
+}
+
 function enterPresentationMode() {
     state.presentationMode = true;
     // Close any open popouts
@@ -4635,6 +4652,7 @@ function enterPresentationMode() {
     if (iconPanel) iconPanel.className = 'icon-panel-closed';
     document.body.classList.add('presentation-mode');
     updatePresentationLabel();
+    requestBrowserFullscreen();
     // Fit after layout reflow so canvas has its new full dimensions
     requestAnimationFrame(() => {
         updateViewBox();
@@ -4645,6 +4663,7 @@ function enterPresentationMode() {
 function exitPresentationMode() {
     state.presentationMode = false;
     document.body.classList.remove('presentation-mode');
+    exitBrowserFullscreen();
     requestAnimationFrame(() => updateViewBox());
 }
 
@@ -5754,6 +5773,16 @@ function init() {
 
     // Presentation mode
     on('btn-present', 'click', enterPresentationMode);
+
+    // Exit presentation mode if the user leaves browser fullscreen externally (F11, browser button, etc.)
+    const onFullscreenChange = () => {
+        const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        if (!fsEl && state.presentationMode) exitPresentationMode();
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('mozfullscreenchange', onFullscreenChange);
+    document.addEventListener('MSFullscreenChange', onFullscreenChange);
     on('pres-exit', 'click', exitPresentationMode);
     on('pres-prev', 'click', () => {
         const n = state.tabs.length;
