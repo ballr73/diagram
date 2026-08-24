@@ -44,6 +44,7 @@
                 <a href="#group-ungroup">Group &amp; Ungroup</a>
 
                 <div class="nav-section">Files</div>
+                <a href="#presentation-mode">Presentation Mode</a>
                 <a href="#open-save-export">Open, Save &amp; Export</a>
                 <a href="#undo-redo">Undo &amp; Redo</a>
 
@@ -1353,6 +1354,63 @@
                     </ul>
                 </section>
 
+                <!-- ── Presentation Mode ──────────────────────────────── -->
+                <section id="presentation-mode">
+                    <h2>Presentation Mode</h2>
+                    <p>
+                        Presentation Mode hides all toolbars, menus, and panels and
+                        displays the diagram fullscreen — ideal for presenting
+                        diagrams to an audience.
+                    </p>
+
+                    <h3>Entering and exiting</h3>
+                    <table>
+                        <tr><th>Action</th><th>How</th></tr>
+                        <tr>
+                            <td>Enter presentation mode</td>
+                            <td>Click the <strong>📽 Presentation</strong> button (far right of top toolbar) or press <kbd>P</kbd></td>
+                        </tr>
+                        <tr>
+                            <td>Exit presentation mode</td>
+                            <td>Click the <strong>✕</strong> icon (bottom-right overlay) or press <kbd>Escape</kbd></td>
+                        </tr>
+                    </table>
+
+                    <h3>What happens in presentation mode</h3>
+                    <ul>
+                        <li>All chrome is hidden: menu bar, toolbars, properties panel, tab bar, icon library.</li>
+                        <li>The diagram automatically <strong>fits to the window</strong> when presentation mode is entered.</li>
+                        <li>The diagram is <strong>read-only</strong> — no shapes can be drawn, selected, moved or edited.</li>
+                        <li>Right-click drag and <kbd>Ctrl+Scroll</kbd> zoom still work for exploring large diagrams.</li>
+                    </ul>
+
+                    <h3>Navigating tabs</h3>
+                    <p>
+                        If the diagram has multiple tabs, a navigation overlay appears at the
+                        <strong>bottom-right</strong> of the screen:
+                    </p>
+                    <table>
+                        <tr><th>Control</th><th>Action</th></tr>
+                        <tr>
+                            <td><strong>◀</strong> button</td>
+                            <td>Go to previous tab</td>
+                        </tr>
+                        <tr>
+                            <td><strong>▶</strong> button</td>
+                            <td>Go to next tab</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>←</kbd> <kbd>→</kbd> arrow keys</td>
+                            <td>Navigate between tabs</td>
+                        </tr>
+                        <tr>
+                            <td>Tab label (e.g. <em>Page 1 (1 / 3)</em>)</td>
+                            <td>Shows current tab name and its position</td>
+                        </tr>
+                    </table>
+                    <p>The ◀ / ▶ buttons are hidden when the diagram contains only one tab.</p>
+                </section>
+
                 <!-- ── Open, Save & Export ────────────────────────────── -->
                 <section id="open-save-export">
                     <h2>Open, Save &amp; Export</h2>
@@ -1564,6 +1622,10 @@
                                 Delete selected elements (or remove focused
                                 waypoint)
                             </td>
+                        </tr>
+                        <tr>
+                            <td><kbd>P</kbd></td>
+                            <td>Enter presentation mode</td>
                         </tr>
                         <tr>
                             <td><kbd>Escape</kbd></td>

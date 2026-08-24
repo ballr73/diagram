@@ -591,6 +591,39 @@ The app uses the `drive.file` scope — it can only read or modify files it has 
 
 ---
 
+## Presentation Mode
+
+Activate **Presentation Mode** to display your diagram fullscreen without any toolbars, menus, or panels.
+
+### Entering and exiting
+
+| Action | How |
+|--------|-----|
+| Enter presentation mode | Click the **📽 Presentation** button (far right of top toolbar) or press `P` |
+| Exit presentation mode | Click the **✕** icon (bottom-right overlay) or press `Escape` |
+
+### What happens in presentation mode
+
+- All chrome is hidden: menu bar, toolbars, properties panel, tab bar, icon library panel.
+- The diagram automatically **fits to the window** when presentation mode is entered.
+- The diagram is **read-only** — no shapes can be drawn, selected, moved or edited.
+- **Right-click drag** and **Ctrl+Scroll** zoom still work for exploring large diagrams.
+
+### Navigating tabs
+
+If the diagram has multiple tabs a navigation overlay appears at the **bottom-right** of the screen:
+
+| Control | Action |
+|---------|--------|
+| **◀** button | Go to previous tab |
+| **▶** button | Go to next tab |
+| **← →** arrow keys | Navigate between tabs |
+| Tab label (e.g. `Page 1 (1 / 3)`) | Shows current tab name and position |
+
+The ◀ / ▶ buttons are hidden when the diagram contains only one tab.
+
+---
+
 ## Undo & Redo
 
 | Action | Keyboard | Button |
@@ -613,6 +646,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `T` | Text tool |
 | `I` | Toggle icon library panel |
 | `Delete` / `Backspace` | Delete selected elements (or remove focused waypoint) |
+| `P` | Enter presentation mode |
 | `Escape` | Cancel current operation / deselect |
 | `Ctrl+N` | New diagram |
 | `Ctrl+O` | Open file |
