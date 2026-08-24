@@ -781,6 +781,10 @@
                             <td>Toggle layer visibility on/off</td>
                         </tr>
                         <tr>
+                            <td><strong>Padlock icon</strong></td>
+                            <td>Toggle layer lock on/off — locked layers prevent selection, editing, and drawing</td>
+                        </tr>
+                        <tr>
                             <td><strong>Double-click</strong> layer name</td>
                             <td>Rename the layer inline (Enter to confirm, Escape to cancel)</td>
                         </tr>
@@ -797,6 +801,46 @@
                             <td>Delete the layer and all its shapes (disabled when only one layer exists)</td>
                         </tr>
                     </table>
+
+                    <h3>Locking Layers</h3>
+                    <p>
+                        Click the <strong>padlock icon</strong> on a layer row to lock or unlock it.
+                        A locked layer shows an amber padlock and an amber left border; the layer name is shown in italic.
+                    </p>
+                    <p>When a layer is <strong>locked</strong>:</p>
+                    <table>
+                        <tr><th>Restriction</th><th>Detail</th></tr>
+                        <tr>
+                            <td><strong>No selection</strong></td>
+                            <td>Clicking or rubber-band selecting objects on the layer has no effect</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No movement</strong></td>
+                            <td>Objects cannot be dragged or repositioned</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No deletion</strong></td>
+                            <td>Delete key and Cut are ignored for locked-layer objects</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No editing</strong></td>
+                            <td>Properties panel shows a "Layer is locked" banner instead of controls</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No drawing</strong></td>
+                            <td>Drawing tools are disabled while a locked layer is the active layer — switch to another layer first</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No paste</strong></td>
+                            <td>Paste is blocked while the active layer is locked</td>
+                        </tr>
+                    </table>
+                    <p>
+                        Locked layers <strong>can</strong> still be hidden/shown (eye icon), reordered (drag), renamed, and deleted.
+                    </p>
+                    <div class="note">
+                        Tip: Use locking to freeze background or reference layers while you work on content layers above them.
+                    </div>
 
                     <h3>Layer Z-ordering</h3>
                     <p>

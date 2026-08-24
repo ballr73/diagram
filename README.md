@@ -257,6 +257,7 @@ Each tab has its own **Layers panel** (below the Properties panel on the right).
 |---------|--------|
 | Click a layer row | Make it the active layer — new shapes are placed on this layer |
 | **Eye icon** | Toggle layer visibility on/off |
+| **Padlock icon** | Toggle layer lock on/off (see below) |
 | **Double-click** layer name | Rename the layer inline (Enter to confirm, Escape to cancel) |
 | **Drag a layer row** | Reorder layers — drag up to move a layer in front, down to move it behind |
 | **＋ button** (panel header) | Add a new layer (automatically becomes active) |
@@ -267,6 +268,25 @@ Each tab has its own **Layers panel** (below the Properties panel on the right).
 Layers control rendering depth across the whole diagram. **Objects on higher layers always appear in front of objects on lower layers**, regardless of individual Bring to Front / Send to Back actions. The panel lists layers top-to-bottom from frontmost to backmost — drag rows to reorder.
 
 Within a single layer, use **Bring to Front** and **Send to Back** (Arrange menu or Z-order toolbar buttons) to adjust the stacking of elements. These actions are scoped to the layer — they cannot move an element in front of elements on a higher layer.
+
+### Locking layers
+
+Click the **padlock icon** on a layer row to lock or unlock that layer. Locked layers are indicated by an amber padlock icon and an amber left border on the row; the layer name is shown in italic.
+
+When a layer is **locked**:
+
+| Restriction | Detail |
+|-------------|--------|
+| **No selection** | Clicking or rubber-band selecting objects on the layer has no effect |
+| **No movement** | Objects cannot be dragged or repositioned |
+| **No deletion** | Delete key and Cut are ignored for locked-layer objects |
+| **No editing** | Properties panel shows a "Layer is locked" banner instead of controls |
+| **No drawing** | If the locked layer is the active layer, drawing tools are disabled (switch to another layer first) |
+| **No paste** | Paste is blocked while the active layer is locked |
+
+Locked layers **can** still be hidden/shown (eye icon), reordered (drag), renamed, and deleted.
+
+> **Tip:** Use locking to freeze background or reference layers while you work on content layers above them.
 
 ### Active layer
 
