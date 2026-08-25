@@ -4811,6 +4811,8 @@ function updateEditButtons() {
     if (btnCopy) btnCopy.disabled = !hasSel;
     if (btnPaste) btnPaste.disabled = !hasCb;
     if (btnDupe) btnDupe.disabled = !hasSel;
+    const btnDel = document.getElementById('btn-delete');
+    if (btnDel) btnDel.disabled = !hasSel;
 
     // Align toggle: enabled when ≥2 positional items selectable
     const alignCount = getAlignItems().length;
@@ -4869,6 +4871,7 @@ function updateEditButtons() {
     mi('mi-copy', !hasSel);
     mi('mi-paste', !hasCb);
     mi('mi-duplicate', !hasSel);
+    mi('mi-delete', !hasSel);
     mi('mi-group', !canGroup);
     mi('mi-ungroup', !canUngroup);
     mi('mi-bring-front', !hasSel);
@@ -5682,6 +5685,7 @@ function initMenuBar() {
         'copy': () => copySelected(),
         'paste': () => pasteClipboard(),
         'duplicate': () => duplicateSelected(),
+        'delete': () => deleteSelected(),
         'group': () => groupItems(),
         'ungroup': () => ungroupItems(),
         'zoom-in': () => zoomIn(),
@@ -5805,6 +5809,7 @@ function init() {
     on('btn-copy', 'click', copySelected);
     on('btn-paste', 'click', pasteClipboard);
     on('btn-duplicate', 'click', duplicateSelected);
+    on('btn-delete', 'click', deleteSelected);
 
     // Align / Distribute — floating popup
     (function () {

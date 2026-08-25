@@ -336,7 +336,7 @@ Select a shape — eight resize handles appear around it. Drag any handle to res
 > **Note:** Double-clicking a **connector** or **line** inserts a waypoint corner — use the Properties panel to edit their labels.
 
 ### Deleting
-- Select one or more elements and press `Delete` or `Backspace` to delete them.
+- Select one or more elements and press `Delete` or `Backspace`, click the **🗑 Delete** button in the top toolbar, or use **Edit → Delete**.
 - To remove a connector or line waypoint: click its handle to focus it, then press `Delete` / `Backspace`.
 
 ### Selecting Multiple Elements
@@ -514,6 +514,7 @@ A standard application menu bar sits between the diagram name and the icon toolb
 | Copy | `Ctrl+C` | Copy selected elements |
 | Paste | `Ctrl+V` | Paste clipboard |
 | Duplicate | `Ctrl+D` | Duplicate selected elements |
+| Delete | `Del` | Delete selected elements |
 | Group | `Ctrl+G` | Group 2+ selected shapes into one unit |
 | Ungroup | `Ctrl+Shift+G` | Dissolve selected group back to individual shapes |
 
