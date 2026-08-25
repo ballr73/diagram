@@ -850,6 +850,12 @@ function shapeVertices(node) {
                 { x, y: y + h },
             ];
         }
+        case 'merge':
+            return [
+                { x, y },
+                { x: x + w, y },
+                { x: cx, y: y + h },
+            ];
         default:
             return null;
     }
@@ -1320,6 +1326,42 @@ function createShapeEl(node, sel) {
         case 'parallelogram': {
             const sk = w * 0.2;
             const pts = `${x + sk},${y} ${x + w},${y} ${x + w - sk},${y + h} ${x},${y + h}`;
+            el = svgEl('polygon', { points: pts, class: cls });
+            break;
+        }
+        case 'document': {
+            // Rectangle body with a wavy bottom edge (one full wave)
+            const waveH = Math.max(6, h * 0.12);
+            const by = y + h - waveH; // y of wave baseline
+            const d = `M ${x},${y} L ${x + w},${y} L ${x + w},${by}` +
+                      ` C ${x + w * 0.75},${by} ${x + w * 0.75},${y + h} ${x + w * 0.5},${y + h}` +
+                      ` C ${x + w * 0.25},${y + h} ${x + w * 0.25},${by} ${x},${by} Z`;
+            el = svgEl('path', { d, class: cls });
+            break;
+        }
+        case 'database': {
+            // Cylinder: top ellipse + body rect + bottom arc
+            const ry = Math.max(4, h * 0.15);
+            const d = `M ${x},${y + ry}` +
+                      ` A ${w / 2},${ry} 0 0 1 ${x + w},${y + ry}` +
+                      ` L ${x + w},${y + h - ry}` +
+                      ` A ${w / 2},${ry} 0 0 1 ${x},${y + h - ry} Z` +
+                      ` M ${x},${y + ry}` +
+                      ` A ${w / 2},${ry} 0 0 0 ${x + w},${y + ry}`;
+            el = svgEl('path', { d, class: cls });
+            break;
+        }
+        case 'wait': {
+            // D-shape: straight left/top/bottom, bezier-curved right edge
+            const cr = Math.min(w * 0.55, h * 0.55);
+            const d = `M ${x},${y} L ${x + w - cr},${y}` +
+                      ` C ${x + w + cr * 0.2},${y} ${x + w + cr * 0.2},${y + h} ${x + w - cr},${y + h}` +
+                      ` L ${x},${y + h} Z`;
+            el = svgEl('path', { d, class: cls });
+            break;
+        }
+        case 'merge': {
+            const pts = `${x},${y} ${x + w},${y} ${cx},${y + h}`;
             el = svgEl('polygon', { points: pts, class: cls });
             break;
         }
@@ -2570,6 +2612,10 @@ function dragEnd(p) {
             diamond: 'Diamond',
             triangle: 'Triangle',
             parallelogram: 'Step',
+            document: 'Document',
+            database: 'Database',
+            wait: 'Wait',
+            merge: 'Merge',
         };
         state.nodes.set(id, {
             id,
@@ -3935,6 +3981,10 @@ function renderNodeProps(container, node) {
         'diamond',
         'triangle',
         'parallelogram',
+        'document',
+        'database',
+        'wait',
+        'merge',
     ]
         .map(
             (s) =>
@@ -4416,6 +4466,10 @@ const SHAPE_SVGS = {
     diamond:       '<polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     triangle:      '<polygon points="8,1 15,14 1,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     parallelogram: '<polygon points="4,3 15,3 12,13 1,13" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    document:      '<path d="M2,3 L14,3 L14,10 C10.5,10 10.5,13 7,13 C3.5,13 3.5,10 2,10 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    database:      '<path d="M2,5 A6,2 0 0 1 14,5 L14,11 A6,2 0 0 1 2,11 Z M2,5 A6,2 0 0 0 14,5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    wait:          '<path d="M2,3 L9,3 C14,3 14,13 9,13 L2,13 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    merge:         '<polygon points="1,2 15,2 8,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
 };
 
 function setCurrentShape(shape) {

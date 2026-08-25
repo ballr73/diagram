@@ -81,7 +81,7 @@ open index.html
 
 ### Shapes
 
-Click the **Shape** button in the left toolbar to activate the draw tool. A small **triangle indicator** in the corner of the button shows that clicking it also opens the **shape type pop-out** — a floating panel where you can choose the shape type. The button icon updates to reflect the currently selected shape. You can also change an existing shape's type in the Properties panel. Available shapes:
+Click the **Shape** button in the left toolbar to activate the draw tool. A small **triangle indicator** in the corner of the button shows that clicking it also opens the **shape type pop-out** — a floating panel where you can choose the shape type. The button icon updates to reflect the currently selected shape. Hovering over a pop-out icon shows its name as a tooltip. You can also change an existing shape's type in the Properties panel. Available shapes:
 
 | Shape | Description |
 |-------|-------------|
@@ -90,7 +90,11 @@ Click the **Shape** button in the left toolbar to activate the draw tool. A smal
 | Oval | Horizontal ellipse |
 | Diamond | Rotated square |
 | Triangle | Upward-pointing triangle |
-| Parallelogram | Skewed rectangle |
+| Parallelogram | Skewed rectangle (Step) |
+| Document | Rectangle with a wavy bottom edge |
+| Database | Cylinder (rectangle with elliptic caps) |
+| Wait | D-shape — straight left side, curved right edge |
+| Merge | Inverted triangle (apex at bottom) |
 
 ### Connectors
 
