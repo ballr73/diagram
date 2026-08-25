@@ -871,6 +871,17 @@ body,
     fill: #dbeafe;
 }
 
+.edge-endpoint-handle {
+    fill: #16a34a;
+    stroke: #ffffff;
+    stroke-width: 1.5;
+    cursor: move;
+}
+
+.edge-endpoint-handle:hover {
+    fill: #22c55e;
+}
+
 /* ============================================================
    SVG — Annotations
    ============================================================ */

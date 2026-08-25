@@ -133,6 +133,18 @@ Connectors can be bent or curved using waypoints:
 
 Waypoints are preserved through undo/redo, copy/paste, and open/save.
 
+### Connector anchor points
+
+By default, connectors attach automatically at the point on each node's border that faces the opposite node. You can override this by dragging the endpoint anchor to any position on the node border.
+
+1. Select the **Select** tool and click a connector to select it
+2. **Green handles** appear at each end of the connector (on the node borders)
+3. **Drag a green handle** to reposition the anchor point around the node's border
+4. The connector remembers the new anchor direction — moving or resizing the node preserves the relative attachment angle
+5. Anchor changes are undoable and saved with the diagram
+
+> Connectors on locked layers cannot have their anchors moved.
+
 ### Lines
 
 Free-floating lines not attached to any shape. Unlike connectors, lines have no direction or arrowhead — they are purely decorative or structural.

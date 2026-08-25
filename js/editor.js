@@ -1056,10 +1056,22 @@ function edgePoints(edge) {
     const to = state.nodes.get(edge.to);
     if (!from || !to) return null;
     const wps = edge.waypoints || [];
-    const firstTarget = wps.length > 0 ? wps[0] : nodeCenter(to);
-    const lastSource = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(from);
-    const p1 = borderIntersect(from, firstTarget);
-    const p2 = borderIntersect(to, lastSource);
+    // Determine aim targets for borderIntersect, honouring anchor offsets
+    let fromAim, toAim;
+    if (edge.fromAnchorOffset) {
+        const fc = nodeCenter(from);
+        fromAim = { x: fc.x + edge.fromAnchorOffset.dx, y: fc.y + edge.fromAnchorOffset.dy };
+    } else {
+        fromAim = wps.length > 0 ? wps[0] : nodeCenter(to);
+    }
+    if (edge.toAnchorOffset) {
+        const tc = nodeCenter(to);
+        toAim = { x: tc.x + edge.toAnchorOffset.dx, y: tc.y + edge.toAnchorOffset.dy };
+    } else {
+        toAim = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(from);
+    }
+    const p1 = borderIntersect(from, fromAim);
+    const p2 = borderIntersect(to, toAim);
     return [p1, ...wps, p2];
 }
 
@@ -1646,6 +1658,14 @@ function renderEdgeGroup(edge) {
         }
     }
 
+    // Endpoint anchor handles (always shown when selected)
+    if (sel && pts && pts.length >= 2) {
+        const p1 = pts[0];
+        const p2 = pts[pts.length - 1];
+        g.appendChild(svgEl('circle', { cx: p1.x, cy: p1.y, r: 6, class: 'edge-endpoint-handle', 'data-which': 'from' }));
+        g.appendChild(svgEl('circle', { cx: p2.x, cy: p2.y, r: 6, class: 'edge-endpoint-handle', 'data-which': 'to' }));
+    }
+
     return g;
 }
 
@@ -1961,6 +1981,20 @@ function hitTest(x, y) {
             if (Math.hypot(x - line.x2, y - line.y2) <= 7)
                 return { type: 'line-endpoint', which: 'end', lineId };
         }
+        // Edge endpoint (anchor) handles (when edge is selected and not on locked layer)
+        for (const selId of state.selected) {
+            const edge = state.edges.get(selId);
+            if (!edge) continue;
+            const fromNode = state.nodes.get(edge.from);
+            if (fromNode && isLayerLocked(fromNode.layerId)) continue;
+            const pts = edgePoints(edge);
+            if (!pts || pts.length < 2) continue;
+            const p1 = pts[0], p2 = pts[pts.length - 1];
+            if (Math.hypot(x - p1.x, y - p1.y) <= 8)
+                return { type: 'edge-endpoint', edgeId: selId, which: 'from' };
+            if (Math.hypot(x - p2.x, y - p2.y) <= 8)
+                return { type: 'edge-endpoint', edgeId: selId, which: 'to' };
+        }
         // Waypoint handles on selected edges and lines
         for (const selId of state.selected) {
             const edge = state.edges.get(selId);
@@ -2152,6 +2186,17 @@ function selectMouseDown(p, hit, e) {
         drag = {
             type: 'move-line-endpoint',
             lineId: hit.lineId,
+            which: hit.which,
+            moved: false,
+        };
+        return;
+    }
+
+    if (hit.type === 'edge-endpoint') {
+        state.selectedWaypoint = null;
+        drag = {
+            type: 'move-edge-endpoint',
+            edgeId: hit.edgeId,
             which: hit.which,
             moved: false,
         };
@@ -2458,6 +2503,23 @@ function dragMove(p) {
         return;
     }
 
+    if (drag.type === 'move-edge-endpoint') {
+        const edge = state.edges.get(drag.edgeId);
+        if (edge) {
+            const nodeId = drag.which === 'from' ? edge.from : edge.to;
+            const node = state.nodes.get(nodeId);
+            if (node) {
+                const c = nodeCenter(node);
+                const offset = { dx: p.x - c.x, dy: p.y - c.y };
+                if (drag.which === 'from') edge.fromAnchorOffset = offset;
+                else edge.toAnchorOffset = offset;
+                drag.moved = true;
+                render();
+            }
+        }
+        return;
+    }
+
     if (drag.type === 'move-line') {
         const dx = p.x - drag.startX,
             dy = p.y - drag.startY;
@@ -2580,6 +2642,11 @@ function dragEnd(p) {
     }
 
     if (d.type === 'move-line' || d.type === 'move-line-endpoint') {
+        if (d.moved) pushHistory();
+        return;
+    }
+
+    if (d.type === 'move-edge-endpoint') {
         if (d.moved) pushHistory();
         return;
     }
