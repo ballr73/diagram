@@ -66,6 +66,7 @@ jobs:
                     css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
                     css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
                     help.html about.html faq.html privacy.html contact.html terms.html blog.html README.md \
+                    sitemap.xml robots.txt \
                     articles/blog-why-i-built.html articles/blog-cloud-architecture-best-practices.html \
                     icons/manifest.js icons/manifest.json \
                     icons/AWS icons/Azure icons/GCP \
@@ -160,6 +161,8 @@ jobs:
                     --delete \
                     --exclude "*" \
                     --include "ads.txt" \
+                    --include "robots.txt" \
+                    --include "sitemap.xml" \
                     --include "index.html" \
                     --include "app.html" \
                     --include "help.html" \
