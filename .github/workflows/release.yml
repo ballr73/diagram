@@ -45,6 +45,7 @@ jobs:
                   cp css/faq.css css/faq.${TAG}.css
                   cp css/help.css css/help.${TAG}.css
                   cp css/privacy.css css/privacy.${TAG}.css
+                  cp css/samples.css css/samples.${TAG}.css
                   cp css/terms.css css/terms.${TAG}.css
                   sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" app.html
                   sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" app.html
@@ -58,6 +59,7 @@ jobs:
                   sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
                   sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
                   sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
+                  sed -i "s|href=\"css/samples.css\"|href=\"css/samples.${TAG}.css\"|" samples.html
                   sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
 
             - name: Package release files
@@ -66,9 +68,10 @@ jobs:
                   tar -czf diagram-app.tar.gz \
                     index.html app.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
                     css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
-                    css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
-                    help.html about.html faq.html privacy.html contact.html terms.html blog.html README.md \
+                    css/help.${TAG}.css css/privacy.${TAG}.css css/samples.${TAG}.css css/terms.${TAG}.css \
+                    help.html about.html faq.html samples.html privacy.html contact.html terms.html blog.html README.md \
                     sitemap.xml robots.txt \
+                    samples/ \
                     articles/blog-why-i-built.html articles/blog-cloud-architecture-best-practices.html \
                     articles/blog-aws-network-topologies.html articles/blog-azure-network-topologies.html \
                     icons/manifest.js icons/manifest.json \
@@ -128,6 +131,7 @@ jobs:
                   cp css/faq.css css/faq.${TAG}.css
                   cp css/help.css css/help.${TAG}.css
                   cp css/privacy.css css/privacy.${TAG}.css
+                  cp css/samples.css css/samples.${TAG}.css
                   cp css/terms.css css/terms.${TAG}.css
                   sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" app.html
                   sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" app.html
@@ -141,6 +145,7 @@ jobs:
                   sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
                   sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
                   sed -i "s|href=\"css/privacy.css\"|href=\"css/privacy.${TAG}.css\"|" privacy.html
+                  sed -i "s|href=\"css/samples.css\"|href=\"css/samples.${TAG}.css\"|" samples.html
                   sed -i "s|href=\"css/terms.css\"|href=\"css/terms.${TAG}.css\"|" terms.html
 
             - name: Debug OIDC token
@@ -177,6 +182,8 @@ jobs:
                     --include "contact.html" \
                     --include "terms.html" \
                     --include "blog.html" \
+                    --include "samples.html" \
+                    --include "samples/*" \
                     --include "articles/blog-why-i-built.html" \
                     --include "articles/blog-cloud-architecture-best-practices.html" \
                     --include "articles/blog-aws-network-topologies.html" \
@@ -190,6 +197,7 @@ jobs:
                     --include "css/faq.${TAG}.css" \
                     --include "css/help.${TAG}.css" \
                     --include "css/privacy.${TAG}.css" \
+                    --include "css/samples.${TAG}.css" \
                     --include "css/terms.${TAG}.css" \
                     --include "icons/*"
 

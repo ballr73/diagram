@@ -1,0 +1,158 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+#samples-header {
+    background: #1e293b;
+    border-bottom: 1px solid #0f172a;
+    padding: 14px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+#samples-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+#samples-version {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* ── Content ─────────────────────────────────────────── */
+#samples-content {
+    max-width: 760px;
+    margin: 40px auto;
+    padding: 0 32px 64px;
+}
+
+#samples-content > h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+}
+
+#samples-content > .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 32px;
+}
+
+/* ── Sample Cards ────────────────────────────────────── */
+.sample-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+}
+
+.sample-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sample-icon svg {
+    width: 36px;
+    height: 36px;
+}
+
+.sample-info {
+    flex: 1;
+}
+
+.sample-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 6px;
+}
+
+.sample-info p {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.sample-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #3b82f6;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.sample-download:hover {
+    background: #2563eb;
+}
+
+.sample-download svg {
+    width: 13px;
+    height: 13px;
+    stroke: #fff;
+}
+
+.samples-note {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 16px;
+    line-height: 1.6;
+}
+
+/* ── Divider ─────────────────────────────────────────── */
+.divider {
+    border: none;
+    border-top: 1px solid #1e293b;
+    margin: 36px 0;
+}
+
+/* ── Footer links ────────────────────────────────────── */
+.footer-links {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+}
+
+.footer-links a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}

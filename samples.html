@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Diagram App — Sample Diagrams</title>
+        <meta name="description" content="Download free sample diagrams for Diagram App — flowcharts, Azure network topologies, and AWS architectures ready to open and edit." />
+        <link rel="stylesheet" href="css/samples.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="samples-header">
+            <h1>Diagram App — Samples</h1>
+            <span id="samples-version">dev</span>
+        </div>
+
+        <div id="samples-content">
+            <h2>Sample Diagrams</h2>
+            <p class="subtitle">
+                Download a sample and open it in Diagram App using
+                <strong>File&nbsp;→&nbsp;Open</strong>.
+                Each file is a ready-to-edit diagram in Diagram App's native format.
+            </p>
+
+            <!-- Flowchart -->
+            <div class="sample-card">
+                <div class="sample-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="5" rx="1"/>
+                        <polygon points="12,5.5 16,9 20,5.5 18,5.5 18,3 14,3 14,5.5"/>
+                        <rect x="3" y="13" width="7" height="5" rx="1"/>
+                        <rect x="14" y="13" width="7" height="5" rx="1"/>
+                        <line x1="6.5" y1="8" x2="6.5" y2="13"/>
+                        <line x1="6.5" y1="13" x2="17.5" y2="13"/>
+                        <line x1="17.5" y1="13" x2="17.5" y2="13"/>
+                    </svg>
+                </div>
+                <div class="sample-info">
+                    <h3>Simple Flowchart</h3>
+                    <p>
+                        A step-by-step process diagram with start/end ovals, process boxes, and
+                        decision diamonds with Yes/No branches. Great starting point for any
+                        workflow or approval process.
+                    </p>
+                    <a href="samples/flowchart.json" download="flowchart.json" class="sample-download">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2v8M5 7l3 3 3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/>
+                        </svg>
+                        Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- Azure -->
+            <div class="sample-card">
+                <div class="sample-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <rect x="5" y="8" width="8" height="8" rx="1"/>
+                        <rect x="15" y="8" width="4" height="5" rx="1"/>
+                    </svg>
+                </div>
+                <div class="sample-info">
+                    <h3>Azure Network Topology</h3>
+                    <p>
+                        A simple Azure network with a Virtual Network, Subnet, Virtual Machine,
+                        and Azure Firewall, showing traffic flow from the VM through the firewall
+                        to the internet.
+                    </p>
+                    <a href="samples/azure-simple.json" download="azure-simple.json" class="sample-download">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2v8M5 7l3 3 3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/>
+                        </svg>
+                        Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- AWS -->
+            <div class="sample-card">
+                <div class="sample-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <rect x="5" y="9" width="7" height="7" rx="1"/>
+                        <circle cx="16" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <div class="sample-info">
+                    <h3>AWS Network Topology</h3>
+                    <p>
+                        A simple AWS architecture with a VPC, Public Subnet, EC2 instance, and
+                        Internet Gateway showing outbound connectivity from the EC2 instance to
+                        the internet.
+                    </p>
+                    <a href="samples/aws-simple.json" download="aws-simple.json" class="sample-download">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2v8M5 7l3 3 3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/>
+                        </svg>
+                        Download
+                    </a>
+                </div>
+            </div>
+
+            <p class="samples-note">
+                After downloading, open the file in
+                <a href="app.html" style="color:#3b82f6">Diagram App</a>
+                using <strong>File&nbsp;→&nbsp;Open</strong> from the menu bar.
+                All samples are in Diagram App's native JSON format and can be freely edited.
+            </p>
+
+            <hr class="divider" />
+
+            <div class="footer-links">
+                <a href="app.html">Launch App</a>
+                <a
+                    href="#"
+                    onclick="
+                        window.open(
+                            'help.html',
+                            'diagram-help',
+                            'width=1000,height=720,resizable=yes',
+                        );
+                        return false;
+                    "
+                    >Help</a
+                >
+                <a href="blog.html">Blog</a>
+                <a href="faq.html">FAQ</a>
+                <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </div>
+
+        <script>
+            try {
+                const ver =
+                    window.opener &&
+                    window.opener.document &&
+                    window.opener.document.getElementById('app-version');
+                if (ver) {
+                    document.getElementById('samples-version').textContent =
+                        ver.textContent;
+                }
+            } catch (_) {}
+        </script>
+    </body>
+</html>

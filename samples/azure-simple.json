@@ -1,0 +1,115 @@
+{
+  "version": 2,
+  "tabs": [
+    {
+      "name": "Azure Network",
+      "nodes": [
+        {
+          "id": "n-vnet-box",
+          "shape": "box",
+          "label": "Virtual Network (10.0.0.0/16)",
+          "x": 60,
+          "y": 60,
+          "width": 680,
+          "height": 460,
+          "fill": "#eff6ff",
+          "stroke": "#3b82f6",
+          "strokeStyle": "dashed",
+          "opacity": 40,
+          "labelPos": "tm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-subnet-box",
+          "shape": "box",
+          "label": "Subnet (10.0.1.0/24)",
+          "x": 140,
+          "y": 140,
+          "width": 280,
+          "height": 280,
+          "fill": "#dbeafe",
+          "stroke": "#60a5fa",
+          "strokeStyle": "dashed",
+          "opacity": 50,
+          "labelPos": "tm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-vm",
+          "type": "symbol",
+          "iconPath": "icons/Azure/compute/10021-icon-service-Virtual-Machine.svg",
+          "label": "Virtual Machine",
+          "x": 224,
+          "y": 220,
+          "width": 64,
+          "height": 64,
+          "labelPos": "bm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-firewall",
+          "type": "symbol",
+          "iconPath": "icons/Azure/networking/10084-icon-service-Firewalls.svg",
+          "label": "Azure Firewall",
+          "x": 540,
+          "y": 220,
+          "width": 64,
+          "height": 64,
+          "labelPos": "bm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-vnet-icon",
+          "type": "symbol",
+          "iconPath": "icons/Azure/networking/10061-icon-service-Virtual-Networks.svg",
+          "label": "Virtual Network",
+          "x": 80,
+          "y": 440,
+          "width": 64,
+          "height": 64,
+          "labelPos": "bm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-internet",
+          "shape": "oval",
+          "label": "Internet",
+          "x": 500,
+          "y": 580,
+          "width": 120,
+          "height": 50,
+          "fill": "#f1f5f9",
+          "stroke": "#94a3b8",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "n-vm",
+          "to": "n-firewall",
+          "label": "Traffic",
+          "waypoints": []
+        },
+        {
+          "id": "e2",
+          "from": "n-firewall",
+          "to": "n-internet",
+          "label": "Filtered Egress",
+          "waypoints": []
+        }
+      ],
+      "lines": [],
+      "annotations": [],
+      "groups": [],
+      "layers": [
+        { "id": "layer-1", "name": "Layer 1", "visible": true, "locked": false }
+      ],
+      "activeLayerId": "layer-1",
+      "zoom": 1,
+      "viewCenterX": 400,
+      "viewCenterY": 360
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "version": 2,
+  "tabs": [
+    {
+      "name": "Flowchart",
+      "nodes": [
+        {
+          "id": "n1",
+          "shape": "oval",
+          "label": "Start",
+          "x": 290,
+          "y": 40,
+          "width": 140,
+          "height": 50,
+          "fill": "#22c55e",
+          "stroke": "#16a34a",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n2",
+          "shape": "box",
+          "label": "Gather Requirements",
+          "x": 255,
+          "y": 150,
+          "width": 210,
+          "height": 60,
+          "fill": "#eff6ff",
+          "stroke": "#3b82f6",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n3",
+          "shape": "diamond",
+          "label": "Requirements\nComplete?",
+          "x": 255,
+          "y": 280,
+          "width": 210,
+          "height": 80,
+          "fill": "#fefce8",
+          "stroke": "#eab308",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n4",
+          "shape": "box",
+          "label": "Design Solution",
+          "x": 255,
+          "y": 430,
+          "width": 210,
+          "height": 60,
+          "fill": "#eff6ff",
+          "stroke": "#3b82f6",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n5",
+          "shape": "diamond",
+          "label": "Review\nApproved?",
+          "x": 255,
+          "y": 560,
+          "width": 210,
+          "height": 80,
+          "fill": "#fefce8",
+          "stroke": "#eab308",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n6",
+          "shape": "box",
+          "label": "Implement",
+          "x": 255,
+          "y": 710,
+          "width": 210,
+          "height": 60,
+          "fill": "#eff6ff",
+          "stroke": "#3b82f6",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n7",
+          "shape": "oval",
+          "label": "End",
+          "x": 290,
+          "y": 840,
+          "width": 140,
+          "height": 50,
+          "fill": "#ef4444",
+          "stroke": "#dc2626",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n8",
+          "shape": "box",
+          "label": "Revise Requirements",
+          "x": 530,
+          "y": 295,
+          "width": 170,
+          "height": 50,
+          "fill": "#fff7ed",
+          "stroke": "#f97316",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n9",
+          "shape": "box",
+          "label": "Revise Design",
+          "x": 530,
+          "y": 575,
+          "width": 170,
+          "height": 50,
+          "fill": "#fff7ed",
+          "stroke": "#f97316",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "n1",
+          "to": "n2",
+          "label": "",
+          "waypoints": []
+        },
+        {
+          "id": "e2",
+          "from": "n2",
+          "to": "n3",
+          "label": "",
+          "waypoints": []
+        },
+        {
+          "id": "e3",
+          "from": "n3",
+          "to": "n4",
+          "label": "Yes",
+          "waypoints": []
+        },
+        {
+          "id": "e4",
+          "from": "n3",
+          "to": "n8",
+          "label": "No",
+          "waypoints": []
+        },
+        {
+          "id": "e5",
+          "from": "n8",
+          "to": "n2",
+          "label": "",
+          "waypoints": [
+            { "id": "wp1", "x": 615, "y": 180 }
+          ]
+        },
+        {
+          "id": "e6",
+          "from": "n4",
+          "to": "n5",
+          "label": "",
+          "waypoints": []
+        },
+        {
+          "id": "e7",
+          "from": "n5",
+          "to": "n6",
+          "label": "Yes",
+          "waypoints": []
+        },
+        {
+          "id": "e8",
+          "from": "n5",
+          "to": "n9",
+          "label": "No",
+          "waypoints": []
+        },
+        {
+          "id": "e9",
+          "from": "n9",
+          "to": "n4",
+          "label": "",
+          "waypoints": [
+            { "id": "wp2", "x": 615, "y": 460 }
+          ]
+        },
+        {
+          "id": "e10",
+          "from": "n6",
+          "to": "n7",
+          "label": "",
+          "waypoints": []
+        }
+      ],
+      "lines": [],
+      "annotations": [],
+      "groups": [],
+      "layers": [
+        { "id": "layer-1", "name": "Layer 1", "visible": true, "locked": false }
+      ],
+      "activeLayerId": "layer-1",
+      "zoom": 1,
+      "viewCenterX": 360,
+      "viewCenterY": 450
+    }
+  ]
+}

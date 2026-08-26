@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "tabs": [
+    {
+      "name": "AWS Network",
+      "nodes": [
+        {
+          "id": "n-vpc-box",
+          "shape": "box",
+          "label": "VPC (10.0.0.0/16)",
+          "x": 60,
+          "y": 60,
+          "width": 620,
+          "height": 400,
+          "fill": "#fff7ed",
+          "stroke": "#f97316",
+          "strokeStyle": "dashed",
+          "opacity": 40,
+          "labelPos": "tm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-subnet-box",
+          "shape": "box",
+          "label": "Public Subnet (10.0.1.0/24)",
+          "x": 140,
+          "y": 140,
+          "width": 260,
+          "height": 230,
+          "fill": "#f0fdf4",
+          "stroke": "#86efac",
+          "strokeStyle": "dashed",
+          "opacity": 50,
+          "labelPos": "tm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-ec2",
+          "type": "symbol",
+          "iconPath": "icons/AWS/Compute/EC2.svg",
+          "label": "EC2 Instance",
+          "x": 218,
+          "y": 218,
+          "width": 64,
+          "height": 64,
+          "labelPos": "bm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-igw",
+          "shape": "box",
+          "label": "Internet Gateway",
+          "x": 490,
+          "y": 200,
+          "width": 140,
+          "height": 60,
+          "fill": "#eff6ff",
+          "stroke": "#3b82f6",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        },
+        {
+          "id": "n-internet",
+          "shape": "oval",
+          "label": "Internet",
+          "x": 510,
+          "y": 530,
+          "width": 120,
+          "height": 50,
+          "fill": "#f1f5f9",
+          "stroke": "#94a3b8",
+          "labelPos": "mm",
+          "layerId": "layer-1"
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "from": "n-ec2",
+          "to": "n-igw",
+          "label": "Outbound",
+          "waypoints": []
+        },
+        {
+          "id": "e2",
+          "from": "n-igw",
+          "to": "n-internet",
+          "label": "",
+          "waypoints": []
+        }
+      ],
+      "lines": [],
+      "annotations": [],
+      "groups": [],
+      "layers": [
+        { "id": "layer-1", "name": "Layer 1", "visible": true, "locked": false }
+      ],
+      "activeLayerId": "layer-1",
+      "zoom": 1,
+      "viewCenterX": 370,
+      "viewCenterY": 320
+    }
+  ]
+}
