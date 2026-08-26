@@ -29,9 +29,9 @@ jobs:
                   echo "tag=$TAG" >> "$GITHUB_OUTPUT"
                   echo "Generated tag: $TAG"
 
-            - name: Inject version into index.html
+            - name: Inject version into app.html
               run: |
-                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
+                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" app.html
 
             - name: Version asset filenames
               run: |
@@ -46,9 +46,9 @@ jobs:
                   cp css/help.css css/help.${TAG}.css
                   cp css/privacy.css css/privacy.${TAG}.css
                   cp css/terms.css css/terms.${TAG}.css
-                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
-                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" index.html
-                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.js\"|" index.html
+                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" app.html
+                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" app.html
+                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.js\"|" app.html
                   sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
                   sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
                   sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
@@ -61,7 +61,7 @@ jobs:
               run: |
                   TAG=${{ steps.version.outputs.tag }}
                   tar -czf diagram-editor.tar.gz \
-                    index.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
+                    index.html app.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
                     css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
                     css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
                     help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md \
@@ -101,9 +101,9 @@ jobs:
                   TAG="v$(date +'%Y.%m.%d').${{ github.run_number }}"
                   echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-            - name: Inject version into index.html
+            - name: Inject version into app.html
               run: |
-                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" index.html
+                  sed -i "s|id=\"app-version\">dev<|id=\"app-version\">${{ steps.version.outputs.tag }}<|" app.html
 
             - name: Minify JS
               run: |
@@ -123,9 +123,9 @@ jobs:
                   cp css/help.css css/help.${TAG}.css
                   cp css/privacy.css css/privacy.${TAG}.css
                   cp css/terms.css css/terms.${TAG}.css
-                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" index.html
-                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" index.html
-                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" index.html
+                  sed -i "s|href=\"css/diagram.css\"|href=\"css/diagram.${TAG}.css\"|" app.html
+                  sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" app.html
+                  sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" app.html
                   sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
                   sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
                   sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
@@ -158,6 +158,7 @@ jobs:
                     --exclude "*" \
                     --include "ads.txt" \
                     --include "index.html" \
+                    --include "app.html" \
                     --include "help.html" \
                     --include "about.html" \
                     --include "faq.html" \

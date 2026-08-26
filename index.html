@@ -3,2087 +3,269 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Diagram Editor</title>
-        <link rel="stylesheet" href="css/diagram.css" />
-        <script
-            src="https://accounts.google.com/gsi/client"
-            async
-            defer
-        ></script>
-        <script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
-            crossorigin="anonymous"
-        ></script>
+        <title>Free Online Diagram Editor — Cloud, Network &amp; Flowchart Diagrams</title>
+        <meta name="description" content="Free browser-based diagram editor for cloud architecture diagrams, AWS diagrams, Azure diagrams, network diagrams, flowcharts and more. No installation required." />
+        <meta name="keywords" content="diagram editor, flowchart maker, cloud architecture diagram, AWS diagram, Azure diagram, GCP diagram, network diagram, system design, software architecture, free online diagram tool" />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513" crossorigin="anonymous"></script>
+        <style>
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            html, body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: #0f172a; color: #e2e8f0; line-height: 1.6;
+            }
+            nav {
+                background: #1e293b; border-bottom: 1px solid #334155;
+                padding: 0 32px; display: flex; align-items: center; gap: 24px; height: 52px;
+            }
+            .nav-brand {
+                font-size: 16px; font-weight: 700; color: #f1f5f9;
+                text-decoration: none; display: flex; align-items: center; gap: 10px;
+            }
+            .nav-links { display: flex; gap: 20px; margin-left: auto; }
+            .nav-links a { font-size: 13px; color: #94a3b8; text-decoration: none; transition: color 0.15s; }
+            .nav-links a:hover { color: #f1f5f9; }
+            .nav-cta {
+                background: #2563eb; color: #fff !important; padding: 6px 16px;
+                border-radius: 6px; font-weight: 600; transition: background 0.15s !important;
+            }
+            .nav-cta:hover { background: #1d4ed8 !important; }
+            .hero { text-align: center; padding: 72px 32px 56px; max-width: 800px; margin: 0 auto; }
+            .hero-badge {
+                display: inline-block; background: #1e3a5f; color: #60a5fa;
+                font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+                padding: 4px 12px; border-radius: 999px; margin-bottom: 20px; border: 1px solid #2563eb55;
+            }
+            .hero h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; color: #f1f5f9; line-height: 1.15; margin-bottom: 20px; }
+            .hero h1 span { color: #3b82f6; }
+            .hero > p { font-size: 17px; color: #94a3b8; max-width: 620px; margin: 0 auto 36px; }
+            .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+            .btn-primary {
+                display: inline-flex; align-items: center; gap: 8px; background: #2563eb;
+                color: #fff; font-size: 15px; font-weight: 600; padding: 13px 28px;
+                border-radius: 8px; text-decoration: none; transition: background 0.15s, transform 0.1s;
+            }
+            .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+            .btn-secondary {
+                display: inline-flex; align-items: center; gap: 8px; background: #1e293b;
+                color: #cbd5e1; font-size: 15px; font-weight: 500; padding: 13px 28px;
+                border-radius: 8px; text-decoration: none; border: 1px solid #334155; transition: background 0.15s;
+            }
+            .btn-secondary:hover { background: #273549; }
+            .container { max-width: 860px; margin: 0 auto; padding: 0 32px; }
+            section { padding: 52px 0; border-top: 1px solid #1e293b; }
+            section h2 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 16px; }
+            section p { font-size: 15px; color: #94a3b8; margin-bottom: 12px; }
+            section p:last-child { margin-bottom: 0; }
+            section p strong { color: #cbd5e1; }
+            .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+            .feature-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px 20px; }
+            .feature-card h3 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin-bottom: 6px; }
+            .feature-card p { font-size: 13px; color: #64748b; margin: 0; }
+            .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+            .tag { background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-size: 13px; padding: 4px 12px; border-radius: 999px; }
+            .two-col { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 24px; margin-top: 16px; }
+            .two-col li { list-style: none; font-size: 14px; color: #94a3b8; padding-left: 18px; position: relative; }
+            .two-col li::before { content: '✓'; position: absolute; left: 0; color: #22c55e; font-size: 12px; }
+            .cta-band {
+                background: #1e3a5f; border: 1px solid #2563eb44; border-radius: 16px;
+                text-align: center; padding: 48px 32px; margin: 52px 0;
+            }
+            .cta-band h2 { font-size: 24px; margin-bottom: 12px; }
+            .cta-band p { margin-bottom: 28px; }
+            footer { background: #1e293b; border-top: 1px solid #334155; padding: 24px 32px; text-align: center; font-size: 13px; color: #64748b; }
+            .footer-links { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; }
+            .footer-links a { color: #64748b; text-decoration: none; transition: color 0.15s; }
+            .footer-links a:hover { color: #94a3b8; }
+        </style>
     </head>
     <body>
-        <div id="app">
-            <div id="diagram-title">Untitled diagram</div>
 
-            <nav id="menu-bar">
-                <div class="menu">
-                    <button class="menu-title">File</button>
-                    <ul class="menu-dropdown">
-                        <li>
-                            <button class="menu-item" data-action="new">
-                                <span>New</span><kbd>Ctrl+N</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="open">
-                                <span>Open…</span><kbd>Ctrl+O</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="open-gdrive">
-                                <span>Open from Google Drive…</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="save">
-                                <span>Save</span><kbd>Ctrl+S</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="save-gdrive">
-                                <span>Save to Google Drive…</span>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button class="menu-item" data-action="export-png">
-                                <span>Export PNG</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="export-svg">
-                                <span>Export SVG</span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="menu">
-                    <button class="menu-title">Edit</button>
-                    <ul class="menu-dropdown">
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-undo"
-                                data-action="undo"
-                            >
-                                <span>Undo</span><kbd>Ctrl+Z</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-redo"
-                                data-action="redo"
-                            >
-                                <span>Redo</span><kbd>Ctrl+Y</kbd>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-cut"
-                                data-action="cut"
-                            >
-                                <span>Cut</span><kbd>Ctrl+X</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-copy"
-                                data-action="copy"
-                            >
-                                <span>Copy</span><kbd>Ctrl+C</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-paste"
-                                data-action="paste"
-                            >
-                                <span>Paste</span><kbd>Ctrl+V</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-duplicate"
-                                data-action="duplicate"
-                            >
-                                <span>Duplicate</span><kbd>Ctrl+D</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-delete"
-                                data-action="delete"
-                            >
-                                <span>Delete</span><kbd>Del</kbd>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-group"
-                                data-action="group"
-                            >
-                                <span>Group</span><kbd>Ctrl+G</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-ungroup"
-                                data-action="ungroup"
-                            >
-                                <span>Ungroup</span><kbd>Ctrl+⇧G</kbd>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="menu">
-                    <button class="menu-title">View</button>
-                    <ul class="menu-dropdown">
-                        <li>
-                            <button class="menu-item" data-action="zoom-in">
-                                <span>Zoom In</span><kbd>Ctrl++</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-out">
-                                <span>Zoom Out</span><kbd>Ctrl+−</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-100">
-                                <span>100%</span><kbd>Ctrl+0</kbd>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-fit">
-                                <span>Fit Window</span><kbd>Ctrl+⇧0</kbd>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-25">
-                                <span>25%</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-50">
-                                <span>50%</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-75">
-                                <span>75%</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-125">
-                                <span>125%</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-150">
-                                <span>150%</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="zoom-200">
-                                <span>200%</span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="menu">
-                    <button class="menu-title">Arrange</button>
-                    <ul class="menu-dropdown">
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-bring-front"
-                                data-action="bring-front"
-                            >
-                                <span>Bring to Front</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-send-back"
-                                data-action="send-back"
-                            >
-                                <span>Send to Back</span>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-align-left"
-                                data-action="align-left"
-                            >
-                                <span>Align Left</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-align-center-h"
-                                data-action="align-center-h"
-                            >
-                                <span>Align Center</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-align-right"
-                                data-action="align-right"
-                            >
-                                <span>Align Right</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-align-top"
-                                data-action="align-top"
-                            >
-                                <span>Align Top</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-align-center-v"
-                                data-action="align-center-v"
-                            >
-                                <span>Align Middle</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-align-bottom"
-                                data-action="align-bottom"
-                            >
-                                <span>Align Bottom</span>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-dist-h"
-                                data-action="dist-h"
-                            >
-                                <span>Distribute Horizontally</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-dist-v"
-                                data-action="dist-v"
-                            >
-                                <span>Distribute Vertically</span>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-same-width"
-                                data-action="same-width"
-                            >
-                                <span>Same Width</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-same-height"
-                                data-action="same-height"
-                            >
-                                <span>Same Height</span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="menu">
-                    <button class="menu-title">Help</button>
-                    <ul class="menu-dropdown">
-                        <li>
-                            <button class="menu-item" data-action="show-help">
-                                <span>Show Help</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button class="menu-item" data-action="show-about">
-                                <span>About</span>
-                            </button>
-                        </li>
-                        <li class="menu-sep"></li>
-                        <li>
-                            <button
-                                class="menu-item"
-                                id="mi-version"
-                                data-action="show-version"
-                            >
-                                <span
-                                    >Version:
-                                    <span id="mi-version-text">dev</span></span
-                                >
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <div id="toolbar">
-                <div class="tool-group" id="new-group">
-                    <button id="btn-new" title="New diagram">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <path
-                                d="M3 2 L9 2 L13 6 L13 14 C13 14.6 12.6 15 12 15 L4 15 C3.4 15 3 14.6 3 14 Z"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linejoin="round"
-                            />
-                            <path
-                                d="M9 2 L9 6 L13 6"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linejoin="round"
-                            />
-                            <line
-                                x1="8"
-                                y1="9"
-                                x2="8"
-                                y2="13"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <line
-                                x1="6"
-                                y1="11"
-                                x2="10"
-                                y2="11"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator" id="file-group">
-                    <button id="btn-open" title="Open diagram (JSON)">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <path
-                                d="M2 4.5 C2 3.7 2.7 3 3.5 3 L6.5 3 L8 5 L13 5 C13.8 5 14 5.5 14 6 L14 12.5 C14 13.3 13.3 14 12.5 14 L3.5 14 C2.7 14 2 13.3 2 12.5 Z"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
-                    </button>
-                    <button id="btn-save" title="Save diagram (JSON)">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <rect
-                                x="2"
-                                y="2"
-                                width="12"
-                                height="12"
-                                rx="1.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="5"
-                                y="2"
-                                width="6"
-                                height="4"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.2"
-                            />
-                            <rect
-                                x="4"
-                                y="8"
-                                width="8"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.2"
-                            />
-                        </svg>
-                    </button>
-                    <button id="btn-gdrive-save" title="Save to Google Drive">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 87.3 78"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L28.25 48H0c0 1.55.4 3.1 1.2 4.5z"
-                                fill="#0066da"
-                            />
-                            <path
-                                d="M43.65 24 29.1 0C27.75.8 26.6 1.9 25.8 3.3L1.2 43.5C.4 44.9 0 46.45 0 48h28.25z"
-                                fill="#00ac47"
-                            />
-                            <path
-                                d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59l5.9 10.95z"
-                                fill="#ea4335"
-                            />
-                            <path
-                                d="M43.65 24 58.2 0C56.85-.8 55.3-.8 53.95 0L28.25 48H59l-15.35-24z"
-                                fill="#00832d"
-                            />
-                            <path
-                                d="M73.55 76.8 59 48H28.25l-14.5 28.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z"
-                                fill="#2684fc"
-                            />
-                            <path
-                                d="M73.4 24.6C72.6 23.2 71.45 22.1 70.1 21.3L58.2 0 43.65 24 59 48h28.25c0-1.55-.4-3.1-1.2-4.5z"
-                                fill="#ffba00"
-                            />
-                        </svg>
-                    </button>
-                    <input
-                        type="file"
-                        id="file-input"
-                        accept=".json"
-                        style="display: none"
-                    />
-                </div>
-                <div class="tool-group" id="zoom-group">
-                    <button id="btn-zoom-out" title="Zoom out (Ctrl+-)">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <circle
-                                cx="7"
-                                cy="7"
-                                r="4.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <line
-                                x1="4.5"
-                                y1="7"
-                                x2="9.5"
-                                y2="7"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <line
-                                x1="11"
-                                y1="11"
-                                x2="14"
-                                y2="14"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-                    <select id="zoom-select" title="Zoom level">
-                        <option value="0.25">25%</option>
-                        <option value="0.5">50%</option>
-                        <option value="0.75">75%</option>
-                        <option value="1" selected>100%</option>
-                        <option value="1.25">125%</option>
-                        <option value="1.5">150%</option>
-                        <option value="2">200%</option>
-                        <option value="fit">Fit</option>
-                    </select>
-                    <button id="btn-zoom-in" title="Zoom in (Ctrl+=)">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <circle
-                                cx="7"
-                                cy="7"
-                                r="4.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <line
-                                x1="7"
-                                y1="4.5"
-                                x2="7"
-                                y2="9.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <line
-                                x1="4.5"
-                                y1="7"
-                                x2="9.5"
-                                y2="7"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <line
-                                x1="11"
-                                y1="11"
-                                x2="14"
-                                y2="14"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-                </div>
-                <!-- Snap to Grid toggle -->
-                <div class="tool-group toolbar-separator">
-                    <button
-                        id="btn-snap"
-                        title="Snap to grid (toggle)"
-                        aria-pressed="false"
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <!-- Off state: plain dot grid -->
-                            <g class="snap-icon-off">
-                                <circle
-                                    cx="3"
-                                    cy="3"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="8"
-                                    cy="3"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="13"
-                                    cy="3"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="3"
-                                    cy="8"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="8"
-                                    cy="8"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="13"
-                                    cy="8"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="3"
-                                    cy="13"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="8"
-                                    cy="13"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                                <circle
-                                    cx="13"
-                                    cy="13"
-                                    r="1"
-                                    fill="currentColor"
-                                    opacity="0.5"
-                                />
-                            </g>
-                            <!-- On state: dot grid + crosshair on centre dot -->
-                            <g class="snap-icon-on">
-                                <circle
-                                    cx="3"
-                                    cy="3"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="8"
-                                    cy="3"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="13"
-                                    cy="3"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="3"
-                                    cy="8"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="13"
-                                    cy="8"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="3"
-                                    cy="13"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="8"
-                                    cy="13"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <circle
-                                    cx="13"
-                                    cy="13"
-                                    r="1"
-                                    fill="currentColor"
-                                />
-                                <!-- Highlighted centre dot (larger) -->
-                                <circle
-                                    cx="8"
-                                    cy="8"
-                                    r="2"
-                                    fill="currentColor"
-                                />
-                                <!-- Crosshair lines through centre -->
-                                <line
-                                    x1="8"
-                                    y1="4.5"
-                                    x2="8"
-                                    y2="6"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                />
-                                <line
-                                    x1="8"
-                                    y1="10"
-                                    x2="8"
-                                    y2="11.5"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                />
-                                <line
-                                    x1="4.5"
-                                    y1="8"
-                                    x2="6"
-                                    y2="8"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                />
-                                <line
-                                    x1="10"
-                                    y1="8"
-                                    x2="11.5"
-                                    y2="8"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                />
-                            </g>
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator">
-                    <button id="btn-undo" title="Undo (Ctrl+Z)">
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <path
-                                d="M3 8 A5 5 0 1 1 8 13"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <polyline
-                                points="3,4 3,8 7,8"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
-                    </button>
-                    <button id="btn-redo" title="Redo (Ctrl+Y)">
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <path
-                                d="M13 8 A5 5 0 1 0 8 13"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <polyline
-                                points="13,4 13,8 9,8"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator">
-                    <button id="btn-cut" title="Cut (Ctrl+X)" disabled>
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <line
-                                x1="4"
-                                y1="4"
-                                x2="12"
-                                y2="12"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <line
-                                x1="12"
-                                y1="4"
-                                x2="4"
-                                y2="12"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <circle
-                                cx="3"
-                                cy="13"
-                                r="2"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <circle
-                                cx="13"
-                                cy="13"
-                                r="2"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                        </svg>
-                    </button>
-                    <button id="btn-copy" title="Copy (Ctrl+C)" disabled>
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <rect
-                                x="5"
-                                y="2"
-                                width="9"
-                                height="10"
-                                rx="1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="2"
-                                y="5"
-                                width="9"
-                                height="10"
-                                rx="1"
-                                fill="#1e293b"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                        </svg>
-                    </button>
-                    <button id="btn-paste" title="Paste (Ctrl+V)" disabled>
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <rect
-                                x="3"
-                                y="4"
-                                width="10"
-                                height="11"
-                                rx="1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <path
-                                d="M6 4 V3 Q6 1 8 1 Q10 1 10 3 V4"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                        </svg>
-                    </button>
-                    <button
-                        id="btn-duplicate"
-                        title="Duplicate (Ctrl+D)"
-                        disabled
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <rect
-                                x="5"
-                                y="5"
-                                width="9"
-                                height="9"
-                                rx="1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="2"
-                                y="2"
-                                width="9"
-                                height="9"
-                                rx="1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <line
-                                x1="6.5"
-                                y1="6.5"
-                                x2="9.5"
-                                y2="6.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <line
-                                x1="8"
-                                y1="5"
-                                x2="8"
-                                y2="8"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-                    <button
-                        id="btn-delete"
-                        title="Delete (Del)"
-                        disabled
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <polyline points="2,4 14,4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            <path d="M5,4 L5,2 L11,2 L11,4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3,4 L4,14 L12,14 L13,4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <line x1="6.5" y1="7" x2="6.5" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            <line x1="9.5" y1="7" x2="9.5" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator">
-                    <button
-                        id="btn-bring-front"
-                        title="Bring to Front"
-                        disabled
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <rect
-                                x="4"
-                                y="6"
-                                width="8"
-                                height="7"
-                                rx="1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="1"
-                                y="9"
-                                width="8"
-                                height="6"
-                                rx="1"
-                                fill="#1e293b"
-                                stroke="currentColor"
-                                stroke-width="1.3"
-                                opacity="0.6"
-                            />
-                            <polyline
-                                points="8,5 8,1 12,1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-                            <line
-                                x1="8"
-                                y1="1"
-                                x2="8"
-                                y2="5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-                    <button id="btn-send-back" title="Send to Back" disabled>
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <rect
-                                x="4"
-                                y="3"
-                                width="8"
-                                height="7"
-                                rx="1"
-                                fill="#1e293b"
-                                stroke="currentColor"
-                                stroke-width="1.3"
-                                opacity="0.6"
-                            />
-                            <rect
-                                x="1"
-                                y="6"
-                                width="8"
-                                height="7"
-                                rx="1"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <line
-                                x1="12"
-                                y1="11"
-                                x2="12"
-                                y2="15"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <polyline
-                                points="8,15 12,15 12,11"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator" id="align-group">
-                    <button
-                        id="btn-align-toggle"
-                        class="shape-btn"
-                        title="Align / Distribute"
-                        disabled
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <line
-                                x1="8"
-                                y1="1"
-                                x2="8"
-                                y2="15"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <rect
-                                x="3"
-                                y="3"
-                                width="10"
-                                height="3"
-                                rx="0.5"
-                                fill="currentColor"
-                                opacity="0.8"
-                            />
-                            <rect
-                                x="5"
-                                y="10"
-                                width="6"
-                                height="3"
-                                rx="0.5"
-                                fill="currentColor"
-                                opacity="0.8"
-                            />
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator">
-                    <button
-                        id="btn-group"
-                        title="Group selected shapes (Ctrl+G)"
-                        disabled
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <rect
-                                x="2"
-                                y="2"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="9"
-                                y="2"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="2"
-                                y="9"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="9"
-                                y="9"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="0.75"
-                                y="0.75"
-                                width="14.5"
-                                height="14.5"
-                                rx="1.5"
-                                stroke="currentColor"
-                                stroke-width="1"
-                                stroke-dasharray="3 2"
-                            />
-                        </svg>
-                    </button>
-                    <button
-                        id="btn-ungroup"
-                        title="Ungroup (Ctrl+Shift+G)"
-                        disabled
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <rect
-                                x="2"
-                                y="2"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="9"
-                                y="2"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="2"
-                                y="9"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <rect
-                                x="9"
-                                y="9"
-                                width="5"
-                                height="5"
-                                rx="0.5"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <line
-                                x1="1"
-                                y1="1"
-                                x2="15"
-                                y2="15"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-                </div>
-                <div class="tool-group toolbar-separator">
-                    <button id="btn-export-svg" title="Export diagram as SVG">
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <path
-                                d="M8 2 L8 10 M5 7 L8 10 L11 7"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <path
-                                d="M3 12 L3 14 L13 14 L13 12"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                        </svg>
-                        SVG
-                    </button>
-                    <button id="btn-export-png" title="Export diagram as PNG">
-                        <svg width="16" height="16" viewBox="0 0 16 16">
-                            <path
-                                d="M8 2 L8 10 M5 7 L8 10 L11 7"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <path
-                                d="M3 12 L3 14 L13 14 L13 12"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                        </svg>
-                        PNG
-                    </button>
-                </div>
-
-                <div class="tool-group toolbar-separator" style="margin-left:auto">
-                    <button id="btn-present" title="Presentation mode (P)">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <rect x="1" y="2" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-                            <line x1="8" y1="12" x2="8" y2="15" stroke="currentColor" stroke-width="1.4"/>
-                            <line x1="5" y1="15" x2="11" y2="15" stroke="currentColor" stroke-width="1.4"/>
-                            <polygon points="6,5 11,7 6,9" fill="currentColor"/>
-                        </svg>
-                    </button>
-                </div>
-                <div id="toolbar-status"></div>
+        <nav>
+            <a class="nav-brand" href="/">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <line x1="17.5" y1="10" x2="17.5" y2="14"/>
+                    <line x1="6.5" y1="10" x2="17.5" y2="10"/>
+                    <line x1="6.5" y1="10" x2="6.5" y2="14"/>
+                </svg>
+                Diagram Editor
+            </a>
+            <div class="nav-links">
+                <a href="help.html">Help</a>
+                <a href="blog.html">Blog</a>
+                <a href="faq.html">FAQ</a>
+                <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub</a>
+                <a href="app.html" class="nav-cta">Launch App →</a>
             </div>
+        </nav>
 
-            <div id="main">
-                <div id="left-toolbar">
-                    <button
-                        class="tool-btn"
-                        data-tool="select"
-                        title="Select — click, drag to move/resize (S)"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 16 16">
-                            <path
-                                d="M2 2 L2 12 L5.5 9 L7.5 13.5 L9 12.8 L7 8.3 L11 8.3 Z"
-                                fill="currentColor"
-                            />
-                        </svg>
-                        <span>Select</span>
-                    </button>
-                    <button
-                        id="btn-shape-tool"
-                        class="tool-btn"
-                        data-tool="box"
-                        title="Shape — click and drag to draw (B)"
-                    >
-                        <span id="shape-tool-icon">
-                            <svg width="16" height="16" viewBox="0 0 16 16">
-                                <rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-                            </svg>
-                        </span>
-                    </button>
-                    <button
-                        class="tool-btn"
-                        data-tool="connector"
-                        title="Connector — drag from one box to another (C)"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 16 16">
-                            <line
-                                x1="2"
-                                y1="8"
-                                x2="11"
-                                y2="8"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            />
-                            <polygon
-                                points="11,5 15,8 11,11"
-                                fill="currentColor"
-                            />
-                        </svg>
-                        <span>Connect</span>
-                    </button>
-                    <button
-                        class="tool-btn"
-                        data-tool="line"
-                        title="Line — click and drag to draw a free line (L)"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 16 16">
-                            <line
-                                x1="2"
-                                y1="14"
-                                x2="14"
-                                y2="2"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                            />
-                            <circle cx="2" cy="14" r="2" fill="currentColor" />
-                            <circle cx="14" cy="2" r="2" fill="currentColor" />
-                        </svg>
-                        <span>Line</span>
-                    </button>
-                    <button
-                        class="tool-btn"
-                        data-tool="text"
-                        title="Text — click canvas for annotation, click element to edit (T)"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 16 16">
-                            <text
-                                x="3"
-                                y="13"
-                                font-size="13"
-                                font-weight="bold"
-                                fill="currentColor"
-                            >
-                                T
-                            </text>
-                        </svg>
-                        <span>Text</span>
-                    </button>
-                    <div class="left-tb-sep"></div>
-                    <button
-                        class="tool-btn"
-                        id="btn-toggle-icons"
-                        title="Icon Library (I)"
-                    >
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                        >
-                            <rect
-                                x="1"
-                                y="1"
-                                width="6"
-                                height="6"
-                                rx="1"
-                                stroke="currentColor"
-                                stroke-width="1.3"
-                            />
-                            <rect
-                                x="9"
-                                y="1"
-                                width="6"
-                                height="6"
-                                rx="1"
-                                stroke="currentColor"
-                                stroke-width="1.3"
-                            />
-                            <rect
-                                x="1"
-                                y="9"
-                                width="6"
-                                height="6"
-                                rx="1"
-                                stroke="currentColor"
-                                stroke-width="1.3"
-                            />
-                            <rect
-                                x="9"
-                                y="9"
-                                width="6"
-                                height="6"
-                                rx="1"
-                                stroke="currentColor"
-                                stroke-width="1.3"
-                            />
-                        </svg>
-                        <span>Icons</span>
-                    </button>
-                    <div id="app-version">dev</div>
-                </div>
-                <!-- Shape type pop-out (fixed-positioned, shown via JS) -->
-                <div id="shape-popout">
-                    <div id="shape-popout-title">Shape Type</div>
-                    <div id="shape-popout-grid">
-                        <button class="shape-popout-btn" data-shape="box" title="Box">
-                            <svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/></svg>
-                            Box
-                        </button>
-                        <button class="shape-popout-btn" data-shape="circle" title="Circle">
-                            <svg viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Circle
-                        </button>
-                        <button class="shape-popout-btn" data-shape="oval" title="Oval">
-                            <svg viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="7" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Oval
-                        </button>
-                        <button class="shape-popout-btn" data-shape="diamond" title="Diamond">
-                            <svg viewBox="0 0 16 16"><polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Diamond
-                        </button>
-                        <button class="shape-popout-btn" data-shape="triangle" title="Triangle">
-                            <svg viewBox="0 0 16 16"><polygon points="8,1 15,14 1,14" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Triangle
-                        </button>
-                        <button class="shape-popout-btn" data-shape="parallelogram" title="Parallelogram">
-                            <svg viewBox="0 0 16 16"><polygon points="4,3 15,3 12,13 1,13" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Para&shy;llel
-                        </button>
-                        <button class="shape-popout-btn" data-shape="document" title="Document">
-                            <svg viewBox="0 0 16 16"><path d="M2,3 L14,3 L14,10 C10.5,10 10.5,13 7,13 C3.5,13 3.5,10 2,10 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Doc&shy;ument
-                        </button>
-                        <button class="shape-popout-btn" data-shape="database" title="Database">
-                            <svg viewBox="0 0 16 16"><path d="M2,5 A6,2 0 0 1 14,5 L14,11 A6,2 0 0 1 2,11 Z M2,5 A6,2 0 0 0 14,5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Data&shy;base
-                        </button>
-                        <button class="shape-popout-btn" data-shape="wait" title="Wait">
-                            <svg viewBox="0 0 16 16"><path d="M2,3 L9,3 C14,3 14,13 9,13 L2,13 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Wait
-                        </button>
-                        <button class="shape-popout-btn" data-shape="merge" title="Merge">
-                            <svg viewBox="0 0 16 16"><polygon points="1,2 15,2 8,14" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                            Merge
-                        </button>
-                    </div>
-                </div>
-                <div id="icon-panel" class="icon-panel-closed">
-                    <div id="icon-panel-header">
-                        <input
-                            id="icon-search"
-                            type="text"
-                            placeholder="Search icons…"
-                            autocomplete="off"
-                        />
-                    </div>
-                    <div id="icon-tree"></div>
-                </div>
-                <div id="canvas-container">
-                    <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <!-- Grid patterns: minor every 20px, major every 100px -->
-                            <pattern
-                                id="grid-minor"
-                                x="0"
-                                y="0"
-                                width="20"
-                                height="20"
-                                patternUnits="userSpaceOnUse"
-                            >
-                                <circle
-                                    cx="0"
-                                    cy="0"
-                                    r="0.6"
-                                    fill="var(--grid-dot-minor, #94a3b8)"
-                                    opacity="0.5"
-                                />
-                            </pattern>
-                            <pattern
-                                id="grid-major"
-                                x="0"
-                                y="0"
-                                width="100"
-                                height="100"
-                                patternUnits="userSpaceOnUse"
-                            >
-                                <rect
-                                    width="100"
-                                    height="100"
-                                    fill="url(#grid-minor)"
-                                />
-                                <circle
-                                    cx="0"
-                                    cy="0"
-                                    r="1.2"
-                                    fill="var(--grid-dot-major, #64748b)"
-                                    opacity="0.7"
-                                />
-                            </pattern>
-                            <marker
-                                id="arrowhead"
-                                markerWidth="10"
-                                markerHeight="7"
-                                refX="10"
-                                refY="3.5"
-                                orient="auto"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <path
-                                    d="M0,0 L10,3.5 L0,7 Z"
-                                    class="arrow-fill"
-                                />
-                            </marker>
-                            <marker
-                                id="arrowhead-sel"
-                                markerWidth="10"
-                                markerHeight="7"
-                                refX="10"
-                                refY="3.5"
-                                orient="auto"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <path
-                                    d="M0,0 L10,3.5 L0,7 Z"
-                                    class="arrow-fill-sel"
-                                />
-                            </marker>
-                            <marker
-                                id="arrowhead-start"
-                                markerWidth="10"
-                                markerHeight="7"
-                                refX="10"
-                                refY="3.5"
-                                orient="auto-start-reverse"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <path
-                                    d="M0,0 L10,3.5 L0,7 Z"
-                                    class="arrow-fill"
-                                />
-                            </marker>
-                            <marker
-                                id="arrowhead-start-sel"
-                                markerWidth="10"
-                                markerHeight="7"
-                                refX="10"
-                                refY="3.5"
-                                orient="auto-start-reverse"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <path
-                                    d="M0,0 L10,3.5 L0,7 Z"
-                                    class="arrow-fill-sel"
-                                />
-                            </marker>
-                            <!-- Line end symbols: dot and square, normal + selected -->
-                            <marker
-                                id="dot-marker"
-                                markerWidth="8"
-                                markerHeight="8"
-                                refX="4"
-                                refY="4"
-                                orient="auto"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <circle
-                                    cx="4"
-                                    cy="4"
-                                    r="3"
-                                    class="line-sym-fill"
-                                />
-                            </marker>
-                            <marker
-                                id="dot-marker-sel"
-                                markerWidth="8"
-                                markerHeight="8"
-                                refX="4"
-                                refY="4"
-                                orient="auto"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <circle
-                                    cx="4"
-                                    cy="4"
-                                    r="3"
-                                    class="line-sym-fill-sel"
-                                />
-                            </marker>
-                            <marker
-                                id="square-marker"
-                                markerWidth="8"
-                                markerHeight="8"
-                                refX="4"
-                                refY="4"
-                                orient="auto"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <rect
-                                    x="1"
-                                    y="1"
-                                    width="6"
-                                    height="6"
-                                    class="line-sym-fill"
-                                />
-                            </marker>
-                            <marker
-                                id="square-marker-sel"
-                                markerWidth="8"
-                                markerHeight="8"
-                                refX="4"
-                                refY="4"
-                                orient="auto"
-                                markerUnits="userSpaceOnUse"
-                            >
-                                <rect
-                                    x="1"
-                                    y="1"
-                                    width="6"
-                                    height="6"
-                                    class="line-sym-fill-sel"
-                                />
-                            </marker>
-                        </defs>
-                        <!-- Grid background — covers infinite canvas, pointer-events:none so it doesn't block interaction -->
-                        <rect
-                            id="grid-bg"
-                            x="-1000000"
-                            y="-1000000"
-                            width="2000000"
-                            height="2000000"
-                            fill="url(#grid-major)"
-                            pointer-events="none"
-                        />
-                        <g id="bg-annotations-layer"></g>
-                        <g id="shapes-layer"></g>
-                        <g id="lines-layer"></g>
-                        <g id="annotations-layer"></g>
-                        <g id="ui-layer"></g>
-                    </svg>
-                    <div id="tab-bar"></div>
-                </div>
-
-                <!-- Presentation mode navigation overlay (shown via JS) -->
-                <div id="presentation-controls">
-                    <button id="pres-prev" title="Previous tab (←)">
-                        <svg width="14" height="14" viewBox="0 0 16 16"><polygon points="12,2 4,8 12,14" fill="currentColor"/></svg>
-                    </button>
-                    <span id="pres-tab-label"></span>
-                    <button id="pres-next" title="Next tab (→)">
-                        <svg width="14" height="14" viewBox="0 0 16 16"><polygon points="4,2 12,8 4,14" fill="currentColor"/></svg>
-                    </button>
-                    <div class="pres-sep"></div>
-                    <button id="pres-exit" title="Exit presentation (Esc)">
-                        <svg width="12" height="12" viewBox="0 0 16 16"><line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="2" x2="2" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        Exit
-                    </button>
-                </div>
-
-                <div id="right-panel">
-                    <div id="properties-panel">
-                        <div id="properties-header">Properties</div>
-                        <div id="properties-content">
-                            <p class="no-selection">Nothing selected</p>
-                        </div>
-                    </div>
-
-                    <div id="layers-panel">
-                        <div id="layers-header">
-                            <span>Layers</span>
-                            <button id="btn-add-layer" title="Add layer">
-                                <svg viewBox="0 0 16 16" width="14" height="14">
-                                    <line
-                                        x1="8"
-                                        y1="2"
-                                        x2="8"
-                                        y2="14"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                    />
-                                    <line
-                                        x1="2"
-                                        y1="8"
-                                        x2="14"
-                                        y2="8"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                        <div id="layers-list"></div>
-                    </div>
-                </div>
+        <div class="hero">
+            <div class="hero-badge">Free · No Install · No Account</div>
+            <h1>Draw <span>Diagrams</span> Instantly<br>in Your Browser</h1>
+            <p>
+                A powerful, free online diagram editor for cloud architecture diagrams,
+                network diagrams, flowcharts, AWS &amp; Azure diagrams, ER diagrams,
+                and more — all running directly in your browser with no sign-up required.
+            </p>
+            <div class="hero-actions">
+                <a href="app.html" class="btn-primary">
+                    ▶ &nbsp;Launch App — It's Free
+                </a>
+                <a href="help.html" class="btn-secondary">
+                    View Documentation
+                </a>
             </div>
         </div>
 
-        <!-- Floating align/distribute popup -->
-        <div id="align-popup" class="align-popup" hidden>
-            <div class="align-popup-row">
-                <button
-                    id="btn-align-left"
-                    class="align-popup-btn"
-                    title="Align left edges"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <line
-                            x1="3"
-                            y1="1"
-                            x2="3"
-                            y2="15"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <rect
-                            x="3"
-                            y="3"
-                            width="9"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="3"
-                            y="10"
-                            width="6"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-align-center-h"
-                    class="align-popup-btn"
-                    title="Align centers horizontally"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <line
-                            x1="8"
-                            y1="1"
-                            x2="8"
-                            y2="15"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <rect
-                            x="3"
-                            y="3"
-                            width="10"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="5"
-                            y="10"
-                            width="6"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-align-right"
-                    class="align-popup-btn"
-                    title="Align right edges"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <line
-                            x1="13"
-                            y1="1"
-                            x2="13"
-                            y2="15"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <rect
-                            x="4"
-                            y="3"
-                            width="9"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="7"
-                            y="10"
-                            width="6"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-align-top"
-                    class="align-popup-btn"
-                    title="Align top edges"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <line
-                            x1="1"
-                            y1="3"
-                            x2="15"
-                            y2="3"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <rect
-                            x="3"
-                            y="3"
-                            width="3"
-                            height="9"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="10"
-                            y="3"
-                            width="3"
-                            height="6"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-align-center-v"
-                    class="align-popup-btn"
-                    title="Align centers vertically"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <line
-                            x1="1"
-                            y1="8"
-                            x2="15"
-                            y2="8"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <rect
-                            x="3"
-                            y="3"
-                            width="3"
-                            height="10"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="10"
-                            y="5"
-                            width="3"
-                            height="6"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-align-bottom"
-                    class="align-popup-btn"
-                    title="Align bottom edges"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <line
-                            x1="1"
-                            y1="13"
-                            x2="15"
-                            y2="13"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <rect
-                            x="3"
-                            y="4"
-                            width="3"
-                            height="9"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="10"
-                            y="7"
-                            width="3"
-                            height="6"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                    </svg>
-                </button>
+        <div class="container">
+
+            <section>
+                <h2>What Is It?</h2>
+                <p>
+                    <strong>Diagram Editor</strong> is a free, browser-based diagramming tool that lets you
+                    create professional technical diagrams without installing any software.
+                    It runs entirely in your browser — open a file or start from scratch in seconds.
+                    Your work is saved locally as a <code style="background:#1e293b;color:#93c5fd;padding:1px 5px;border-radius:3px">.json</code> file or synced to
+                    <strong>Google Drive</strong>, keeping your data private and always accessible.
+                </p>
+                <p>
+                    Whether you need to sketch a <strong>cloud architecture diagram</strong> for AWS, Azure,
+                    or GCP, map out a <strong>network topology</strong>, document a <strong>software system
+                    design</strong>, or build a <strong>flowchart</strong> for a business process,
+                    Diagram Editor gives you the tools to do it quickly and cleanly.
+                    Export finished diagrams as <strong>SVG or PNG</strong> for presentations, wikis, or documentation.
+                </p>
+            </section>
+
+            <section>
+                <h2>Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>🏗 Built-in Shape Library</h3>
+                        <p>Box, circle, diamond, triangle, parallelogram, document, database, wait, merge — all standard flowchart and diagram shapes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔗 Smart Connectors</h3>
+                        <p>Drag connectors between shapes. Add waypoints, choose curved or straight routing, and drag anchor points anywhere on a shape's border.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>☁️ Cloud &amp; Tech Icons</h3>
+                        <p>Hundreds of icons for AWS, Azure, GCP, and general networking — drag and drop to build cloud architecture diagrams instantly.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📐 Layers</h3>
+                        <p>Organise complex diagrams into layers. Toggle visibility, lock layers, reorder by drag-and-drop, and control Z-ordering per layer.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Multi-Tab Diagrams</h3>
+                        <p>One file, multiple pages. Create separate tabs for different views — great for layered architecture documentation.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🎬 Presentation Mode</h3>
+                        <p>Present diagrams fullscreen with all UI hidden. Navigate between tabs with arrow keys or on-screen controls.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>💾 Google Drive</h3>
+                        <p>Open and save diagrams directly to Google Drive. Browse folders and keep diagrams in sync across devices.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🖼 Export SVG &amp; PNG</h3>
+                        <p>Export crisp, high-resolution diagrams as scalable SVG or retina-ready PNG — perfect for slides, docs, or print.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>⚙️ Full Styling Control</h3>
+                        <p>Per-element fill, stroke, opacity, font, dash style, label position, and arrow direction. Powerful without being complex.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Who Is It For?</h2>
+                <p>
+                    Diagram Editor is built for anyone who needs clear, structured diagrams
+                    without the overhead of heavyweight tools or cloud subscriptions.
+                </p>
+                <ul class="two-col">
+                    <li>Software developers &amp; engineers</li>
+                    <li>Cloud &amp; DevOps architects</li>
+                    <li>System designers &amp; technical leads</li>
+                    <li>Network engineers</li>
+                    <li>Data engineers &amp; analysts</li>
+                    <li>Students &amp; academics</li>
+                    <li>Teachers &amp; trainers</li>
+                    <li>Project managers</li>
+                    <li>Business analysts</li>
+                    <li>Technical writers</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>What Can You Diagram?</h2>
+                <p>
+                    From high-level system overviews to detailed technical schematics, Diagram Editor
+                    handles a wide range of diagram types:
+                </p>
+                <div class="tag-list">
+                    <span class="tag">Cloud Architecture (AWS, Azure, GCP)</span>
+                    <span class="tag">Network Topology</span>
+                    <span class="tag">Data Flow Diagrams</span>
+                    <span class="tag">Entity-Relationship (ER) Diagrams</span>
+                    <span class="tag">Flowcharts &amp; Process Maps</span>
+                    <span class="tag">System Design Diagrams</span>
+                    <span class="tag">Microservices Architecture</span>
+                    <span class="tag">Infrastructure Diagrams</span>
+                    <span class="tag">Org Charts</span>
+                    <span class="tag">UML (informal)</span>
+                    <span class="tag">Sequence Diagrams</span>
+                    <span class="tag">Decision Trees</span>
+                    <span class="tag">Database Schemas</span>
+                    <span class="tag">CI/CD Pipelines</span>
+                    <span class="tag">Swimlane Diagrams</span>
+                </div>
+            </section>
+
+            <section>
+                <h2>Why Diagram Editor?</h2>
+                <ul class="two-col">
+                    <li>Completely free — no subscription</li>
+                    <li>No installation or build step</li>
+                    <li>No account or sign-up required</li>
+                    <li>Works in any modern browser</li>
+                    <li>Data stays on your machine</li>
+                    <li>Optional Google Drive sync</li>
+                    <li>Open source on GitHub</li>
+                    <li>Fast &amp; lightweight</li>
+                    <li>Full undo / redo history</li>
+                    <li>SVG &amp; PNG export included</li>
+                </ul>
+            </section>
+
+            <div class="cta-band">
+                <h2>Ready to Start Diagramming?</h2>
+                <p>No sign-up. No download. Just open the editor and start drawing.</p>
+                <a href="app.html" class="btn-primary" style="font-size:16px;padding:14px 32px;">
+                    Launch Diagram Editor — Free →
+                </a>
             </div>
-            <div class="align-popup-divider"></div>
-            <div class="align-popup-row">
-                <button
-                    id="btn-dist-h"
-                    class="align-popup-btn"
-                    title="Distribute horizontally (equal gaps)"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <rect
-                            x="1"
-                            y="5"
-                            width="3"
-                            height="6"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="6.5"
-                            y="5"
-                            width="3"
-                            height="6"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="12"
-                            y="5"
-                            width="3"
-                            height="6"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <line
-                            x1="4"
-                            y1="8"
-                            x2="6.5"
-                            y2="8"
-                            stroke="currentColor"
-                            stroke-width="1"
-                            opacity="0.6"
-                        />
-                        <line
-                            x1="9.5"
-                            y1="8"
-                            x2="12"
-                            y2="8"
-                            stroke="currentColor"
-                            stroke-width="1"
-                            opacity="0.6"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-dist-v"
-                    class="align-popup-btn"
-                    title="Distribute vertically (equal gaps)"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <rect
-                            x="5"
-                            y="1"
-                            width="6"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="5"
-                            y="6.5"
-                            width="6"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="5"
-                            y="12"
-                            width="6"
-                            height="3"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <line
-                            x1="8"
-                            y1="4"
-                            x2="8"
-                            y2="6.5"
-                            stroke="currentColor"
-                            stroke-width="1"
-                            opacity="0.6"
-                        />
-                        <line
-                            x1="8"
-                            y1="9.5"
-                            x2="8"
-                            y2="12"
-                            stroke="currentColor"
-                            stroke-width="1"
-                            opacity="0.6"
-                        />
-                    </svg>
-                </button>
-            </div>
-            <div class="align-popup-divider"></div>
-            <div class="align-popup-row">
-                <button
-                    id="btn-same-width"
-                    class="align-popup-btn"
-                    title="Same width (match last selected)"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <rect
-                            x="2"
-                            y="4"
-                            width="12"
-                            height="4"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="2"
-                            y="10"
-                            width="12"
-                            height="2"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.5"
-                        />
-                        <line
-                            x1="2"
-                            y1="3"
-                            x2="2"
-                            y2="13"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <line
-                            x1="14"
-                            y1="3"
-                            x2="14"
-                            y2="13"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                    </svg>
-                </button>
-                <button
-                    id="btn-same-height"
-                    class="align-popup-btn"
-                    title="Same height (match last selected)"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16">
-                        <rect
-                            x="4"
-                            y="2"
-                            width="4"
-                            height="12"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.8"
-                        />
-                        <rect
-                            x="10"
-                            y="2"
-                            width="2"
-                            height="12"
-                            rx="0.5"
-                            fill="currentColor"
-                            opacity="0.5"
-                        />
-                        <line
-                            x1="3"
-                            y1="2"
-                            x2="13"
-                            y2="2"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                        <line
-                            x1="3"
-                            y1="14"
-                            x2="13"
-                            y2="14"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            stroke-linecap="round"
-                        />
-                    </svg>
-                </button>
-            </div>
+
         </div>
 
-        <script src="icons/manifest.js"></script>
-        <script src="js/editor.js"></script>
-        <script src="js/gdrive.js"></script>
+        <footer>
+            <div class="footer-links">
+                <a href="app.html">Launch App</a>
+                <a href="help.html">Help</a>
+                <a href="blog.html">Blog</a>
+                <a href="faq.html">FAQ</a>
+                <a href="about.html">About</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="contact.html">Contact</a>
+                <a href="https://github.com/ballr73/diagram" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p>Free online diagram editor — browser-based, open source, no account required.</p>
+        </footer>
+
     </body>
 </html>

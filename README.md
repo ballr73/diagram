@@ -1,6 +1,6 @@
 # Diagram Editor
 
-A lightweight, self-contained browser-based diagram editor. No installation, no build step, no dependencies — just open `index.html` in any modern browser.
+A lightweight, self-contained browser-based diagram editor. No installation, no build step, no dependencies — just open `app.html` in any modern browser (or visit the homepage at `index.html`).
 
 ## Getting Started
 
@@ -20,14 +20,14 @@ https://ballr73.github.io/diagram/
    ```
    tar -xzf diagram-editor.tar.gz
    ```
-4. Open `index.html` in your browser
+4. Open `app.html` in your browser (or `index.html` for the homepage)
 
 ### Option 3 — Clone the repo
 
 ```
 git clone https://github.com/ballr73/diagram.git
 cd diagram
-open index.html
+open app.html
 ```
 
 > **Note:** All three options work offline once the files are on your machine. No server required.
@@ -690,7 +690,8 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 ## Files
 
 ```
-index.html                        — HTML shell and SVG canvas
+index.html                        — SEO landing page / homepage
+app.html                          — HTML shell and SVG canvas (the editor)
 editor.js                         — All editor logic (~3,530 lines)
 diagram.css                       — UI and SVG styling (~1,100 lines)
 README.md                         — This file
@@ -723,7 +724,7 @@ Visit the [Releases page](https://github.com/ballr73/diagram/releases) and downl
 
 ```
 tar -xzf diagram-editor.tar.gz
-open index.html
+open app.html
 ```
 
 ### GitHub Pages setup (one-time, repo owner only)
