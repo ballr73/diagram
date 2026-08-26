@@ -50,7 +50,8 @@ jobs:
                   sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.js\"|" app.html
                   sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.js\"|" app.html
                   sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
-                  sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-why-i-built.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-cloud-architecture-best-practices.html
                   sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
                   sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
                   sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
@@ -64,7 +65,8 @@ jobs:
                     index.html app.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
                     css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
                     css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
-                    help.html about.html faq.html privacy.html contact.html terms.html blog.html blog-why-i-built.html README.md \
+                    help.html about.html faq.html privacy.html contact.html terms.html blog.html README.md \
+                    articles/blog-why-i-built.html articles/blog-cloud-architecture-best-practices.html \
                     icons/manifest.js icons/manifest.json \
                     icons/AWS icons/Azure icons/GCP \
                     scripts/generate-manifest.js
@@ -127,7 +129,8 @@ jobs:
                   sed -i "s|src=\"js/editor.js\"|src=\"js/editor.${TAG}.min.js\"|" app.html
                   sed -i "s|src=\"js/gdrive.js\"|src=\"js/gdrive.${TAG}.min.js\"|" app.html
                   sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
-                  sed -i "s|href=\"css/blog-article.css\"|href=\"css/blog-article.${TAG}.css\"|" blog-why-i-built.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-why-i-built.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-cloud-architecture-best-practices.html
                   sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
                   sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
                   sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
@@ -166,7 +169,8 @@ jobs:
                     --include "contact.html" \
                     --include "terms.html" \
                     --include "blog.html" \
-                    --include "blog-why-i-built.html" \
+                    --include "articles/blog-why-i-built.html" \
+                    --include "articles/blog-cloud-architecture-best-practices.html" \
                     --include "js/editor.${TAG}.min.js" \
                     --include "js/gdrive.${TAG}.min.js" \
                     --include "css/diagram.${TAG}.css" \

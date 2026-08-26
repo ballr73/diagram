@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Best Practices for Cloud Architecture Diagrams — Diagram App Blog</title>
+        <meta name="description" content="14 best practices for creating clear, accurate, and maintainable cloud architecture diagrams for AWS, Azure, GCP, and Kubernetes." />
+        <link rel="stylesheet" href="../css/blog-article.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="article-header">
+            <a href="../blog.html">Blog</a>
+            <span class="sep">/</span>
+            <span class="current">Best Practices for Cloud Architecture Diagrams</span>
+        </div>
+
+        <div id="article-body">
+            <!-- Table of contents -->
+            <nav id="article-toc">
+                <h2>In this article</h2>
+                <a href="#clear-boundaries" class="active">1. Start With Clear Boundaries</a>
+                <a href="#standard-icons">2. Use Standard Icons</a>
+                <a href="#group-components">3. Group Related Components</a>
+                <a href="#keep-simple">4. Keep It Simple</a>
+                <a href="#consistent-labels">5. Clear, Consistent Labeling</a>
+                <a href="#data-flow">6. Show Data Flow</a>
+                <a href="#redundancy">7. Highlight Redundancy</a>
+                <a href="#security">8. Represent Security</a>
+                <a href="#multiple-levels">9. Use Multiple Levels</a>
+                <a href="#keep-updated">10. Keep Diagrams Updated</a>
+                <a href="#legend">11. Provide a Legend</a>
+                <a href="#color">12. Use Color Intentionally</a>
+                <a href="#annotations">13. Include Annotations</a>
+                <a href="#export-formats">14. Export in Multiple Formats</a>
+                <a href="#conclusion">Conclusion</a>
+            </nav>
+
+            <!-- Article -->
+            <div id="article-content">
+                <div class="article-meta">
+                    <span class="article-date">26 August 2026</span>
+                    <span class="article-tag">Best Practices</span>
+                </div>
+
+                <h1>Best Practices for Cloud Architecture Diagrams</h1>
+
+                <div class="article-section" style="margin-bottom: 36px">
+                    <p>
+                        Cloud architecture diagrams are essential for planning, communicating, and
+                        maintaining modern systems. Whether you're designing an AWS deployment,
+                        mapping an Azure network, or documenting a Kubernetes cluster, a clear
+                        diagram helps teams understand how everything fits together. Good diagrams
+                        reduce confusion, speed up onboarding, and make troubleshooting far easier.
+                    </p>
+                    <p>
+                        This guide covers the best practices for creating cloud architecture diagrams
+                        that are accurate, readable, and genuinely useful.
+                    </p>
+                </div>
+
+                <!-- 1 -->
+                <section class="article-section" id="clear-boundaries">
+                    <h2>1. Start With Clear Boundaries and Context</h2>
+                    <p>
+                        Every cloud diagram should begin by defining the system's scope. Without
+                        boundaries, diagrams quickly become cluttered and confusing.
+                    </p>
+                    <p>Include:</p>
+                    <ul>
+                        <li>The system or application boundary</li>
+                        <li>External systems (SaaS, third‑party APIs, identity providers)</li>
+                        <li>Cloud regions or availability zones</li>
+                        <li>VPCs, subnets, or network segments</li>
+                    </ul>
+                    <p>
+                        Clear boundaries help viewers understand what is inside your architecture
+                        and what sits outside it.
+                    </p>
+                </section>
+
+                <!-- 2 -->
+                <section class="article-section" id="standard-icons">
+                    <h2>2. Use Standard Icons and Shapes</h2>
+                    <p>
+                        Consistency is key. Use official or widely recognized icons for each cloud
+                        provider:
+                    </p>
+                    <ul>
+                        <li><strong>AWS:</strong> EC2, RDS, ALB, S3, Lambda</li>
+                        <li><strong>Azure:</strong> VM, Storage Account, App Service, Load Balancer</li>
+                        <li><strong>GCP:</strong> Compute Engine, Cloud SQL, Cloud Storage, Cloud Run</li>
+                        <li><strong>Kubernetes:</strong> Pods, Deployments, Services, Nodes</li>
+                    </ul>
+                    <p>Standard icons make diagrams easier to read and reduce ambiguity.</p>
+                </section>
+
+                <!-- 3 -->
+                <section class="article-section" id="group-components">
+                    <h2>3. Group Related Components</h2>
+                    <p>
+                        Cloud systems often contain many moving parts. Grouping helps organize
+                        them visually.
+                    </p>
+                    <p>Common groupings:</p>
+                    <ul>
+                        <li>VPCs and subnets</li>
+                        <li>Microservices</li>
+                        <li>Databases and storage layers</li>
+                        <li>Security zones</li>
+                        <li>Kubernetes namespaces</li>
+                    </ul>
+                    <p>
+                        Use containers, boxes, or shaded areas to show logical or network
+                        boundaries.
+                    </p>
+                </section>
+
+                <!-- 4 -->
+                <section class="article-section" id="keep-simple">
+                    <h2>4. Keep the Diagram Simple and Readable</h2>
+                    <p>
+                        A diagram should communicate the architecture at a glance. Avoid
+                        unnecessary detail.
+                    </p>
+                    <p>Tips for simplicity:</p>
+                    <ul>
+                        <li>Limit the number of icons</li>
+                        <li>Avoid long, winding arrows</li>
+                        <li>Use consistent spacing</li>
+                        <li>Keep labels short</li>
+                        <li>Break large systems into multiple diagrams</li>
+                    </ul>
+                    <p>
+                        If a diagram tries to show everything, it ends up showing nothing clearly.
+                    </p>
+                </section>
+
+                <!-- 5 -->
+                <section class="article-section" id="consistent-labels">
+                    <h2>5. Use Clear, Consistent Labeling</h2>
+                    <p>
+                        Labels should be short, descriptive, and consistent across the diagram.
+                    </p>
+                    <p>Examples:</p>
+                    <ul>
+                        <li>"Web API (Node.js)"</li>
+                        <li>"Worker Service"</li>
+                        <li>"PostgreSQL Database"</li>
+                        <li>"Internal Load Balancer"</li>
+                    </ul>
+                    <p>Avoid vague labels like "Service 1" or "Component A".</p>
+                </section>
+
+                <!-- 6 -->
+                <section class="article-section" id="data-flow">
+                    <h2>6. Show Data Flow and Connectivity</h2>
+                    <p>
+                        Arrows and lines should clearly indicate how components communicate.
+                    </p>
+                    <p>Best practices:</p>
+                    <ul>
+                        <li>Use directional arrows</li>
+                        <li>Avoid crossing lines when possible</li>
+                        <li>Use different arrow styles for synchronous vs asynchronous communication</li>
+                        <li>Label important connections (e.g., HTTPS, gRPC, AMQP)</li>
+                    </ul>
+                    <p>Connectivity is often the most important part of the diagram.</p>
+                </section>
+
+                <!-- 7 -->
+                <section class="article-section" id="redundancy">
+                    <h2>7. Highlight Redundancy and Failover</h2>
+                    <p>
+                        Cloud architectures rely heavily on resilience. Make sure your diagram
+                        shows:
+                    </p>
+                    <ul>
+                        <li>Multi‑AZ deployments</li>
+                        <li>Load balancers</li>
+                        <li>Auto‑scaling groups</li>
+                        <li>Replicated databases</li>
+                        <li>Backup systems</li>
+                    </ul>
+                    <p>This helps teams understand how the system handles failures.</p>
+                </section>
+
+                <!-- 8 -->
+                <section class="article-section" id="security">
+                    <h2>8. Represent Security Clearly</h2>
+                    <p>
+                        Security is a core part of cloud design. Diagrams should show:
+                    </p>
+                    <ul>
+                        <li>Firewalls / security groups</li>
+                        <li>IAM roles or policies (at a high level)</li>
+                        <li>Private vs public subnets</li>
+                        <li>Zero‑trust boundaries</li>
+                        <li>API gateways or WAFs</li>
+                    </ul>
+                    <p>Security elements should be visually distinct.</p>
+                </section>
+
+                <!-- 9 -->
+                <section class="article-section" id="multiple-levels">
+                    <h2>9. Use Multiple Diagram Levels</h2>
+                    <p>Complex systems benefit from layered diagrams.</p>
+                    <p>Recommended layers:</p>
+                    <ul>
+                        <li><strong>High‑level overview:</strong> major components and data flow</li>
+                        <li><strong>Infrastructure layer:</strong> VPCs, subnets, load balancers, compute</li>
+                        <li><strong>Application layer:</strong> microservices, queues, databases</li>
+                        <li><strong>Deployment layer:</strong> CI/CD, containers, clusters</li>
+                    </ul>
+                    <p>Breaking diagrams into layers improves clarity and maintainability.</p>
+                </section>
+
+                <!-- 10 -->
+                <section class="article-section" id="keep-updated">
+                    <h2>10. Keep Diagrams Updated</h2>
+                    <p>
+                        A diagram is only useful if it reflects reality. Cloud systems evolve
+                        quickly.
+                    </p>
+                    <p>Update diagrams when:</p>
+                    <ul>
+                        <li>new services are added</li>
+                        <li>architecture changes</li>
+                        <li>scaling rules change</li>
+                        <li>security boundaries shift</li>
+                        <li>deployments move to new regions</li>
+                    </ul>
+                    <p>Treat diagrams as living documentation.</p>
+                </section>
+
+                <!-- 11 -->
+                <section class="article-section" id="legend">
+                    <h2>11. Provide a Legend or Key</h2>
+                    <p>A small legend helps viewers understand:</p>
+                    <ul>
+                        <li>icon meanings</li>
+                        <li>arrow types</li>
+                        <li>color coding</li>
+                        <li>grouping conventions</li>
+                    </ul>
+                    <p>
+                        This is especially important when mixing multiple cloud providers or
+                        diagram conventions.
+                    </p>
+                </section>
+
+                <!-- 12 -->
+                <section class="article-section" id="color">
+                    <h2>12. Use Color Intentionally</h2>
+                    <p>Color should enhance clarity, not distract.</p>
+                    <p>Good uses of color:</p>
+                    <ul>
+                        <li>highlight security zones</li>
+                        <li>differentiate environments (dev / staging / prod)</li>
+                        <li>show data flow direction</li>
+                        <li>distinguish cloud providers</li>
+                    </ul>
+                    <p>Avoid overly bright or inconsistent colors.</p>
+                </section>
+
+                <!-- 13 -->
+                <section class="article-section" id="annotations">
+                    <h2>13. Include Notes and Annotations</h2>
+                    <p>
+                        Annotations help explain decisions or highlight important details.
+                    </p>
+                    <p>Examples:</p>
+                    <ul>
+                        <li>"This service scales based on queue length."</li>
+                        <li>"Traffic enters through CloudFront before reaching ALB."</li>
+                        <li>"Database replicas are read‑only."</li>
+                    </ul>
+                    <p>Annotations turn a diagram into a teaching tool.</p>
+                </section>
+
+                <!-- 14 -->
+                <section class="article-section" id="export-formats">
+                    <h2>14. Export in Multiple Formats</h2>
+                    <p>Different teams need diagrams in different formats.</p>
+                    <p>Common formats:</p>
+                    <ul>
+                        <li><strong>PNG</strong> — for documentation and wikis</li>
+                        <li><strong>SVG</strong> — for editing and scaling</li>
+                        <li><strong>PDF</strong> — for reports and presentations</li>
+                        <li><strong>JSON</strong> — for re‑loading into your diagram editor</li>
+                    </ul>
+                    <p>Providing multiple export options increases usability across teams.</p>
+                </section>
+
+                <!-- Conclusion -->
+                <section class="article-section" id="conclusion">
+                    <h2>Conclusion</h2>
+                    <p>
+                        A well‑designed cloud architecture diagram is more than a picture — it's a
+                        communication tool. By using standard icons, grouping components, showing
+                        data flow, and keeping diagrams simple and readable, you help teams
+                        understand how systems work and how they should evolve.
+                    </p>
+                    <p>
+                        Clear diagrams lead to better decisions, faster troubleshooting, and
+                        stronger collaboration across engineering, DevOps, and architecture teams.
+                    </p>
+                    <p>
+                        If you're building cloud systems, investing in good diagrams is one of the
+                        smartest moves you can make.
+                    </p>
+                    <p>
+                        Ready to put these practices into action?
+                        <a href="../app.html" style="color: #3b82f6">Open Diagram App</a>
+                        and start drawing — free, in your browser, no account required.
+                    </p>
+                </section>
+
+            </div><!-- /article-content -->
+        </div><!-- /article-body -->
+
+        <script>
+            // Sidebar TOC active section on scroll
+            const sections = document.querySelectorAll('.article-section[id]');
+            const tocLinks = document.querySelectorAll('#article-toc a');
+            const content = document.getElementById('article-content');
+
+            function updateActive() {
+                let current = sections[0] ? sections[0].id : '';
+                sections.forEach((sec) => {
+                    if (
+                        sec.getBoundingClientRect().top -
+                            content.getBoundingClientRect().top <
+                        80
+                    ) {
+                        current = sec.id;
+                    }
+                });
+                tocLinks.forEach((a) => {
+                    a.classList.toggle(
+                        'active',
+                        a.getAttribute('href') === '#' + current,
+                    );
+                });
+            }
+
+            content.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        </script>
+    </body>
+</html>
