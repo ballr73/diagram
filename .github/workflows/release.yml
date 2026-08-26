@@ -52,6 +52,8 @@ jobs:
                   sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
                   sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-why-i-built.html
                   sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-cloud-architecture-best-practices.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-aws-network-topologies.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-azure-network-topologies.html
                   sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
                   sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
                   sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
@@ -68,6 +70,7 @@ jobs:
                     help.html about.html faq.html privacy.html contact.html terms.html blog.html README.md \
                     sitemap.xml robots.txt \
                     articles/blog-why-i-built.html articles/blog-cloud-architecture-best-practices.html \
+                    articles/blog-aws-network-topologies.html articles/blog-azure-network-topologies.html \
                     icons/manifest.js icons/manifest.json \
                     icons/AWS icons/Azure icons/GCP \
                     scripts/generate-manifest.js
@@ -132,6 +135,8 @@ jobs:
                   sed -i "s|href=\"css/blog.css\"|href=\"css/blog.${TAG}.css\"|" blog.html
                   sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-why-i-built.html
                   sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-cloud-architecture-best-practices.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-aws-network-topologies.html
+                  sed -i "s|href=\"../css/blog-article.css\"|href=\"../css/blog-article.${TAG}.css\"|" articles/blog-azure-network-topologies.html
                   sed -i "s|href=\"css/contact.css\"|href=\"css/contact.${TAG}.css\"|" contact.html
                   sed -i "s|href=\"css/faq.css\"|href=\"css/faq.${TAG}.css\"|" faq.html
                   sed -i "s|href=\"css/help.css\"|href=\"css/help.${TAG}.css\"|" help.html
@@ -174,6 +179,8 @@ jobs:
                     --include "blog.html" \
                     --include "articles/blog-why-i-built.html" \
                     --include "articles/blog-cloud-architecture-best-practices.html" \
+                    --include "articles/blog-aws-network-topologies.html" \
+                    --include "articles/blog-azure-network-topologies.html" \
                     --include "js/editor.${TAG}.min.js" \
                     --include "js/gdrive.${TAG}.min.js" \
                     --include "css/diagram.${TAG}.css" \

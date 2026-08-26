@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>How to Design AWS Network Topologies — Diagram App Blog</title>
+        <meta name="description" content="A practical guide to designing AWS network topologies: VPCs, subnets, security groups, Transit Gateway, hybrid connectivity, and best practices for resilient AWS network architecture." />
+        <link rel="stylesheet" href="../css/blog-article.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="article-header">
+            <a href="../blog.html">Blog</a>
+            <span class="sep">/</span>
+            <span class="current">How to Design AWS Network Topologies</span>
+        </div>
+
+        <div id="article-body">
+            <!-- Table of contents -->
+            <nav id="article-toc">
+                <h2>In this article</h2>
+                <a href="#overview" class="active">1. Overview</a>
+                <a href="#vpc-fundamentals">2. VPC Fundamentals</a>
+                <a href="#subnet-design">3. Subnet Design</a>
+                <a href="#security-groups">4. Security Groups &amp; NACLs</a>
+                <a href="#internet-access">5. Internet Access</a>
+                <a href="#transit-gateway">6. Transit Gateway</a>
+                <a href="#hybrid-connectivity">7. Hybrid Connectivity</a>
+                <a href="#multi-account">8. Multi-Account Architecture</a>
+                <a href="#high-availability">9. High Availability</a>
+                <a href="#private-link">10. PrivateLink &amp; Endpoints</a>
+                <a href="#monitoring">11. Monitoring &amp; Flow Logs</a>
+                <a href="#diagramming">12. Diagramming Your Network</a>
+                <a href="#conclusion">Conclusion</a>
+            </nav>
+
+            <!-- Article -->
+            <div id="article-content">
+                <div class="article-meta">
+                    <span class="article-date">26 August 2026</span>
+                    <span class="article-tag">AWS</span>
+                </div>
+
+                <h1>How to Design AWS Network Topologies</h1>
+
+                <div class="article-section" style="margin-bottom: 36px">
+                    <p>
+                        Designing a robust AWS network topology is one of the most important steps
+                        when building cloud infrastructure. Your network is the foundation that
+                        everything else runs on — compute, databases, APIs, and microservices all
+                        depend on it being secure, scalable, and reliable.
+                    </p>
+                    <p>
+                        This guide walks through the core building blocks of AWS networking, from
+                        VPCs and subnets to Transit Gateway and hybrid connectivity, and explains
+                        how to put them together into a production-ready architecture.
+                    </p>
+                </div>
+
+                <!-- 1 -->
+                <section class="article-section" id="overview">
+                    <h2>1. Overview: AWS Networking Building Blocks</h2>
+                    <p>
+                        AWS networking is built around a set of core services that work together
+                        to form a complete network topology:
+                    </p>
+                    <ul>
+                        <li><strong>VPC (Virtual Private Cloud)</strong> — your isolated network</li>
+                        <li><strong>Subnets</strong> — subdivisions of your VPC, tied to availability zones</li>
+                        <li><strong>Route Tables</strong> — control traffic routing within the VPC</li>
+                        <li><strong>Internet Gateway (IGW)</strong> — enables internet access for public subnets</li>
+                        <li><strong>NAT Gateway</strong> — allows private subnets to reach the internet</li>
+                        <li><strong>Security Groups &amp; NACLs</strong> — traffic filtering at instance and subnet level</li>
+                        <li><strong>Transit Gateway</strong> — connects multiple VPCs and on-premises networks</li>
+                        <li><strong>Direct Connect / VPN</strong> — hybrid connectivity to on-premises data centres</li>
+                    </ul>
+                    <p>
+                        Understanding how these components relate to each other is the first step
+                        in designing a sound AWS network topology.
+                    </p>
+                </section>
+
+                <!-- 2 -->
+                <section class="article-section" id="vpc-fundamentals">
+                    <h2>2. VPC Fundamentals</h2>
+                    <p>
+                        A <strong>Virtual Private Cloud (VPC)</strong> is a logically isolated
+                        section of the AWS cloud where you launch resources. Each VPC is defined
+                        by a CIDR block (e.g. <code>10.0.0.0/16</code>) and is specific to a
+                        single AWS region.
+                    </p>
+                    <p>Key decisions when designing a VPC:</p>
+                    <ul>
+                        <li>
+                            <strong>CIDR size:</strong> Choose a large enough range (typically
+                            /16) to allow growth without overlap with on-premises or peered VPCs.
+                        </li>
+                        <li>
+                            <strong>One VPC or many:</strong> Larger organisations typically use
+                            one VPC per environment (dev, staging, prod) or one per application,
+                            managed through a shared services or hub-and-spoke model.
+                        </li>
+                        <li>
+                            <strong>Non-overlapping CIDRs:</strong> If you plan to peer VPCs or
+                            connect to on-premises networks, ensure CIDR ranges do not overlap.
+                        </li>
+                    </ul>
+                    <p>
+                        A common starting point is <code>10.0.0.0/16</code> for production and
+                        <code>10.1.0.0/16</code> for staging, leaving room to add more environments.
+                    </p>
+                </section>
+
+                <!-- 3 -->
+                <section class="article-section" id="subnet-design">
+                    <h2>3. Subnet Design</h2>
+                    <p>
+                        Subnets are subdivisions of your VPC and are always associated with a
+                        single <strong>Availability Zone (AZ)</strong>. Spreading resources across
+                        multiple AZs is the foundation of high availability on AWS.
+                    </p>
+                    <p>A typical three-tier subnet layout looks like this:</p>
+                    <ul>
+                        <li>
+                            <strong>Public subnets</strong> — hosts load balancers, NAT gateways,
+                            and bastion hosts. Resources here can have public IPs and direct
+                            internet access via the Internet Gateway.
+                        </li>
+                        <li>
+                            <strong>Private application subnets</strong> — hosts compute
+                            (EC2, ECS, Lambda). No direct internet access; outbound traffic
+                            routes through a NAT Gateway in the public subnet.
+                        </li>
+                        <li>
+                            <strong>Private data subnets</strong> — hosts databases (RDS, Redshift,
+                            ElastiCache). Should be the most isolated tier, with no NAT access needed.
+                        </li>
+                    </ul>
+                    <p>
+                        Create one set of these tiers per AZ. For a three-AZ deployment you'd
+                        have nine subnets total. A consistent naming scheme (e.g.
+                        <code>public-1a</code>, <code>app-1b</code>, <code>data-1c</code>) makes
+                        diagrams and automation much easier.
+                    </p>
+                </section>
+
+                <!-- 4 -->
+                <section class="article-section" id="security-groups">
+                    <h2>4. Security Groups and Network ACLs</h2>
+                    <p>
+                        AWS provides two layers of traffic filtering:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Security Groups</strong> — stateful firewalls attached to
+                            individual resources (EC2 instances, RDS, ECS tasks). They operate on
+                            allow rules only; all other traffic is implicitly denied. Changes take
+                            effect immediately.
+                        </li>
+                        <li>
+                            <strong>Network ACLs (NACLs)</strong> — stateless firewalls attached
+                            at the subnet level. They support both allow and deny rules, evaluated
+                            in numeric order. Because they are stateless, you must explicitly allow
+                            return traffic.
+                        </li>
+                    </ul>
+                    <p>Best practices:</p>
+                    <ul>
+                        <li>Use security groups as your primary control layer</li>
+                        <li>Reference security groups by ID in rules (not CIDR) where possible</li>
+                        <li>Use NACLs to enforce coarse-grained rules, such as blocking entire IP ranges</li>
+                        <li>Never open <code>0.0.0.0/0</code> on sensitive ports to the internet</li>
+                        <li>Use separate security groups per application tier</li>
+                    </ul>
+                </section>
+
+                <!-- 5 -->
+                <section class="article-section" id="internet-access">
+                    <h2>5. Internet Access: IGW and NAT Gateway</h2>
+                    <p>
+                        Controlling how traffic enters and exits the internet is critical for
+                        security.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Internet Gateway (IGW)</strong> — attach one to your VPC to
+                            allow inbound and outbound internet access for resources in public
+                            subnets. The route table for public subnets must have a
+                            <code>0.0.0.0/0</code> route pointing to the IGW.
+                        </li>
+                        <li>
+                            <strong>NAT Gateway</strong> — deploy one per AZ in a public subnet.
+                            Private subnets route <code>0.0.0.0/0</code> to the NAT Gateway,
+                            allowing outbound internet access (e.g. for package updates) without
+                            exposing the resource to inbound traffic. NAT Gateway is managed and
+                            highly available within its AZ.
+                        </li>
+                        <li>
+                            <strong>Egress-Only Internet Gateway</strong> — for IPv6 traffic from
+                            private resources that should not be reachable from the internet.
+                        </li>
+                    </ul>
+                    <p>
+                        For cost optimisation in non-production environments, a single shared NAT
+                        Gateway is acceptable. In production, use one per AZ to avoid cross-AZ
+                        data transfer charges and single points of failure.
+                    </p>
+                </section>
+
+                <!-- 6 -->
+                <section class="article-section" id="transit-gateway">
+                    <h2>6. Transit Gateway</h2>
+                    <p>
+                        <strong>AWS Transit Gateway (TGW)</strong> acts as a regional network hub.
+                        It connects multiple VPCs, AWS accounts, and on-premises networks through
+                        a single managed resource, replacing complex VPC peering meshes.
+                    </p>
+                    <p>When to use Transit Gateway:</p>
+                    <ul>
+                        <li>You have more than two or three VPCs that need to communicate</li>
+                        <li>You need shared services (DNS, security appliances) accessible from all VPCs</li>
+                        <li>You want a single attachment point for VPN or Direct Connect</li>
+                        <li>You need to route traffic through a centralised inspection firewall</li>
+                    </ul>
+                    <p>
+                        Transit Gateway supports <strong>route tables</strong> that let you
+                        control which VPCs can communicate with each other and which traffic flows
+                        through inspection. A common pattern is to separate <em>spoke VPCs</em>
+                        from a <em>shared services VPC</em>, with traffic only flowing through the
+                        hub.
+                    </p>
+                    <p>
+                        For multi-region architectures, use <strong>Transit Gateway inter-region peering</strong>
+                        to connect regional hubs, enabling a global backbone.
+                    </p>
+                </section>
+
+                <!-- 7 -->
+                <section class="article-section" id="hybrid-connectivity">
+                    <h2>7. Hybrid Connectivity</h2>
+                    <p>
+                        Most organisations need to connect their AWS environment to on-premises
+                        data centres or offices. AWS provides two primary options:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>AWS Site-to-Site VPN</strong> — an encrypted IPSec tunnel over
+                            the internet. Quick to provision (minutes), lower cost, but subject to
+                            public internet latency and throughput limits. Suitable for backup paths
+                            or lower-bandwidth workloads.
+                        </li>
+                        <li>
+                            <strong>AWS Direct Connect</strong> — a dedicated private physical
+                            connection from your data centre to an AWS Direct Connect location.
+                            Consistent latency, higher throughput (1 Gbps to 100 Gbps), and no
+                            public internet traversal. Takes weeks to provision but is the preferred
+                            option for production workloads with high bandwidth requirements.
+                        </li>
+                    </ul>
+                    <p>
+                        A common resilient design is to use <strong>Direct Connect as the primary
+                        path</strong> with a <strong>Site-to-Site VPN as failover</strong>. Both
+                        attach to a Transit Gateway for centralised management.
+                    </p>
+                </section>
+
+                <!-- 8 -->
+                <section class="article-section" id="multi-account">
+                    <h2>8. Multi-Account Architecture</h2>
+                    <p>
+                        AWS recommends using <strong>multiple accounts</strong> to provide security
+                        isolation, billing separation, and blast radius reduction. The standard
+                        pattern is built on <strong>AWS Organizations</strong>:
+                    </p>
+                    <ul>
+                        <li><strong>Management account</strong> — root of the organisation, billing, and SCPs only</li>
+                        <li><strong>Security / Audit account</strong> — centralised logging, GuardDuty, SecurityHub</li>
+                        <li><strong>Shared Services account</strong> — DNS, directory services, shared Transit Gateway</li>
+                        <li><strong>Workload accounts</strong> — one per environment (dev, staging, prod) or per team</li>
+                    </ul>
+                    <p>
+                        The <strong>AWS Landing Zone</strong> or <strong>Control Tower</strong>
+                        service helps automate this structure. Networking typically lives in a
+                        dedicated <em>Network account</em>, with Transit Gateway shared via
+                        <strong>Resource Access Manager (RAM)</strong> to all spoke accounts.
+                    </p>
+                </section>
+
+                <!-- 9 -->
+                <section class="article-section" id="high-availability">
+                    <h2>9. High Availability Design</h2>
+                    <p>
+                        AWS guarantees availability at the service level, but your architecture
+                        must be designed for resilience. Key principles:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Deploy across at least two AZs</strong> — most AWS services
+                            are AZ-scoped. A single AZ outage should not take down your application.
+                        </li>
+                        <li>
+                            <strong>Use managed load balancers</strong> — Application Load Balancer
+                            (ALB) for HTTP/HTTPS, Network Load Balancer (NLB) for TCP/UDP. Both
+                            are multi-AZ by default.
+                        </li>
+                        <li>
+                            <strong>Use Auto Scaling</strong> — scale compute horizontally in
+                            response to demand, spread across AZs.
+                        </li>
+                        <li>
+                            <strong>Multi-AZ databases</strong> — RDS Multi-AZ, Aurora with read
+                            replicas, ElastiCache with replica nodes.
+                        </li>
+                        <li>
+                            <strong>One NAT Gateway per AZ</strong> — avoid routing private traffic
+                            across AZ boundaries for both cost and resilience.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 10 -->
+                <section class="article-section" id="private-link">
+                    <h2>10. PrivateLink and VPC Endpoints</h2>
+                    <p>
+                        By default, AWS API calls (e.g. to S3, DynamoDB, or SSM) traverse the
+                        public internet. <strong>VPC Endpoints</strong> keep this traffic on the
+                        AWS backbone:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Gateway Endpoints</strong> — free; support S3 and DynamoDB.
+                            Add routes to your route table pointing to the endpoint.
+                        </li>
+                        <li>
+                            <strong>Interface Endpoints (PrivateLink)</strong> — provision an ENI
+                            in your subnet with a private IP. Supports hundreds of AWS services and
+                            third-party SaaS products. Charged per hour and per GB.
+                        </li>
+                    </ul>
+                    <p>
+                        Use PrivateLink to expose internal services between VPCs or accounts without
+                        peering entire networks — only the specific service is reachable, not the
+                        whole VPC CIDR.
+                    </p>
+                </section>
+
+                <!-- 11 -->
+                <section class="article-section" id="monitoring">
+                    <h2>11. Monitoring and VPC Flow Logs</h2>
+                    <p>
+                        Good network topology design includes observability from day one.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>VPC Flow Logs</strong> — capture metadata about IP traffic
+                            flowing through your VPC, subnets, or individual ENIs. Send to
+                            CloudWatch Logs or S3. Invaluable for troubleshooting and security
+                            investigations.
+                        </li>
+                        <li>
+                            <strong>AWS Network Manager</strong> — centrally manage and monitor
+                            your global network, including Transit Gateway and Direct Connect.
+                        </li>
+                        <li>
+                            <strong>Reachability Analyser</strong> — verify that a network path
+                            between two endpoints is actually open, without sending test traffic.
+                        </li>
+                        <li>
+                            <strong>GuardDuty</strong> — threat detection that analyses VPC Flow
+                            Logs and DNS logs for suspicious activity automatically.
+                        </li>
+                    </ul>
+                    <p>
+                        Enable Flow Logs on all production VPCs and set up alerts for unexpected
+                        traffic patterns.
+                    </p>
+                </section>
+
+                <!-- 12 -->
+                <section class="article-section" id="diagramming">
+                    <h2>12. Diagramming Your AWS Network</h2>
+                    <p>
+                        A clear network diagram is essential for communicating your architecture
+                        to the wider team and for documenting it for future reference.
+                    </p>
+                    <p>What to include in an AWS network diagram:</p>
+                    <ul>
+                        <li>AWS region and availability zone boundaries</li>
+                        <li>VPC CIDR blocks</li>
+                        <li>Public, application, and data subnet tiers with CIDR ranges</li>
+                        <li>Internet Gateway, NAT Gateways, and their subnets</li>
+                        <li>Load balancers and their listener configuration</li>
+                        <li>Transit Gateway and VPC attachments</li>
+                        <li>VPN or Direct Connect connections to on-premises</li>
+                        <li>Key security group rules (at a high level)</li>
+                        <li>VPC Endpoints / PrivateLink</li>
+                        <li>Route table summaries</li>
+                    </ul>
+                    <p>
+                        Use official AWS icon sets (available in Diagram App's icon library under
+                        the AWS category) to ensure your diagrams are immediately recognisable to
+                        any AWS engineer.
+                    </p>
+                </section>
+
+                <!-- Conclusion -->
+                <section class="article-section" id="conclusion">
+                    <h2>Conclusion</h2>
+                    <p>
+                        Designing an AWS network topology well from the start saves significant
+                        time and pain later. Starting with a well-thought-out VPC design, using
+                        multiple AZs, applying the principle of least privilege with security
+                        groups, and planning for hybrid connectivity gives you a foundation that
+                        can scale with your workloads.
+                    </p>
+                    <p>
+                        Transit Gateway, PrivateLink, and multi-account architecture are the tools
+                        that take you from a single VPC proof-of-concept to a production-grade
+                        global network. And a clear, up-to-date network diagram is what keeps
+                        your team aligned as that network grows and evolves.
+                    </p>
+                    <p>
+                        Ready to diagram your AWS network?
+                        <a href="../app.html" style="color: #3b82f6">Open Diagram App</a>
+                        — free, in your browser, with AWS icons built in.
+                    </p>
+                </section>
+
+            </div><!-- /article-content -->
+        </div><!-- /article-body -->
+
+        <script>
+            // Sidebar TOC active section on scroll
+            const sections = document.querySelectorAll('.article-section[id]');
+            const tocLinks = document.querySelectorAll('#article-toc a');
+            const content = document.getElementById('article-content');
+
+            function updateActive() {
+                let current = sections[0] ? sections[0].id : '';
+                sections.forEach((sec) => {
+                    if (
+                        sec.getBoundingClientRect().top -
+                            content.getBoundingClientRect().top <
+                        80
+                    ) {
+                        current = sec.id;
+                    }
+                });
+                tocLinks.forEach((a) => {
+                    a.classList.toggle(
+                        'active',
+                        a.getAttribute('href') === '#' + current,
+                    );
+                });
+            }
+
+            content.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>How to Design Azure Network Topologies — Diagram App Blog</title>
+        <meta name="description" content="A practical guide to designing Azure network topologies: VNets, subnets, NSGs, Azure Firewall, Virtual WAN, ExpressRoute, hub-and-spoke, and Azure Landing Zones." />
+        <link rel="stylesheet" href="../css/blog-article.css" />
+        <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3527300374644513"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div id="article-header">
+            <a href="../blog.html">Blog</a>
+            <span class="sep">/</span>
+            <span class="current">How to Design Azure Network Topologies</span>
+        </div>
+
+        <div id="article-body">
+            <!-- Table of contents -->
+            <nav id="article-toc">
+                <h2>In this article</h2>
+                <a href="#overview" class="active">1. Overview</a>
+                <a href="#vnet-fundamentals">2. VNet Fundamentals</a>
+                <a href="#subnet-design">3. Subnet Design</a>
+                <a href="#nsg-udr">4. NSGs and UDRs</a>
+                <a href="#internet-access">5. Internet Access</a>
+                <a href="#hub-spoke">6. Hub-and-Spoke Topology</a>
+                <a href="#virtual-wan">7. Azure Virtual WAN</a>
+                <a href="#hybrid-connectivity">8. Hybrid Connectivity</a>
+                <a href="#azure-firewall">9. Azure Firewall</a>
+                <a href="#private-endpoints">10. Private Endpoints</a>
+                <a href="#landing-zones">11. Azure Landing Zones</a>
+                <a href="#diagramming">12. Diagramming Your Network</a>
+                <a href="#conclusion">Conclusion</a>
+            </nav>
+
+            <!-- Article -->
+            <div id="article-content">
+                <div class="article-meta">
+                    <span class="article-date">26 August 2026</span>
+                    <span class="article-tag">Azure</span>
+                </div>
+
+                <h1>How to Design Azure Network Topologies</h1>
+
+                <div class="article-section" style="margin-bottom: 36px">
+                    <p>
+                        Designing a well-structured Azure network topology is the cornerstone of
+                        any successful cloud deployment. Your virtual network is the fabric that
+                        ties together compute, storage, databases, and external services — and
+                        getting it right from the start saves significant pain as your architecture
+                        scales.
+                    </p>
+                    <p>
+                        This guide covers the key Azure networking concepts and patterns, from
+                        Virtual Networks and subnets through to hub-and-spoke topologies, Azure
+                        Virtual WAN, ExpressRoute, and Azure Landing Zones.
+                    </p>
+                </div>
+
+                <!-- 1 -->
+                <section class="article-section" id="overview">
+                    <h2>1. Overview: Azure Networking Building Blocks</h2>
+                    <p>
+                        Azure networking is composed of several interconnected services. Before
+                        designing a topology, you should understand the core building blocks:
+                    </p>
+                    <ul>
+                        <li><strong>Virtual Network (VNet)</strong> — your isolated private network in Azure</li>
+                        <li><strong>Subnets</strong> — subdivisions of a VNet, used to segment workloads</li>
+                        <li><strong>Network Security Groups (NSG)</strong> — stateful traffic filtering rules</li>
+                        <li><strong>User-Defined Routes (UDR)</strong> — override Azure default routing</li>
+                        <li><strong>VNet Peering</strong> — connect two VNets with low-latency, high-bandwidth links</li>
+                        <li><strong>Azure Load Balancer / Application Gateway</strong> — L4 and L7 load balancing</li>
+                        <li><strong>Azure Firewall</strong> — managed, stateful firewall for centralised traffic inspection</li>
+                        <li><strong>Virtual Network Gateway</strong> — VPN and ExpressRoute termination</li>
+                        <li><strong>Azure Virtual WAN</strong> — managed hub-and-spoke networking at scale</li>
+                        <li><strong>Private Endpoints</strong> — bring PaaS services onto your VNet</li>
+                    </ul>
+                    <p>
+                        Most Azure network topologies are built by combining these primitives
+                        into patterns that balance security, performance, and operational simplicity.
+                    </p>
+                </section>
+
+                <!-- 2 -->
+                <section class="article-section" id="vnet-fundamentals">
+                    <h2>2. VNet Fundamentals</h2>
+                    <p>
+                        An Azure <strong>Virtual Network (VNet)</strong> is a logically isolated
+                        network within a single Azure region. VNets are scoped to a subscription
+                        and defined by one or more address spaces (CIDR blocks).
+                    </p>
+                    <p>Key design decisions:</p>
+                    <ul>
+                        <li>
+                            <strong>Address space:</strong> Choose a range large enough for
+                            growth, typically <code>10.0.0.0/8</code> subdivided into
+                            <code>/16</code> blocks per VNet (e.g. <code>10.1.0.0/16</code> for
+                            production, <code>10.2.0.0/16</code> for staging).
+                        </li>
+                        <li>
+                            <strong>Non-overlapping CIDRs:</strong> Peered VNets and
+                            on-premises networks must not share overlapping address ranges.
+                            Plan a centrally managed IP address management (IPAM) strategy early.
+                        </li>
+                        <li>
+                            <strong>One VNet or many:</strong> A common approach is one VNet
+                            per environment or per application team, connected via a central
+                            hub VNet using the hub-and-spoke pattern.
+                        </li>
+                        <li>
+                            <strong>Region:</strong> VNets are regional. For multi-region
+                            deployments, create a VNet per region and use Global VNet Peering
+                            or Virtual WAN to connect them.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 3 -->
+                <section class="article-section" id="subnet-design">
+                    <h2>3. Subnet Design</h2>
+                    <p>
+                        Subnets are subdivisions of a VNet. Unlike AWS, Azure subnets are not
+                        tied to specific availability zones — zone redundancy is achieved at the
+                        resource level using <strong>Availability Zones</strong>.
+                    </p>
+                    <p>A standard subnet layout for a workload VNet:</p>
+                    <ul>
+                        <li>
+                            <strong>Gateway subnet</strong> — reserved for the Virtual Network
+                            Gateway (VPN/ExpressRoute). Must be named exactly
+                            <code>GatewaySubnet</code>. No NSGs or UDRs here.
+                        </li>
+                        <li>
+                            <strong>AzureFirewallSubnet</strong> — if using Azure Firewall in
+                            the hub, must be named exactly <code>AzureFirewallSubnet</code> with
+                            a minimum /26 block.
+                        </li>
+                        <li>
+                            <strong>Public / DMZ subnet</strong> — hosts Application Gateway,
+                            Azure Front Door origins, or jump servers.
+                        </li>
+                        <li>
+                            <strong>Application subnet(s)</strong> — hosts compute: VMs, AKS nodes,
+                            App Service Environments, or other PaaS delegated subnets.
+                        </li>
+                        <li>
+                            <strong>Data subnet</strong> — isolated subnet for databases, Azure SQL
+                            Managed Instance, or other data tier resources.
+                        </li>
+                    </ul>
+                    <p>
+                        Reserve larger subnets than you think you need — Azure reserves the first
+                        four and last IP in each subnet, and some services (like AKS) consume IPs
+                        rapidly.
+                    </p>
+                </section>
+
+                <!-- 4 -->
+                <section class="article-section" id="nsg-udr">
+                    <h2>4. Network Security Groups and User-Defined Routes</h2>
+                    <p>
+                        <strong>Network Security Groups (NSGs)</strong> are stateful packet filters
+                        that control inbound and outbound traffic at the subnet or NIC level.
+                        They work on allow/deny rules with priority numbers — lower numbers are
+                        evaluated first.
+                    </p>
+                    <p>NSG best practices:</p>
+                    <ul>
+                        <li>Apply NSGs at the subnet level for broad policies and NIC level for exceptions</li>
+                        <li>Use <strong>Service Tags</strong> (e.g. <code>Internet</code>, <code>AzureLoadBalancer</code>, <code>VirtualNetwork</code>) instead of hardcoded CIDRs where possible</li>
+                        <li>Use <strong>Application Security Groups (ASGs)</strong> to group resources logically and write rules between ASGs rather than IPs</li>
+                        <li>Always deny all inbound traffic by default and allow only what is needed</li>
+                        <li>Enable NSG Flow Logs for diagnostics</li>
+                    </ul>
+                    <p>
+                        <strong>User-Defined Routes (UDRs)</strong> override Azure's default system
+                        routes. Common uses:
+                    </p>
+                    <ul>
+                        <li>Force all internet-bound traffic through Azure Firewall or an NVA: next hop = firewall private IP</li>
+                        <li>Force spoke VNet traffic through the hub before going to other spokes</li>
+                        <li>Control traffic between subnets within the same VNet</li>
+                    </ul>
+                </section>
+
+                <!-- 5 -->
+                <section class="article-section" id="internet-access">
+                    <h2>5. Internet Access</h2>
+                    <p>
+                        Azure provides several ways to control outbound and inbound internet
+                        connectivity:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Public IP addresses</strong> — attach to VMs, Load Balancers,
+                            or Application Gateway for inbound access. Direct public IP on a VM
+                            is generally discouraged in production.
+                        </li>
+                        <li>
+                            <strong>NAT Gateway</strong> — provides managed, scalable outbound
+                            connectivity for subnets. Use instead of per-VM public IPs for
+                            private workloads needing internet egress. Supports up to 64,512
+                            SNAT ports per public IP.
+                        </li>
+                        <li>
+                            <strong>Azure Firewall (with SNAT)</strong> — centralise all outbound
+                            internet traffic through a managed firewall, enabling logging and
+                            FQDN-based filtering. Route tables force traffic from all subnets
+                            to the firewall.
+                        </li>
+                        <li>
+                            <strong>Azure Front Door / CDN</strong> — for inbound traffic to global
+                            web applications, use Front Door as the global entry point, with
+                            Application Gateway behind it for WAF and L7 routing.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 6 -->
+                <section class="article-section" id="hub-spoke">
+                    <h2>6. Hub-and-Spoke Topology</h2>
+                    <p>
+                        The <strong>hub-and-spoke</strong> (or star) topology is the most widely
+                        recommended pattern for enterprise Azure networking. It provides centralised
+                        shared services and controlled connectivity between workloads.
+                    </p>
+                    <p><strong>Hub VNet</strong> contains shared infrastructure:</p>
+                    <ul>
+                        <li>Azure Firewall or Network Virtual Appliance (NVA)</li>
+                        <li>Virtual Network Gateway (VPN or ExpressRoute)</li>
+                        <li>Bastion Host (for secure VM access)</li>
+                        <li>DNS resolvers</li>
+                        <li>Shared monitoring and management tools</li>
+                    </ul>
+                    <p><strong>Spoke VNets</strong> contain workloads:</p>
+                    <ul>
+                        <li>One spoke per application, team, or environment</li>
+                        <li>Peered to the hub with <strong>Allow Gateway Transit</strong> enabled</li>
+                        <li>UDRs force spoke traffic through the hub firewall</li>
+                        <li>Spokes do not peer directly to each other — all traffic goes through the hub</li>
+                    </ul>
+                    <p>
+                        This topology provides clear security boundaries, centralised inspection,
+                        and simple management. The trade-off is that the hub is a critical
+                        dependency — make it highly available using zone-redundant resources.
+                    </p>
+                </section>
+
+                <!-- 7 -->
+                <section class="article-section" id="virtual-wan">
+                    <h2>7. Azure Virtual WAN</h2>
+                    <p>
+                        <strong>Azure Virtual WAN (vWAN)</strong> is a managed networking service
+                        that provides a fully automated hub-and-spoke topology at scale.
+                        Microsoft manages the underlying routing infrastructure.
+                    </p>
+                    <p>Virtual WAN advantages over manual hub-and-spoke:</p>
+                    <ul>
+                        <li>Automatic routing between all spokes and branches — no manual UDRs needed</li>
+                        <li>Built-in any-to-any connectivity (spoke to spoke, branch to spoke)</li>
+                        <li>Integrated Site-to-Site VPN, Point-to-Site VPN, and ExpressRoute</li>
+                        <li>Supports Azure Firewall in the hub (Secured Virtual Hub)</li>
+                        <li>Better suited for large-scale, multi-region deployments</li>
+                    </ul>
+                    <p>
+                        Choose Virtual WAN if you have many branch offices, many VNets, or need
+                        Microsoft to manage hub routing complexity. For simpler architectures, a
+                        manually managed hub-and-spoke is lighter and more flexible.
+                    </p>
+                </section>
+
+                <!-- 8 -->
+                <section class="article-section" id="hybrid-connectivity">
+                    <h2>8. Hybrid Connectivity</h2>
+                    <p>
+                        Azure supports two primary hybrid connectivity options:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Azure VPN Gateway</strong> — encrypted IPSec/IKE tunnels over
+                            the public internet. Supports route-based and policy-based VPNs.
+                            Zone-redundant SKUs provide 99.99% SLA. Use for branch offices,
+                            lower-bandwidth workloads, or as a failover for ExpressRoute.
+                        </li>
+                        <li>
+                            <strong>Azure ExpressRoute</strong> — a dedicated private connection
+                            from your on-premises network to Azure via a connectivity provider.
+                            Offers consistent latency, up to 100 Gbps, and does not traverse the
+                            public internet. ExpressRoute Global Reach connects on-premises sites
+                            through the Azure backbone.
+                        </li>
+                    </ul>
+                    <p>Best practice for production:</p>
+                    <ul>
+                        <li>Use <strong>ExpressRoute as primary</strong> and VPN Gateway as failover</li>
+                        <li>Terminate both in the hub VNet or vWAN hub</li>
+                        <li>Use <strong>ExpressRoute circuits with redundant connections</strong> from two different provider edge devices</li>
+                        <li>Enable <strong>BFD (Bidirectional Forwarding Detection)</strong> for fast failover</li>
+                    </ul>
+                </section>
+
+                <!-- 9 -->
+                <section class="article-section" id="azure-firewall">
+                    <h2>9. Azure Firewall</h2>
+                    <p>
+                        <strong>Azure Firewall</strong> is a managed, cloud-native stateful firewall
+                        service. Deploy it in the hub to inspect all traffic between spokes, and
+                        between spokes and the internet or on-premises.
+                    </p>
+                    <p>Key capabilities:</p>
+                    <ul>
+                        <li>FQDN-based application rules (e.g. allow traffic to <code>*.microsoft.com</code>)</li>
+                        <li>Network rules for IP/port/protocol filtering</li>
+                        <li>NAT rules for inbound traffic (DNAT)</li>
+                        <li>Threat intelligence-based filtering (blocks known malicious IPs)</li>
+                        <li>Integration with Azure Monitor, Sentinel, and Log Analytics</li>
+                        <li>Premium SKU adds TLS inspection, IDPS, and URL filtering</li>
+                    </ul>
+                    <p>
+                        Use <strong>Firewall Policy</strong> to manage rules centrally across
+                        multiple Azure Firewall instances in different regions, enabling consistent
+                        security posture globally.
+                    </p>
+                </section>
+
+                <!-- 10 -->
+                <section class="article-section" id="private-endpoints">
+                    <h2>10. Private Endpoints and Private Link</h2>
+                    <p>
+                        By default, Azure PaaS services (Storage, SQL Database, Key Vault, etc.)
+                        are accessed over public endpoints. <strong>Private Endpoints</strong>
+                        bring these services into your VNet with a private IP address.
+                    </p>
+                    <p>Benefits:</p>
+                    <ul>
+                        <li>Traffic between your VNet and the PaaS service never leaves the Microsoft network</li>
+                        <li>Eliminates exposure to the public internet</li>
+                        <li>Works with NSGs and UDRs for additional control</li>
+                        <li>Enables access from on-premises networks connected via ExpressRoute or VPN</li>
+                    </ul>
+                    <p>
+                        After creating a Private Endpoint, configure <strong>Private DNS Zones</strong>
+                        (e.g. <code>privatelink.blob.core.windows.net</code>) to ensure name
+                        resolution returns the private IP rather than the public endpoint. Link
+                        these DNS zones to your hub VNet and configure conditional DNS forwarding
+                        from on-premises if needed.
+                    </p>
+                </section>
+
+                <!-- 11 -->
+                <section class="article-section" id="landing-zones">
+                    <h2>11. Azure Landing Zones</h2>
+                    <p>
+                        For enterprise deployments, Microsoft recommends the
+                        <strong>Azure Landing Zone</strong> framework — a set of opinionated
+                        architectural patterns and accelerators that establish a well-governed,
+                        scalable foundation for workloads.
+                    </p>
+                    <p>The network topology in an Azure Landing Zone typically includes:</p>
+                    <ul>
+                        <li>
+                            A <strong>Platform Management Group</strong> containing Connectivity,
+                            Identity, and Management subscriptions
+                        </li>
+                        <li>
+                            A dedicated <strong>Connectivity subscription</strong> hosting the
+                            hub VNet (or vWAN hub), Azure Firewall, ExpressRoute/VPN gateways,
+                            and DNS infrastructure
+                        </li>
+                        <li>
+                            <strong>Landing Zone subscriptions</strong> (spokes) for individual
+                            application teams, peered to the connectivity hub
+                        </li>
+                        <li>
+                            <strong>Azure Policy</strong> enforcing network guardrails —
+                            disabling public IPs, requiring NSGs, enforcing Private Endpoints
+                        </li>
+                    </ul>
+                    <p>
+                        The Azure Landing Zone architecture can be deployed using the
+                        <strong>Azure Landing Zone Accelerator</strong> (Bicep or Terraform) to
+                        automate the full setup. This is the recommended starting point for any
+                        organisation building on Azure at scale.
+                    </p>
+                </section>
+
+                <!-- 12 -->
+                <section class="article-section" id="diagramming">
+                    <h2>12. Diagramming Your Azure Network</h2>
+                    <p>
+                        A well-drawn network diagram communicates your Azure topology at a glance
+                        and is essential for team alignment and operational documentation.
+                    </p>
+                    <p>What to include in an Azure network diagram:</p>
+                    <ul>
+                        <li>Azure region and subscription boundaries</li>
+                        <li>VNet address spaces and subnet CIDR blocks</li>
+                        <li>Hub VNet with shared services (Firewall, Gateway, Bastion, DNS)</li>
+                        <li>Spoke VNets with workload groupings</li>
+                        <li>VNet peering connections and their direction</li>
+                        <li>NSG assignments per subnet</li>
+                        <li>UDRs and next-hop destinations</li>
+                        <li>ExpressRoute / VPN Gateway connections to on-premises</li>
+                        <li>Private Endpoints and associated Private DNS Zones</li>
+                        <li>Internet egress path (NAT Gateway or Azure Firewall)</li>
+                    </ul>
+                    <p>
+                        Use official Azure icons (available in Diagram App's icon library under
+                        the Azure category) to produce diagrams that match Microsoft's
+                        documentation style and are immediately familiar to Azure engineers.
+                    </p>
+                </section>
+
+                <!-- Conclusion -->
+                <section class="article-section" id="conclusion">
+                    <h2>Conclusion</h2>
+                    <p>
+                        A solid Azure network topology is the foundation of a secure, scalable,
+                        and well-governed cloud deployment. Starting with a sound VNet and subnet
+                        design, adopting hub-and-spoke or Virtual WAN for connectivity, and using
+                        Azure Firewall and Private Endpoints to control traffic flow gives you an
+                        architecture that can grow with your organisation.
+                    </p>
+                    <p>
+                        The Azure Landing Zone framework provides a battle-tested blueprint for
+                        enterprise deployments, bringing together network design, governance, and
+                        automation into a consistent structure. For greenfield deployments,
+                        starting from the Landing Zone is almost always the right move.
+                    </p>
+                    <p>
+                        Ready to diagram your Azure network?
+                        <a href="../app.html" style="color: #3b82f6">Open Diagram App</a>
+                        — free, in your browser, with Azure icons built in.
+                    </p>
+                </section>
+
+            </div><!-- /article-content -->
+        </div><!-- /article-body -->
+
+        <script>
+            // Sidebar TOC active section on scroll
+            const sections = document.querySelectorAll('.article-section[id]');
+            const tocLinks = document.querySelectorAll('#article-toc a');
+            const content = document.getElementById('article-content');
+
+            function updateActive() {
+                let current = sections[0] ? sections[0].id : '';
+                sections.forEach((sec) => {
+                    if (
+                        sec.getBoundingClientRect().top -
+                            content.getBoundingClientRect().top <
+                        80
+                    ) {
+                        current = sec.id;
+                    }
+                });
+                tocLinks.forEach((a) => {
+                    a.classList.toggle(
+                        'active',
+                        a.getAttribute('href') === '#' + current,
+                    );
+                });
+            }
+
+            content.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        </script>
+    </body>
+</html>
