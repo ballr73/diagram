@@ -1,4 +1,4 @@
-# Diagram Editor
+# Diagram App
 
 A lightweight, self-contained browser-based diagram editor. No installation, no build step, no dependencies — just open `app.html` in any modern browser (or visit the homepage at `index.html`).
 
@@ -15,10 +15,10 @@ https://ballr73.github.io/diagram/
 ### Option 2 — Download a release
 
 1. Go to the [Releases page](https://github.com/ballr73/diagram/releases)
-2. Download `diagram-editor.tar.gz` from the latest release
+2. Download `diagram-app.tar.gz` from the latest release
 3. Extract the archive:
    ```
-   tar -xzf diagram-editor.tar.gz
+   tar -xzf diagram-app.tar.gz
    ```
 4. Open `app.html` in your browser (or `index.html` for the homepage)
 
@@ -715,15 +715,15 @@ No build tool, no package manager, no server required.
 
 Every push to `main` automatically:
 
-1. **Creates a GitHub release** tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-editor.tar.gz` download containing all app files and the complete icon library
+1. **Creates a GitHub release** tagged `v{YYYY}.{MM}.{DD}.{build}` with a `diagram-app.tar.gz` download containing all app files and the complete icon library
 2. **Deploys to GitHub Pages** at `https://ballr73.github.io/diagram/`
 
 ### Download a specific release
 
-Visit the [Releases page](https://github.com/ballr73/diagram/releases) and download `diagram-editor.tar.gz` from any release.
+Visit the [Releases page](https://github.com/ballr73/diagram/releases) and download `diagram-app.tar.gz` from any release.
 
 ```
-tar -xzf diagram-editor.tar.gz
+tar -xzf diagram-app.tar.gz
 open app.html
 ```
 

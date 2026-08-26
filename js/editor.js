@@ -1,4 +1,4 @@
-// editor.js — HTML Diagram Editor
+// editor.js — HTML Diagram App
 
 // ============================================================
 // State

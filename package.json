@@ -1,5 +1,5 @@
 {
-  "name": "diagram-editor",
+  "name": "diagram-app",
   "version": "1.0.0",
   "description": "Browser-based cloud architecture diagram editor",
   "scripts": {

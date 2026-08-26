@@ -60,7 +60,7 @@ jobs:
             - name: Package release files
               run: |
                   TAG=${{ steps.version.outputs.tag }}
-                  tar -czf diagram-editor.tar.gz \
+                  tar -czf diagram-app.tar.gz \
                     index.html app.html js/editor.${TAG}.js js/gdrive.${TAG}.js css/diagram.${TAG}.css \
                     css/blog.${TAG}.css css/blog-article.${TAG}.css css/contact.${TAG}.css css/faq.${TAG}.css \
                     css/help.${TAG}.css css/privacy.${TAG}.css css/terms.${TAG}.css \
@@ -74,9 +74,9 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
               run: |
                   gh release create "${{ steps.version.outputs.tag }}" \
-                    --title "Diagram Editor ${{ steps.version.outputs.tag }}" \
+                    --title "Diagram App ${{ steps.version.outputs.tag }}" \
                     --generate-notes \
-                    diagram-editor.tar.gz
+                    diagram-app.tar.gz
 
     deploy:
         name: Deploy to AWS S3
