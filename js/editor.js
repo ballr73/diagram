@@ -1442,6 +1442,7 @@ function getLabelCoords(node) {
 function renderNodeGroup(node) {
     const sel = state.selected.has(node.id);
     const g = svgEl('g', { 'data-id': node.id, 'data-type': 'node' });
+    if (isLayerLocked(node.layerId)) g.classList.add('layer-locked');
 
     if (node.type === 'symbol') {
         // Symbol node: SVG image + selection outline + label
@@ -1554,6 +1555,7 @@ function renderEdgeGroup(edge) {
     const curved = edge.curveStyle === 'curved';
 
     const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
+    if (isLayerLocked(state.nodes.get(edge.from)?.layerId)) g.classList.add('layer-locked');
 
     const defaultStroke = '#64748b';
     const selStroke = '#2563eb';
@@ -1776,6 +1778,7 @@ function renderLineGroup(line) {
     const endSym = line.endSymbol || 'none';
 
     const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
+    if (isLayerLocked(line.layerId)) g.classList.add('layer-locked');
 
     if (curved) {
         const pathD = buildPathD(pts, true);
@@ -1849,6 +1852,7 @@ function renderAnnotationGroup(ann) {
     const bb = annBBox(ann);
 
     const g = svgEl('g', { 'data-id': ann.id, 'data-type': 'annotation' });
+    if (isLayerLocked(ann.layerId)) g.classList.add('layer-locked');
 
     if (ann.fill || ann.stroke) {
         const rect = svgEl('rect', {
@@ -3816,9 +3820,34 @@ function updateCursor(p) {
         hit.type === 'line' ||
         hit.type === 'group'
     )
-        svg.style.cursor = 'move';
-    else if (hit.type === 'edge') svg.style.cursor = 'pointer';
+        svg.style.cursor = isHitLocked(hit) ? 'default' : 'move';
+    else if (hit.type === 'edge') svg.style.cursor = isHitLocked(hit) ? 'default' : 'pointer';
     else svg.style.cursor = 'default';
+}
+
+/** Returns true if the object under the hit is on a locked layer. */
+function isHitLocked(hit) {
+    if (hit.type === 'node')
+        return isLayerLocked(hit.node.layerId);
+    if (hit.type === 'annotation')
+        return isLayerLocked(hit.ann.layerId);
+    if (hit.type === 'line')
+        return isLayerLocked(hit.line.layerId);
+    if (hit.type === 'edge') {
+        const edge = state.edges.get(hit.id);
+        if (!edge) return false;
+        const fromNode = state.nodes.get(edge.from);
+        return fromNode ? isLayerLocked(fromNode.layerId) : false;
+    }
+    if (hit.type === 'group') {
+        const group = state.groups.get(hit.id);
+        if (!group) return false;
+        const firstMember = group.memberIds
+            .map((id) => state.nodes.get(id) || state.annotations.get(id))
+            .find(Boolean);
+        return firstMember ? isLayerLocked(firstMember.layerId) : false;
+    }
+    return false;
 }
 
 // ============================================================

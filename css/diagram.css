@@ -1788,3 +1788,15 @@ body.presentation-mode #presentation-controls {
 #pres-exit:hover {
     background: rgba(239, 68, 68, 0.15) !important;
 }
+
+/* ============================================================
+   Locked layer objects — force default cursor on all children
+   ============================================================ */
+.layer-locked .node-shape,
+.layer-locked image,
+.layer-locked .edge-hit,
+.layer-locked .edge-line,
+.layer-locked .annotation-text,
+.layer-locked .annotation-bg {
+    cursor: default !important;
+}
