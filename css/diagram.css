@@ -767,8 +767,8 @@ body,
 
 .node-shape.selected {
     stroke: #2563eb !important;
-    stroke-width: 2 !important;
-    fill: #eff6ff !important;
+    stroke-width: 2.5 !important;
+    filter: drop-shadow(0 0 5px rgba(37, 99, 235, 0.45)) !important;
 }
 
 .node-shape.connector-hover {

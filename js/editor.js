@@ -1507,8 +1507,8 @@ function renderNodeGroup(node) {
                 width: node.width,
                 height: node.height,
                 class: 'node-shape selected',
-                fill: 'none',
             });
+            outline.style.fill = 'none'; // inline style beats any CSS class rule
             g.appendChild(outline);
         }
 
