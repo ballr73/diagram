@@ -354,6 +354,7 @@ When one element is selected, the Properties panel on the right shows its editab
 |----------|-------------|
 | Shape | Change the shape type |
 | Label | Text displayed inside the shape |
+| Label colour | Text colour for the label (colour picker + reset; default black) |
 | Label pos | 3×3 position picker — place the label at any corner, edge midpoint, or centre of the shape |
 | Font | Size, Bold, Italic, Underline |
 | Fill | Fill colour (colour picker + reset) |
@@ -370,6 +371,7 @@ When one element is selected, the Properties panel on the right shows its editab
 |----------|-------------|
 | Icon | Icon name (read-only) |
 | Label | Text displayed relative to the icon (supports multi-line with `\n`) |
+| Label colour | Text colour for the label (colour picker + reset; default black) |
 | Label pos | 3×3 position picker — default is bottom-centre (below icon); can be placed on any side or inside |
 | Font | Size, Bold, Italic, Underline |
 | X / Y | Position on canvas |
@@ -385,6 +387,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Line style | Solid / Dashed / Dotted |
 | Stroke | Line colour |
 | Label | Text displayed along the connector |
+| Label colour | Text colour for the label (colour picker + reset; default black) |
 | Label Font | Size, Bold, Italic, Underline |
 | Layer | Move the connector to a different layer |
 
@@ -398,6 +401,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Start | End symbol at start point: None / Dot / Square |
 | End | End symbol at end point: None / Dot / Square |
 | Label | Text displayed at the midpoint |
+| Label colour | Text colour for the label (colour picker + reset; default black) |
 | Label Font | Size, Bold, Italic, Underline |
 | Layer | Move the line to a different layer |
 
@@ -415,6 +419,20 @@ When one element is selected, the Properties panel on the right shows its editab
 | X / Y | Anchor position on canvas |
 | Width / Height | Explicit box size; drag resize handles to set visually |
 | Layer | Move the annotation to a different layer |
+
+### Colour Palette
+
+Every colour picker row includes a **colour palette** strip showing up to **6 saved colours** as small swatches.
+
+| Action | How |
+|--------|-----|
+| Save a colour | Click the **`+`** button on any colour row to add the current colour to the palette |
+| Apply a saved colour | Click any filled swatch to instantly apply that colour to the current property |
+| Replace oldest | When all 6 slots are filled, saving a new colour replaces the oldest one |
+| Palette scope | The palette is **per-tab** — each diagram tab has its own saved colours |
+| Persistence | The palette is saved with the diagram (both file export and auto-save) |
+
+Empty palette slots are shown as dashed grey boxes. The palette is shared across all colour rows in the same tab — colours saved from Fill appear in Stroke, Label colour, and all other pickers.
 
 ---
 

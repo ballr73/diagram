@@ -995,6 +995,10 @@
                             <td>Text displayed inside the shape</td>
                         </tr>
                         <tr>
+                            <td>Label colour</td>
+                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                        </tr>
+                        <tr>
                             <td>Label pos</td>
                             <td>
                                 3×3 picker — place the label at any corner, edge
@@ -1053,6 +1057,10 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>Label colour</td>
+                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                        </tr>
+                        <tr>
                             <td>Label pos</td>
                             <td>3×3 picker — default is bottom-centre</td>
                         </tr>
@@ -1104,6 +1112,10 @@
                             <td>Text along the connector</td>
                         </tr>
                         <tr>
+                            <td>Label colour</td>
+                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                        </tr>
+                        <tr>
                             <td>Label Font</td>
                             <td>Size, Bold, Italic, Underline</td>
                         </tr>
@@ -1142,6 +1154,10 @@
                         <tr>
                             <td>Label</td>
                             <td>Text at the midpoint</td>
+                        </tr>
+                        <tr>
+                            <td>Label colour</td>
+                            <td>Text colour for the label (colour picker + reset; default black)</td>
                         </tr>
                         <tr>
                             <td>Label Font</td>
@@ -1203,6 +1219,43 @@
                             <td>Move the annotation to a different layer</td>
                         </tr>
                     </table>
+
+                    <h3>Colour Palette</h3>
+                    <p>
+                        Every colour picker row includes a <strong>palette strip</strong> showing up to
+                        <strong>6 saved colours</strong> as small swatches below the colour input.
+                    </p>
+                    <table>
+                        <tr>
+                            <th>Action</th>
+                            <th>How</th>
+                        </tr>
+                        <tr>
+                            <td>Save a colour</td>
+                            <td>Click the <strong>+</strong> button on any colour row to add the current colour to the palette</td>
+                        </tr>
+                        <tr>
+                            <td>Apply a saved colour</td>
+                            <td>Click any filled swatch to instantly apply that colour to the current property</td>
+                        </tr>
+                        <tr>
+                            <td>Replace oldest</td>
+                            <td>When all 6 slots are filled, saving a new colour replaces the oldest one</td>
+                        </tr>
+                        <tr>
+                            <td>Palette scope</td>
+                            <td>The palette is <strong>per-tab</strong> — each diagram tab has its own saved colours</td>
+                        </tr>
+                        <tr>
+                            <td>Persistence</td>
+                            <td>Saved with the diagram (file export and auto-save); restored on reload</td>
+                        </tr>
+                    </table>
+                    <p>
+                        Empty slots appear as dashed grey boxes. The palette is shared across
+                        all colour rows in the same tab — colours saved from Fill also appear
+                        in Stroke, Label colour, and all other pickers.
+                    </p>
                 </section>
 
                 <!-- ── Z-Order ────────────────────────────────────────── -->
