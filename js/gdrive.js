@@ -10,9 +10,7 @@
 
     const GOOGLE_CLIENT_ID =
         '655872868584-t0pfnmqgaeqiopi8gcma43dpfjuei4ng.apps.googleusercontent.com';
-    const GOOGLE_SCOPES =
-        'https://www.googleapis.com/auth/drive.file ' +
-        'https://www.googleapis.com/auth/drive.metadata.readonly';
+    const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
     const DRIVE_FILES_API = 'https://www.googleapis.com/drive/v3/files';
     const DRIVE_UPLOAD_API =
