@@ -1471,62 +1471,129 @@ kbd {
 }
 
 /* Colour input row */
-.color-row {
+/* ---- Colour target rows (select which property to edit) ---- */
+.color-target-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.color-target-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-}
-
-.color-row input[type='color'] {
-    width: 36px;
-    height: 28px;
-    padding: 1px 2px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    background: #f8fafc;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.color-row input[type='color']::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-.color-row input[type='color']::-webkit-color-swatch {
-    border: none;
-    border-radius: 2px;
-}
-
-.color-hex {
-    font-size: 12px;
-    font-family: monospace;
-    color: #475569;
     flex: 1;
+    padding: 4px 8px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: #475569;
+    text-align: left;
+    transition:
+        background 0.1s,
+        border-color 0.1s;
 }
 
-.color-reset {
-    font-size: 11px;
-    padding: 2px 6px;
+.color-target-btn:hover {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.color-swatch-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.color-target-active .color-target-btn {
+    background: #eff6ff;
+    border-color: #6366f1;
+    color: #1e293b;
+}
+
+.color-reset-btn {
+    font-size: 13px;
+    padding: 2px 5px;
     background: none;
-    border: 1px solid #e2e8f0;
-    border-radius: 3px;
+    border: none;
     cursor: pointer;
     color: #94a3b8;
     font-family: inherit;
-    transition:
-        border-color 0.1s,
-        color 0.1s;
+    transition: color 0.1s;
 }
 
-.color-reset:hover {
-    border-color: #94a3b8;
+.color-reset-btn:hover {
     color: #475569;
 }
 
-.color-save-palette {
-    font-size: 13px;
+/* ---- Shared colour picker section ---- */
+.color-shared-section {
+    margin-top: 6px;
+    padding: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.color-shared-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.color-pick-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: #334155;
+    flex: 1;
+    transition:
+        border-color 0.1s,
+        background 0.1s;
+}
+
+.color-pick-btn:hover {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.color-pick-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.color-hex-display {
+    font-size: 11px;
+    font-family: monospace;
+    color: #475569;
+    min-width: 54px;
+    text-align: center;
+}
+
+.color-save-btn {
+    font-size: 15px;
     font-weight: 600;
     line-height: 1;
-    padding: 2px 6px;
+    padding: 2px 7px;
     background: none;
     border: 1px solid #e2e8f0;
     border-radius: 3px;
@@ -1537,10 +1604,9 @@ kbd {
         border-color 0.1s,
         color 0.1s,
         background 0.1s;
-    flex-shrink: 0;
 }
 
-.color-save-palette:hover {
+.color-save-btn:hover {
     border-color: #6366f1;
     color: #6366f1;
     background: #eef2ff;

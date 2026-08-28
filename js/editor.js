@@ -45,7 +45,9 @@ function createTab(name) {
         lines: new Map(),
         annotations: new Map(),
         groups: new Map(),
-        layers: [{ id: 'layer-1', name: 'Background', visible: true, locked: false }],
+        layers: [
+            { id: 'layer-1', name: 'Background', visible: true, locked: false },
+        ],
         activeLayerId: 'layer-1',
         history: [],
         historyIndex: -1,
@@ -116,11 +118,15 @@ function ensureLayerIds(tab, savedLayers, savedActiveLayerId) {
                 ? savedActiveLayerId
                 : tab.layers[0].id;
     } else {
-        tab.layers = [{ id: 'layer-1', name: 'Background', visible: true, locked: false }];
+        tab.layers = [
+            { id: 'layer-1', name: 'Background', visible: true, locked: false },
+        ];
         tab.activeLayerId = 'layer-1';
     }
     // Backward compat: ensure locked field exists on all layers
-    tab.layers.forEach((l) => { if (l.locked === undefined) l.locked = false; });
+    tab.layers.forEach((l) => {
+        if (l.locked === undefined) l.locked = false;
+    });
     const defaultId = tab.layers[0].id;
     // Assign default layer to any element that doesn't have one
     for (const node of tab.nodes.values()) {
@@ -375,7 +381,8 @@ function restoreSnapshot(snap) {
         state.activeLayerId = snap.activeLayerId;
         if (state.tabs[state.activeTabIndex]) {
             state.tabs[state.activeTabIndex].layers = state.layers;
-            state.tabs[state.activeTabIndex].activeLayerId = state.activeLayerId;
+            state.tabs[state.activeTabIndex].activeLayerId =
+                state.activeLayerId;
         }
     }
     if (state.tabs[state.activeTabIndex]) {
@@ -725,7 +732,9 @@ async function buildExportSVG() {
     const uiLayer = clone.querySelector('#ui-layer');
     if (uiLayer) uiLayer.innerHTML = '';
     clone.querySelectorAll('.resize-handle').forEach((el) => el.remove());
-    clone.querySelectorAll('.line-endpoint-handle').forEach((el) => el.remove());
+    clone
+        .querySelectorAll('.line-endpoint-handle')
+        .forEach((el) => el.remove());
     // Remove grid background from exports
     const gridBg = clone.querySelector('#grid-bg');
     if (gridBg) gridBg.remove();
@@ -1068,13 +1077,19 @@ function edgePoints(edge) {
     let fromAim, toAim;
     if (edge.fromAnchorOffset) {
         const fc = nodeCenter(from);
-        fromAim = { x: fc.x + edge.fromAnchorOffset.dx, y: fc.y + edge.fromAnchorOffset.dy };
+        fromAim = {
+            x: fc.x + edge.fromAnchorOffset.dx,
+            y: fc.y + edge.fromAnchorOffset.dy,
+        };
     } else {
         fromAim = wps.length > 0 ? wps[0] : nodeCenter(to);
     }
     if (edge.toAnchorOffset) {
         const tc = nodeCenter(to);
-        toAim = { x: tc.x + edge.toAnchorOffset.dx, y: tc.y + edge.toAnchorOffset.dy };
+        toAim = {
+            x: tc.x + edge.toAnchorOffset.dx,
+            y: tc.y + edge.toAnchorOffset.dy,
+        };
     } else {
         toAim = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(from);
     }
@@ -1354,30 +1369,33 @@ function createShapeEl(node, sel) {
             // Rectangle body with a wavy bottom edge (one full wave)
             const waveH = Math.max(6, h * 0.12);
             const by = y + h - waveH; // y of wave baseline
-            const d = `M ${x},${y} L ${x + w},${y} L ${x + w},${by}` +
-                      ` C ${x + w * 0.75},${by} ${x + w * 0.75},${y + h} ${x + w * 0.5},${y + h}` +
-                      ` C ${x + w * 0.25},${y + h} ${x + w * 0.25},${by} ${x},${by} Z`;
+            const d =
+                `M ${x},${y} L ${x + w},${y} L ${x + w},${by}` +
+                ` C ${x + w * 0.75},${by} ${x + w * 0.75},${y + h} ${x + w * 0.5},${y + h}` +
+                ` C ${x + w * 0.25},${y + h} ${x + w * 0.25},${by} ${x},${by} Z`;
             el = svgEl('path', { d, class: cls });
             break;
         }
         case 'database': {
             // Cylinder: top ellipse + body rect + bottom arc
             const ry = Math.max(4, h * 0.15);
-            const d = `M ${x},${y + ry}` +
-                      ` A ${w / 2},${ry} 0 0 1 ${x + w},${y + ry}` +
-                      ` L ${x + w},${y + h - ry}` +
-                      ` A ${w / 2},${ry} 0 0 1 ${x},${y + h - ry} Z` +
-                      ` M ${x},${y + ry}` +
-                      ` A ${w / 2},${ry} 0 0 0 ${x + w},${y + ry}`;
+            const d =
+                `M ${x},${y + ry}` +
+                ` A ${w / 2},${ry} 0 0 1 ${x + w},${y + ry}` +
+                ` L ${x + w},${y + h - ry}` +
+                ` A ${w / 2},${ry} 0 0 1 ${x},${y + h - ry} Z` +
+                ` M ${x},${y + ry}` +
+                ` A ${w / 2},${ry} 0 0 0 ${x + w},${y + ry}`;
             el = svgEl('path', { d, class: cls });
             break;
         }
         case 'wait': {
             // D-shape: straight left/top/bottom, bezier-curved right edge
             const cr = Math.min(w * 0.55, h * 0.55);
-            const d = `M ${x},${y} L ${x + w - cr},${y}` +
-                      ` C ${x + w + cr * 0.2},${y} ${x + w + cr * 0.2},${y + h} ${x + w - cr},${y + h}` +
-                      ` L ${x},${y + h} Z`;
+            const d =
+                `M ${x},${y} L ${x + w - cr},${y}` +
+                ` C ${x + w + cr * 0.2},${y} ${x + w + cr * 0.2},${y + h} ${x + w - cr},${y + h}` +
+                ` L ${x},${y + h} Z`;
             el = svgEl('path', { d, class: cls });
             break;
         }
@@ -1423,7 +1441,9 @@ function getLabelCoords(node) {
     const TOGGLE_POS = new Set(['tm', 'ml', 'bm', 'mr']);
     const defaultOutside = node.type === 'symbol' && pos === 'bm';
     const outside = TOGGLE_POS.has(pos)
-        ? (node.labelOutside !== undefined ? node.labelOutside : defaultOutside)
+        ? node.labelOutside !== undefined
+            ? node.labelOutside
+            : defaultOutside
         : false;
 
     let lx, textAnchor;
@@ -1579,7 +1599,8 @@ function renderEdgeGroup(edge) {
     const curved = edge.curveStyle === 'curved';
 
     const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
-    if (isLayerLocked(state.nodes.get(edge.from)?.layerId)) g.classList.add('layer-locked');
+    if (isLayerLocked(state.nodes.get(edge.from)?.layerId))
+        g.classList.add('layer-locked');
 
     const defaultStroke = '#64748b';
     const selStroke = '#2563eb';
@@ -1688,8 +1709,24 @@ function renderEdgeGroup(edge) {
     if (sel && pts && pts.length >= 2) {
         const p1 = pts[0];
         const p2 = pts[pts.length - 1];
-        g.appendChild(svgEl('circle', { cx: p1.x, cy: p1.y, r: 6, class: 'edge-endpoint-handle', 'data-which': 'from' }));
-        g.appendChild(svgEl('circle', { cx: p2.x, cy: p2.y, r: 6, class: 'edge-endpoint-handle', 'data-which': 'to' }));
+        g.appendChild(
+            svgEl('circle', {
+                cx: p1.x,
+                cy: p1.y,
+                r: 6,
+                class: 'edge-endpoint-handle',
+                'data-which': 'from',
+            }),
+        );
+        g.appendChild(
+            svgEl('circle', {
+                cx: p2.x,
+                cy: p2.y,
+                r: 6,
+                class: 'edge-endpoint-handle',
+                'data-which': 'to',
+            }),
+        );
     }
 
     return g;
@@ -1736,34 +1773,52 @@ function renderAll() {
 
     for (const node of state.nodes.values()) {
         if (!isLayerVisible(node.layerId)) continue;
-        items.push({ kind: 'node', item: node,
+        items.push({
+            kind: 'node',
+            item: node,
             layerIdx: getLayerIdx(node.layerId),
-            withinZ: nodeLayerZ.get(node.id) ?? 0 });
+            withinZ: nodeLayerZ.get(node.id) ?? 0,
+        });
     }
     for (const edge of state.edges.values()) {
         if (!isLayerVisible(edge.layerId)) continue;
         const lid = edge.layerId || 'layer-1';
         const fNode = state.nodes.get(edge.from);
         const tNode = state.nodes.get(edge.to);
-        const fz = (fNode && (fNode.layerId || 'layer-1') === lid) ? (nodeLayerZ.get(edge.from) ?? 0) : 0;
-        const tz = (tNode && (tNode.layerId || 'layer-1') === lid) ? (nodeLayerZ.get(edge.to) ?? 0) : 0;
-        items.push({ kind: 'edge', item: edge,
+        const fz =
+            fNode && (fNode.layerId || 'layer-1') === lid
+                ? (nodeLayerZ.get(edge.from) ?? 0)
+                : 0;
+        const tz =
+            tNode && (tNode.layerId || 'layer-1') === lid
+                ? (nodeLayerZ.get(edge.to) ?? 0)
+                : 0;
+        items.push({
+            kind: 'edge',
+            item: edge,
             layerIdx: getLayerIdx(lid),
-            withinZ: Math.max(fz, tz) });
+            withinZ: Math.max(fz, tz),
+        });
     }
     for (const line of state.lines.values()) {
         if (!isLayerVisible(line.layerId)) continue;
-        items.push({ kind: 'line', item: line,
+        items.push({
+            kind: 'line',
+            item: line,
             layerIdx: getLayerIdx(line.layerId),
-            withinZ: nextZ(line.layerId, 'line') });
+            withinZ: nextZ(line.layerId, 'line'),
+        });
     }
     for (const ann of state.annotations.values()) {
         if (!isLayerVisible(ann.layerId)) continue;
         const isBg = ann.zLayer === 'bg';
-        items.push({ kind: 'annotation', item: ann,
+        items.push({
+            kind: 'annotation',
+            item: ann,
             layerIdx: getLayerIdx(ann.layerId),
             withinZ: isBg ? -1 : nextZ(ann.layerId, 'ann'),
-            isBg });
+            isBg,
+        });
     }
 
     // Sort ascending: layerIdx (back→front), then withinZ, then type rank
@@ -1813,9 +1868,13 @@ function renderLineGroup(line) {
             fill: 'none',
         };
         if (startSym !== 'none')
-            pathAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+            pathAttrs['marker-start'] = sel
+                ? `url(#${startSym}-marker-sel)`
+                : `url(#${startSym}-marker)`;
         if (endSym !== 'none')
-            pathAttrs['marker-end'] = sel ? `url(#${endSym}-marker-sel)` : `url(#${endSym}-marker)`;
+            pathAttrs['marker-end'] = sel
+                ? `url(#${endSym}-marker-sel)`
+                : `url(#${endSym}-marker)`;
         const lineEl = svgEl('path', pathAttrs);
         lineEl.style.stroke = strokeColor;
         lineEl.style.strokeWidth = strokeWidth;
@@ -1824,21 +1883,36 @@ function renderLineGroup(line) {
         g.appendChild(lineEl);
         if (line.label) {
             const mid = curvedMidpoint(pts);
-            const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, line.label);
+            const lblEl = svgEl(
+                'text',
+                {
+                    x: mid.x,
+                    y: mid.y - 5,
+                    'text-anchor': 'middle',
+                    class: 'edge-label',
+                },
+                line.label,
+            );
             applyFontStyle(lblEl, line, { size: 11 });
             g.appendChild(lblEl);
         }
     } else {
         const pointsStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
-        g.appendChild(svgEl('polyline', { points: pointsStr, class: 'edge-hit' }));
+        g.appendChild(
+            svgEl('polyline', { points: pointsStr, class: 'edge-hit' }),
+        );
         const lineAttrs = {
             points: pointsStr,
             class: 'edge-line' + (sel ? ' selected' : ''),
         };
         if (startSym !== 'none')
-            lineAttrs['marker-start'] = sel ? `url(#${startSym}-marker-sel)` : `url(#${startSym}-marker)`;
+            lineAttrs['marker-start'] = sel
+                ? `url(#${startSym}-marker-sel)`
+                : `url(#${startSym}-marker)`;
         if (endSym !== 'none')
-            lineAttrs['marker-end'] = sel ? `url(#${endSym}-marker-sel)` : `url(#${endSym}-marker)`;
+            lineAttrs['marker-end'] = sel
+                ? `url(#${endSym}-marker-sel)`
+                : `url(#${endSym}-marker)`;
         const lineEl = svgEl('polyline', lineAttrs);
         lineEl.style.stroke = strokeColor;
         lineEl.style.strokeWidth = strokeWidth;
@@ -1847,7 +1921,16 @@ function renderLineGroup(line) {
         g.appendChild(lineEl);
         if (line.label) {
             const mid = pathMidpoint(pts);
-            const lblEl = svgEl('text', { x: mid.x, y: mid.y - 5, 'text-anchor': 'middle', class: 'edge-label' }, line.label);
+            const lblEl = svgEl(
+                'text',
+                {
+                    x: mid.x,
+                    y: mid.y - 5,
+                    'text-anchor': 'middle',
+                    class: 'edge-label',
+                },
+                line.label,
+            );
             applyFontStyle(lblEl, line, { size: 11 });
             g.appendChild(lblEl);
         }
@@ -1856,11 +1939,35 @@ function renderLineGroup(line) {
     if (sel) {
         if (line.waypoints && line.waypoints.length > 0) {
             for (const wp of line.waypoints) {
-                g.appendChild(svgEl('circle', { cx: wp.x, cy: wp.y, r: 5, class: 'waypoint-handle', 'data-wp-id': wp.id }));
+                g.appendChild(
+                    svgEl('circle', {
+                        cx: wp.x,
+                        cy: wp.y,
+                        r: 5,
+                        class: 'waypoint-handle',
+                        'data-wp-id': wp.id,
+                    }),
+                );
             }
         }
-        g.appendChild(svgEl('circle', { cx: line.x1, cy: line.y1, r: 5, class: 'line-endpoint-handle', 'data-which': 'start' }));
-        g.appendChild(svgEl('circle', { cx: line.x2, cy: line.y2, r: 5, class: 'line-endpoint-handle', 'data-which': 'end' }));
+        g.appendChild(
+            svgEl('circle', {
+                cx: line.x1,
+                cy: line.y1,
+                r: 5,
+                class: 'line-endpoint-handle',
+                'data-which': 'start',
+            }),
+        );
+        g.appendChild(
+            svgEl('circle', {
+                cx: line.x2,
+                cy: line.y2,
+                r: 5,
+                class: 'line-endpoint-handle',
+                'data-which': 'end',
+            }),
+        );
     }
     return g;
 }
@@ -1871,7 +1978,8 @@ function renderAnnotationGroup(ann) {
     const fontSize = ann.fontSize || 13;
     const lineHeight = fontSize * 1.4;
     const align = ann.align || 'left';
-    const textAnchor = align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start';
+    const textAnchor =
+        align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start';
     const pad = 6;
     const bb = annBBox(ann);
 
@@ -1880,9 +1988,13 @@ function renderAnnotationGroup(ann) {
 
     if (ann.fill || ann.stroke) {
         const rect = svgEl('rect', {
-            x: bb.x - pad, y: bb.y - pad,
-            width: bb.w + pad * 2, height: bb.h + pad * 2,
-            rx: 3, ry: 3, class: 'annotation-bg',
+            x: bb.x - pad,
+            y: bb.y - pad,
+            width: bb.w + pad * 2,
+            height: bb.h + pad * 2,
+            rx: 3,
+            ry: 3,
+            class: 'annotation-bg',
         });
         if (ann.fill) {
             rect.style.fill = ann.fill;
@@ -1897,33 +2009,57 @@ function renderAnnotationGroup(ann) {
     }
 
     if (sel) {
-        g.appendChild(svgEl('rect', {
-            x: bb.x - pad, y: bb.y - pad,
-            width: bb.w + pad * 2, height: bb.h + pad * 2,
-            rx: 3, ry: 3, class: 'annotation-selection',
-        }));
+        g.appendChild(
+            svgEl('rect', {
+                x: bb.x - pad,
+                y: bb.y - pad,
+                width: bb.w + pad * 2,
+                height: bb.h + pad * 2,
+                rx: 3,
+                ry: 3,
+                class: 'annotation-selection',
+            }),
+        );
         const handles = [
             { name: 'nw', x: bb.x - pad, y: bb.y - pad },
-            { name: 'n',  x: bb.x + bb.w / 2, y: bb.y - pad },
+            { name: 'n', x: bb.x + bb.w / 2, y: bb.y - pad },
             { name: 'ne', x: bb.x + bb.w + pad, y: bb.y - pad },
-            { name: 'e',  x: bb.x + bb.w + pad, y: bb.y + bb.h / 2 },
+            { name: 'e', x: bb.x + bb.w + pad, y: bb.y + bb.h / 2 },
             { name: 'se', x: bb.x + bb.w + pad, y: bb.y + bb.h + pad },
-            { name: 's',  x: bb.x + bb.w / 2, y: bb.y + bb.h + pad },
+            { name: 's', x: bb.x + bb.w / 2, y: bb.y + bb.h + pad },
             { name: 'sw', x: bb.x - pad, y: bb.y + bb.h + pad },
-            { name: 'w',  x: bb.x - pad, y: bb.y + bb.h / 2 },
+            { name: 'w', x: bb.x - pad, y: bb.y + bb.h / 2 },
         ];
         for (const h of handles) {
-            g.appendChild(svgEl('rect', { x: h.x - 4, y: h.y - 4, width: 8, height: 8, class: 'resize-handle', 'data-handle': h.name }));
+            g.appendChild(
+                svgEl('rect', {
+                    x: h.x - 4,
+                    y: h.y - 4,
+                    width: 8,
+                    height: 8,
+                    class: 'resize-handle',
+                    'data-handle': h.name,
+                }),
+            );
         }
     }
 
-    const textEl = svgEl('text', { x: ann.x, y: ann.y, 'text-anchor': textAnchor, class: 'annotation-text' });
+    const textEl = svgEl('text', {
+        x: ann.x,
+        y: ann.y,
+        'text-anchor': textAnchor,
+        class: 'annotation-text',
+    });
     textEl.style.fill = ann.color || '#7c3aed';
     applyFontStyle(textEl, ann, { size: 13, italic: true });
 
     const wrappedLines = wrapTextToLines(ann.text || '', bb.w, fontSize);
     wrappedLines.forEach((line, i) => {
-        const tspan = svgEl('tspan', { x: ann.x, dy: i === 0 ? '0' : `${lineHeight}` }, line || '\u200b');
+        const tspan = svgEl(
+            'tspan',
+            { x: ann.x, dy: i === 0 ? '0' : `${lineHeight}` },
+            line || '\u200b',
+        );
         textEl.appendChild(tspan);
     });
     g.appendChild(textEl);
@@ -2017,7 +2153,8 @@ function hitTest(x, y) {
             if (fromNode && isLayerLocked(fromNode.layerId)) continue;
             const pts = edgePoints(edge);
             if (!pts || pts.length < 2) continue;
-            const p1 = pts[0], p2 = pts[pts.length - 1];
+            const p1 = pts[0],
+                p2 = pts[pts.length - 1];
             if (Math.hypot(x - p1.x, y - p1.y) <= 8)
                 return { type: 'edge-endpoint', edgeId: selId, which: 'from' };
             if (Math.hypot(x - p2.x, y - p2.y) <= 8)
@@ -2321,7 +2458,8 @@ function selectMouseDown(p, hit, e) {
 // --- Box tool ---
 function boxMouseDown(p) {
     if (isLayerLocked(state.activeLayerId)) return;
-    const sx = snapVal(p.x), sy = snapVal(p.y);
+    const sx = snapVal(p.x),
+        sy = snapVal(p.y);
     drag = { type: 'draw-box', startX: sx, startY: sy };
     uiLayer.appendChild(
         svgEl('rect', {
@@ -2388,7 +2526,13 @@ function textMouseDown(p, hit) {
     // Create annotation on canvas
     if (isLayerLocked(state.activeLayerId)) return;
     const id = genId();
-    state.annotations.set(id, { id, x: p.x, y: p.y + 5, text: 'Text', layerId: state.activeLayerId });
+    state.annotations.set(id, {
+        id,
+        x: p.x,
+        y: p.y + 5,
+        text: 'Text',
+        layerId: state.activeLayerId,
+    });
     state.selected.clear();
     state.selected.add(id);
     render();
@@ -2606,7 +2750,8 @@ function dragMove(p) {
     if (drag.type === 'draw-box') {
         const tmp = document.getElementById('tmp');
         if (!tmp) return;
-        const px = snapVal(p.x), py = snapVal(p.y);
+        const px = snapVal(p.x),
+            py = snapVal(p.y);
         tmp.setAttribute('x', Math.min(px, drag.startX));
         tmp.setAttribute('y', Math.min(py, drag.startY));
         tmp.setAttribute('width', Math.abs(px - drag.startX));
@@ -2694,7 +2839,8 @@ function dragEnd(p) {
 
     if (d.type === 'draw-box') {
         uiLayer.innerHTML = '';
-        const px = snapVal(p.x), py = snapVal(p.y);
+        const px = snapVal(p.x),
+            py = snapVal(p.y);
         const w = Math.abs(px - d.startX);
         const h = Math.abs(py - d.startY);
         if (w < 20 || h < 10) return;
@@ -3139,15 +3285,26 @@ function onKeyDown(e) {
 
     // Presentation mode: only Escape (exit) and arrow keys (tab nav) allowed
     if (state.presentationMode) {
-        if (e.key === 'Escape') { exitPresentationMode(); return; }
+        if (e.key === 'Escape') {
+            exitPresentationMode();
+            return;
+        }
         if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
             const n = state.tabs.length;
-            if (n > 1) { switchToTab((state.activeTabIndex - 1 + n) % n); fitWindow(); updatePresentationLabel(); }
+            if (n > 1) {
+                switchToTab((state.activeTabIndex - 1 + n) % n);
+                fitWindow();
+                updatePresentationLabel();
+            }
             return;
         }
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
             const n = state.tabs.length;
-            if (n > 1) { switchToTab((state.activeTabIndex + 1) % n); fitWindow(); updatePresentationLabel(); }
+            if (n > 1) {
+                switchToTab((state.activeTabIndex + 1) % n);
+                fitWindow();
+                updatePresentationLabel();
+            }
             return;
         }
         return; // block all other shortcuts
@@ -3171,7 +3328,8 @@ function onKeyDown(e) {
         if (targetTool === 'box') {
             if (state.tool === 'box') {
                 // Already on box tool — toggle pop-out for shape type selection
-                if (isShapePopoutOpen()) closeShapePopout(); else openShapePopout();
+                if (isShapePopoutOpen()) closeShapePopout();
+                else openShapePopout();
             } else {
                 setTool('box');
                 closeShapePopout();
@@ -3337,8 +3495,11 @@ function deleteSelected() {
 
     // Remove any elements that are on a locked layer
     for (const id of [...toDelete]) {
-        const el = state.nodes.get(id) || state.edges.get(id) ||
-                   state.lines.get(id) || state.annotations.get(id);
+        const el =
+            state.nodes.get(id) ||
+            state.edges.get(id) ||
+            state.lines.get(id) ||
+            state.annotations.get(id);
         if (el && isLayerLocked(el.layerId)) toDelete.delete(id);
     }
     if (toDelete.size === 0) return;
@@ -3731,7 +3892,13 @@ function pasteClipboard() {
     for (const node of cb.nodes) {
         const newId = genId();
         idMap.set(node.id, newId);
-        const pasted = { ...node, id: newId, x: node.x + off, y: node.y + off, layerId: state.activeLayerId };
+        const pasted = {
+            ...node,
+            id: newId,
+            x: node.x + off,
+            y: node.y + off,
+            layerId: state.activeLayerId,
+        };
         delete pasted.groupId; // will be reassigned below
         state.nodes.set(newId, pasted);
         if (!groupMemberOldIds.has(node.id)) newIds.push(newId);
@@ -3776,7 +3943,13 @@ function pasteClipboard() {
     for (const ann of cb.annotations) {
         const newId = genId();
         idMap.set(ann.id, newId);
-        const pasted = { ...ann, id: newId, x: ann.x + off, y: ann.y + off, layerId: state.activeLayerId };
+        const pasted = {
+            ...ann,
+            id: newId,
+            x: ann.x + off,
+            y: ann.y + off,
+            layerId: state.activeLayerId,
+        };
         delete pasted.groupId;
         state.annotations.set(newId, pasted);
         if (!groupMemberOldIds.has(ann.id)) newIds.push(newId);
@@ -3845,18 +4018,16 @@ function updateCursor(p) {
         hit.type === 'group'
     )
         svg.style.cursor = isHitLocked(hit) ? 'default' : 'move';
-    else if (hit.type === 'edge') svg.style.cursor = isHitLocked(hit) ? 'default' : 'pointer';
+    else if (hit.type === 'edge')
+        svg.style.cursor = isHitLocked(hit) ? 'default' : 'pointer';
     else svg.style.cursor = 'default';
 }
 
 /** Returns true if the object under the hit is on a locked layer. */
 function isHitLocked(hit) {
-    if (hit.type === 'node')
-        return isLayerLocked(hit.node.layerId);
-    if (hit.type === 'annotation')
-        return isLayerLocked(hit.ann.layerId);
-    if (hit.type === 'line')
-        return isLayerLocked(hit.line.layerId);
+    if (hit.type === 'node') return isLayerLocked(hit.node.layerId);
+    if (hit.type === 'annotation') return isLayerLocked(hit.ann.layerId);
+    if (hit.type === 'line') return isLayerLocked(hit.line.layerId);
     if (hit.type === 'edge') {
         const edge = state.edges.get(hit.id);
         if (!edge) return false;
@@ -3882,9 +4053,13 @@ function updatePropertiesPanel() {
     const content = document.getElementById('properties-content');
 
     if (state.selected.size === 0) {
-        const activeLayer = (state.layers || []).find((l) => l.id === state.activeLayerId);
+        const activeLayer = (state.layers || []).find(
+            (l) => l.id === state.activeLayerId,
+        );
         const layerName = activeLayer ? activeLayer.name : 'Background';
-        const lockedTag = activeLayer?.locked ? ' <span style="color:#f59e0b;font-size:10px;">🔒 Locked</span>' : '';
+        const lockedTag = activeLayer?.locked
+            ? ' <span style="color:#f59e0b;font-size:10px;">🔒 Locked</span>'
+            : '';
         content.innerHTML = `<p class="no-selection">Nothing selected</p><p class="active-layer-hint">Active layer: <strong>${layerName}</strong>${lockedTag}</p>`;
         return;
     }
@@ -3920,7 +4095,9 @@ function updatePropertiesPanel() {
     // If element is on a locked layer, show a read-only banner
     const element = node || edge || line || ann;
     if (element && isLayerLocked(element.layerId)) {
-        const lockedLayer = (state.layers || []).find((l) => l.id === element.layerId);
+        const lockedLayer = (state.layers || []).find(
+            (l) => l.id === element.layerId,
+        );
         const lockedName = lockedLayer ? lockedLayer.name : 'this layer';
         content.innerHTML = `<div class="locked-layer-banner">
             <svg width="14" height="14" viewBox="0 0 16 16" style="flex-shrink:0">
@@ -3952,7 +4129,12 @@ function updatePropertiesPanel() {
 // ============================================================
 
 /** Tracks which property sections are open; persists across selection changes. */
-const propSectionState = { basic: true, style: true, geometry: true, layer: true };
+const propSectionState = {
+    basic: true,
+    style: true,
+    geometry: true,
+    layer: true,
+};
 
 /**
  * Returns HTML for a collapsible `<details>` property section.
@@ -3978,22 +4160,36 @@ function bindPropSectionToggles(container) {
 }
 
 /** Helper: render a colour picker row and bind it to an object property. */
-function colorRow(id, currentValue, defaultValue) {
+function colorRow(id, label, currentValue, defaultValue) {
     const val = currentValue || defaultValue;
+    return `<div class="color-target-row" data-color-id="${id}" data-default="${defaultValue}" data-value="${val}">
+  <button class="color-target-btn" title="Select ${label}">
+    <span class="color-swatch-dot" id="${id}-swatch" style="background:${val}"></span>
+    ${label}
+  </button>
+</div>`;
+}
+
+function colorSharedPicker() {
     const palette = state.palette || [];
     const swatches = Array.from({ length: 6 }, (_, i) => {
         const c = palette[i];
         return c
-            ? `<button class="palette-swatch" data-color="${c}" data-target="${id}" style="background:${c}" title="${c}"></button>`
-            : `<button class="palette-swatch palette-swatch-empty" data-target="${id}" data-empty="1" title="Empty slot"></button>`;
+            ? `<button class="palette-swatch" data-color="${c}" style="background:${c}" title="${c}"></button>`
+            : `<button class="palette-swatch palette-swatch-empty" data-empty="1" title="Empty slot"></button>`;
     }).join('');
-    return `<div class="color-row">
-    <input type="color" id="${id}" value="${val}">
-    <span class="color-hex" id="${id}-hex">${val}</span>
-    <button class="color-reset" id="${id}-reset" title="Reset to default">Reset</button>
-    <button class="color-save-palette" id="${id}-save-pal" title="Save colour to palette">+</button>
+    return `<div class="color-shared-section">
+  <div class="color-shared-controls">
+    <label class="color-pick-btn" for="shared-color-input" title="Open colour picker">
+      <span class="color-pick-swatch" id="shared-color-swatch"></span>
+    </label>
+    <span class="color-hex-display" id="shared-color-hex"></span>
+    <button class="color-reset-btn" id="shared-reset-color" title="Reset colour">↺</button>
+    <button class="color-save-btn" id="shared-save-pal" title="Save colour to palette">+</button>
   </div>
-  <div class="palette-strip" id="${id}-palette">${swatches}</div>`;
+  <div class="palette-strip" id="shared-palette">${swatches}</div>
+  <input type="color" id="shared-color-input" value="#000000" style="position:fixed;opacity:0;width:0;height:0;pointer-events:none;border:none;padding:0">
+</div>`;
 }
 
 /** Generate a layer <select> dropdown pre-selected to the element's current layer. */
@@ -4019,77 +4215,127 @@ function bindLayerDropdown(element) {
     });
 }
 
-function bindColorInput(id, defaultValue, setter) {
-    const input = document.getElementById(id);
-    const hex = document.getElementById(`${id}-hex`);
-    const reset = document.getElementById(`${id}-reset`);
-    const savePal = document.getElementById(`${id}-save-pal`);
+function bindColorPanel(container, rows) {
+    const input = document.getElementById('shared-color-input');
+    const pickSwatch = document.getElementById('shared-color-swatch');
+    const hexDisplay = document.getElementById('shared-color-hex');
+    const resetBtn = document.getElementById('shared-reset-color');
+    const savePal = document.getElementById('shared-save-pal');
+    const palStrip = document.getElementById('shared-palette');
     if (!input) return;
-    input.addEventListener('input', () => {
-        hex.textContent = input.value;
-        setter(input.value);
+
+    let activeRow = null;
+
+    function activate(rowDef) {
+        activeRow = rowDef;
+        container.querySelectorAll('.color-target-row').forEach((el) => {
+            el.classList.toggle(
+                'color-target-active',
+                el.dataset.colorId === rowDef.id,
+            );
+        });
+        const rowEl = container.querySelector(
+            `.color-target-row[data-color-id="${rowDef.id}"]`,
+        );
+        const hex = (rowEl && rowEl.dataset.value) || rowDef.defaultValue;
+        input.value = hex;
+        pickSwatch.style.background = hex;
+        hexDisplay.textContent = hex;
+    }
+
+    function applyColor(hex) {
+        if (!activeRow) return;
+        activeRow.setter(hex);
+        const rowEl = container.querySelector(
+            `.color-target-row[data-color-id="${activeRow.id}"]`,
+        );
+        if (rowEl) rowEl.dataset.value = hex;
+        const swatch = document.getElementById(`${activeRow.id}-swatch`);
+        if (swatch) swatch.style.background = hex;
+        pickSwatch.style.background = hex;
+        hexDisplay.textContent = hex;
+        input.value = hex;
         render();
+    }
+
+    function refreshPalStrip() {
+        if (!palStrip) return;
+        const palette = state.palette || [];
+        palStrip.innerHTML = Array.from({ length: 6 }, (_, i) => {
+            const c = palette[i];
+            return c
+                ? `<button class="palette-swatch" data-color="${c}" style="background:${c}" title="${c}"></button>`
+                : `<button class="palette-swatch palette-swatch-empty" data-empty="1" title="Empty slot"></button>`;
+        }).join('');
+    }
+
+    // Wire row selection buttons
+    container.querySelectorAll('.color-target-row').forEach((rowEl) => {
+        const id = rowEl.dataset.colorId;
+        const rowDef = rows.find((r) => r.id === id);
+        if (!rowDef) return;
+        rowEl
+            .querySelector('.color-target-btn')
+            .addEventListener('click', () => activate(rowDef));
     });
+
+    // Wire reset button (resets the active row)
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (!activeRow) return;
+            activeRow.setter(null);
+            const rowEl = container.querySelector(
+                `.color-target-row[data-color-id="${activeRow.id}"]`,
+            );
+            if (rowEl) rowEl.dataset.value = activeRow.defaultValue;
+            const swatch = document.getElementById(`${activeRow.id}-swatch`);
+            if (swatch) swatch.style.background = activeRow.defaultValue;
+            input.value = activeRow.defaultValue;
+            pickSwatch.style.background = activeRow.defaultValue;
+            hexDisplay.textContent = activeRow.defaultValue;
+            pushHistory();
+            render();
+            updatePropertiesPanel();
+        });
+    }
+
+    // Wire colour picker
+    input.addEventListener('input', () => applyColor(input.value));
     input.addEventListener('change', () => pushHistory());
-    reset.addEventListener('click', () => {
-        setter(null);
-        input.value = defaultValue;
-        hex.textContent = defaultValue;
-        pushHistory();
-        render();
-        updatePropertiesPanel();
-    });
+
+    // Wire save to palette
     if (savePal) {
         savePal.addEventListener('click', () => {
             const color = input.value;
             if (!color) return;
             const pal = state.palette;
-            const existing = pal.indexOf(color);
-            if (existing !== -1) return; // already in palette
+            if (pal.indexOf(color) !== -1) return;
             if (pal.length < 6) {
                 pal.push(color);
             } else {
-                pal.shift(); // remove oldest
+                pal.shift();
                 pal.push(color);
             }
             flushTabState();
-            updatePaletteStrips();
+            refreshPalStrip();
             saveToLocalStorage();
         });
     }
-    // Palette swatch clicks for this row
-    const strip = document.getElementById(`${id}-palette`);
-    if (strip) {
-        strip.addEventListener('click', (e) => {
+
+    // Wire palette swatches
+    if (palStrip) {
+        palStrip.addEventListener('click', (e) => {
             const btn = e.target.closest('.palette-swatch');
             if (!btn || btn.dataset.empty) return;
             const color = btn.dataset.color;
             if (!color) return;
-            input.value = color;
-            hex.textContent = color;
-            setter(color);
-            render();
+            applyColor(color);
             pushHistory();
         });
     }
-}
 
-/**
- * Refreshes all palette strips currently visible in the properties panel
- * after the palette has been modified.
- */
-function updatePaletteStrips() {
-    const palette = state.palette || [];
-    document.querySelectorAll('.palette-strip').forEach((strip) => {
-        const id = strip.id.replace(/-palette$/, '');
-        const swatches = Array.from({ length: 6 }, (_, i) => {
-            const c = palette[i];
-            return c
-                ? `<button class="palette-swatch" data-color="${c}" data-target="${id}" style="background:${c}" title="${c}"></button>`
-                : `<button class="palette-swatch palette-swatch-empty" data-target="${id}" data-empty="1" title="Empty slot"></button>`;
-        }).join('');
-        strip.innerHTML = swatches;
-    });
+    // Auto-select first row
+    if (rows.length > 0) activate(rows[0]);
 }
 
 /** The four edge-centre positions that support inside/outside toggle. */
@@ -4099,9 +4345,15 @@ const TOGGLE_LABEL_POS = new Set(['tm', 'ml', 'bm', 'mr']);
 function labelPosPickerHtml(current, outside) {
     const positions = ['tl', 'tm', 'tr', 'ml', 'mm', 'mr', 'bl', 'bm', 'br'];
     const baseTitle = {
-        tl: 'Top left', tm: 'Top centre', tr: 'Top right',
-        ml: 'Middle left', mm: 'Centre', mr: 'Middle right',
-        bl: 'Bottom left', bm: 'Bottom centre', br: 'Bottom right',
+        tl: 'Top left',
+        tm: 'Top centre',
+        tr: 'Top right',
+        ml: 'Middle left',
+        mm: 'Centre',
+        mr: 'Middle right',
+        bl: 'Bottom left',
+        bm: 'Bottom centre',
+        br: 'Bottom right',
     };
     return `<div class="pos-picker">${positions
         .map((p) => {
@@ -4112,7 +4364,10 @@ function labelPosPickerHtml(current, outside) {
             if (isActive) cls += ' active';
             if (isOutside) cls += ' pos-btn-outside';
             let title = baseTitle[p];
-            if (isActive && canToggle) title += isOutside ? ' (outside — click to move inside)' : ' (inside — click to move outside)';
+            if (isActive && canToggle)
+                title += isOutside
+                    ? ' (outside — click to move inside)'
+                    : ' (inside — click to move outside)';
             else if (canToggle) title += ' (click twice to place outside)';
             return `<button class="${cls}" data-pos="${p}" title="${title}"></button>`;
         })
@@ -4127,7 +4382,10 @@ function bindLabelPosPicker(node, defaultPos) {
             if (node.labelPos === pos && TOGGLE_LABEL_POS.has(pos)) {
                 // Already active toggle-capable position — flip inside/outside
                 const defaultOutside = node.type === 'symbol' && pos === 'bm';
-                const current = node.labelOutside !== undefined ? node.labelOutside : defaultOutside;
+                const current =
+                    node.labelOutside !== undefined
+                        ? node.labelOutside
+                        : defaultOutside;
                 node.labelOutside = !current;
             } else {
                 node.labelPos = pos;
@@ -4148,60 +4406,131 @@ function renderSymbolProps(container, node) {
               .replace(/\.svg$/i, '')
         : '';
     const curPos = node.labelPos || 'bm';
-    const curOutside = node.labelOutside !== undefined ? node.labelOutside : (node.type === 'symbol' && curPos === 'bm');
+    const curOutside =
+        node.labelOutside !== undefined
+            ? node.labelOutside
+            : node.type === 'symbol' && curPos === 'bm';
     container.innerHTML =
-        propSection('basic', 'Basic',
+        propSection(
+            'basic',
+            'Basic',
             `<div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
-    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`) +
-        propSection('style', 'Style',
-            `<div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>`) +
-        propSection('geometry', 'Geometry',
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`,
+        ) +
+        propSection(
+            'style',
+            'Style',
+            `${colorRow('p-label-color', 'Label', node.labelColor, '#000000')}
+    ${colorSharedPicker()}
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>`,
+        ) +
+        propSection(
+            'geometry',
+            'Geometry',
             `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
-    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`) +
-        propSection('layer', 'Layer',
-            `<div class="prop-group">${layerDropdownHtml(node)}</div>`);
+    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(node)}</div>`,
+        );
     bindPropSectionToggles(container);
     bindFontControls(node, { size: 11 });
-    bindColorInput('p-label-color', '#000000', (v) => {
-        node.labelColor = v || undefined;
-    });
+    bindColorPanel(container, [
+        {
+            id: 'p-label-color',
+            defaultValue: '#000000',
+            setter: (v) => {
+                node.labelColor = v || undefined;
+            },
+        },
+    ]);
     bindPropInput('p-label', (v) => {
         node.label = v;
     });
     bindLabelPosPicker(node, 'bm');
-    bindPropInput('p-x', (v) => { node.x = +v || 0; }, true);
-    bindPropInput('p-y', (v) => { node.y = +v || 0; }, true);
-    bindPropInput('p-w', (v) => { node.width = Math.max(16, +v || 16); }, true);
-    bindPropInput('p-h', (v) => { node.height = Math.max(16, +v || 16); }, true);
+    bindPropInput(
+        'p-x',
+        (v) => {
+            node.x = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-y',
+        (v) => {
+            node.y = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-w',
+        (v) => {
+            node.width = Math.max(16, +v || 16);
+        },
+        true,
+    );
+    bindPropInput(
+        'p-h',
+        (v) => {
+            node.height = Math.max(16, +v || 16);
+        },
+        true,
+    );
     bindLayerDropdown(node);
 }
 
 function renderNodeProps(container, node) {
     const shapeOpts = [
-        'box', 'circle', 'oval', 'diamond', 'triangle',
-        'parallelogram', 'document', 'database', 'wait', 'merge',
+        'box',
+        'circle',
+        'oval',
+        'diamond',
+        'triangle',
+        'parallelogram',
+        'document',
+        'database',
+        'wait',
+        'merge',
     ]
-        .map((s) => `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
+        .map(
+            (s) =>
+                `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`,
+        )
         .join('');
-    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
-        .map(([v, l]) => `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    const dashOpts = [
+        ['solid', 'Solid'],
+        ['dashed', 'Dashed'],
+        ['dotted', 'Dotted'],
+    ]
+        .map(
+            ([v, l]) =>
+                `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
+        )
         .join('');
     const curPos = node.labelPos || 'mm';
-    const curOutside = node.labelOutside !== undefined ? node.labelOutside : false;
+    const curOutside =
+        node.labelOutside !== undefined ? node.labelOutside : false;
     container.innerHTML =
-        propSection('basic', 'Basic',
+        propSection(
+            'basic',
+            'Basic',
             `<div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
-    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`) +
-        propSection('style', 'Style',
-            `<div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`,
+        ) +
+        propSection(
+            'style',
+            'Style',
+            `${colorRow('p-label-color', 'Label', node.labelColor, '#000000')}
+    ${colorRow('p-fill', 'Fill', node.fill, '#ffffff')}
+    ${colorRow('p-stroke', 'Stroke', node.stroke, '#475569')}
+    ${colorSharedPicker()}
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
-    <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
-    <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', node.stroke, '#475569')}</div>
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group">
       <label>Opacity</label>
@@ -4209,29 +4538,58 @@ function renderNodeProps(container, node) {
         <input type="range" id="p-opacity" min="0" max="100" step="1" value="${node.opacity ?? 100}">
         <span id="p-opacity-val">${node.opacity ?? 100}%</span>
       </div>
-    </div>`) +
-        propSection('geometry', 'Geometry',
+    </div>`,
+        ) +
+        propSection(
+            'geometry',
+            'Geometry',
             `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
-    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`) +
-        propSection('layer', 'Layer',
-            `<div class="prop-group">${layerDropdownHtml(node)}</div>`);
+    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(node)}</div>`,
+        );
     bindPropSectionToggles(container);
     document.getElementById('p-shape').addEventListener('change', (e) => {
         node.shape = e.target.value;
         pushHistory();
         render();
     });
-    document.getElementById('p-stroke-style').addEventListener('change', (e) => {
-        node.strokeStyle = e.target.value;
-        pushHistory();
-        render();
-    });
+    document
+        .getElementById('p-stroke-style')
+        .addEventListener('change', (e) => {
+            node.strokeStyle = e.target.value;
+            pushHistory();
+            render();
+        });
     bindFontControls(node, { size: 13 });
-    bindColorInput('p-label-color', '#000000', (v) => { node.labelColor = v || undefined; });
-    bindColorInput('p-fill', '#ffffff', (v) => { node.fill = v || undefined; });
-    bindColorInput('p-stroke', '#475569', (v) => { node.stroke = v || undefined; });
+    bindColorPanel(container, [
+        {
+            id: 'p-label-color',
+            defaultValue: '#000000',
+            setter: (v) => {
+                node.labelColor = v || undefined;
+            },
+        },
+        {
+            id: 'p-fill',
+            defaultValue: '#ffffff',
+            setter: (v) => {
+                node.fill = v || undefined;
+            },
+        },
+        {
+            id: 'p-stroke',
+            defaultValue: '#475569',
+            setter: (v) => {
+                node.stroke = v || undefined;
+            },
+        },
+    ]);
     const opacitySlider = document.getElementById('p-opacity');
     const opacityVal = document.getElementById('p-opacity-val');
     opacitySlider.addEventListener('input', () => {
@@ -4240,12 +4598,38 @@ function renderNodeProps(container, node) {
         render();
     });
     opacitySlider.addEventListener('change', () => pushHistory());
-    bindPropInput('p-label', (v) => { node.label = v; });
+    bindPropInput('p-label', (v) => {
+        node.label = v;
+    });
     bindLabelPosPicker(node, 'mm');
-    bindPropInput('p-x', (v) => { node.x = +v || 0; }, true);
-    bindPropInput('p-y', (v) => { node.y = +v || 0; }, true);
-    bindPropInput('p-w', (v) => { node.width = Math.max(40, +v || 40); }, true);
-    bindPropInput('p-h', (v) => { node.height = Math.max(20, +v || 20); }, true);
+    bindPropInput(
+        'p-x',
+        (v) => {
+            node.x = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-y',
+        (v) => {
+            node.y = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-w',
+        (v) => {
+            node.width = Math.max(40, +v || 40);
+        },
+        true,
+    );
+    bindPropInput(
+        'p-h',
+        (v) => {
+            node.height = Math.max(20, +v || 20);
+        },
+        true,
+    );
     bindLayerDropdown(node);
 }
 
@@ -4254,30 +4638,61 @@ function renderEdgeProps(container, edge) {
     const toNode = state.nodes.get(edge.to);
     const dir = edge.direction || 'forward';
     const curveStyle = edge.curveStyle || 'straight';
-    const dirOpts = [['forward', '→ Forward'], ['back', '← Backward'], ['both', '↔ Both'], ['none', '— None']]
-        .map(([v, label]) => `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`)
+    const dirOpts = [
+        ['forward', '→ Forward'],
+        ['back', '← Backward'],
+        ['both', '↔ Both'],
+        ['none', '— None'],
+    ]
+        .map(
+            ([v, label]) =>
+                `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`,
+        )
         .join('');
-    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
-        .map(([v, l]) => `<option value="${v}"${(edge.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    const dashOpts = [
+        ['solid', 'Solid'],
+        ['dashed', 'Dashed'],
+        ['dotted', 'Dotted'],
+    ]
+        .map(
+            ([v, l]) =>
+                `<option value="${v}"${(edge.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
+        )
         .join('');
-    const curveOpts = [['straight', 'Straight'], ['curved', 'Curved']]
-        .map(([v, l]) => `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`)
+    const curveOpts = [
+        ['straight', 'Straight'],
+        ['curved', 'Curved'],
+    ]
+        .map(
+            ([v, l]) =>
+                `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`,
+        )
         .join('');
 
     container.innerHTML =
-        propSection('basic', 'Basic',
+        propSection(
+            'basic',
+            'Basic',
             `<div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
-    <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>`) +
-        propSection('style', 'Style',
-            `<div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
+    <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>`,
+        ) +
+        propSection(
+            'style',
+            'Style',
+            `${colorRow('p-stroke', 'Stroke', edge.stroke, '#64748b')}
+    ${colorRow('p-label-color', 'Label', edge.labelColor, '#000000')}
+    ${colorSharedPicker()}
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
-    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', edge.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>`) +
-        propSection('layer', 'Layer',
-            `<div class="prop-group">${layerDropdownHtml(edge)}</div>`);
+    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(edge)}</div>`,
+        );
     bindPropSectionToggles(container);
     document.getElementById('p-dir').addEventListener('change', (e) => {
         edge.direction = e.target.value;
@@ -4289,55 +4704,105 @@ function renderEdgeProps(container, edge) {
         pushHistory();
         render();
     });
-    document.getElementById('p-stroke-style').addEventListener('change', (e) => {
-        edge.strokeStyle = e.target.value;
-        pushHistory();
-        render();
+    document
+        .getElementById('p-stroke-style')
+        .addEventListener('change', (e) => {
+            edge.strokeStyle = e.target.value;
+            pushHistory();
+            render();
+        });
+    bindColorPanel(container, [
+        {
+            id: 'p-stroke',
+            defaultValue: '#64748b',
+            setter: (v) => {
+                edge.stroke = v || undefined;
+            },
+        },
+        {
+            id: 'p-label-color',
+            defaultValue: '#000000',
+            setter: (v) => {
+                edge.labelColor = v || undefined;
+            },
+        },
+    ]);
+    bindPropInput('p-label', (v) => {
+        edge.label = v;
     });
-    bindColorInput('p-stroke', '#64748b', (v) => { edge.stroke = v || undefined; });
-    bindColorInput('p-label-color', '#000000', (v) => { edge.labelColor = v || undefined; });
-    bindPropInput('p-label', (v) => { edge.label = v; });
     bindFontControls(edge, { size: 11 });
     bindLayerDropdown(edge);
 }
 
 function renderLineProps(container, line) {
     const curveStyle = line.curveStyle || 'straight';
-    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
-        .map(([v, l]) => `<option value="${v}"${(line.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    const dashOpts = [
+        ['solid', 'Solid'],
+        ['dashed', 'Dashed'],
+        ['dotted', 'Dotted'],
+    ]
+        .map(
+            ([v, l]) =>
+                `<option value="${v}"${(line.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
+        )
         .join('');
-    const curveOpts = [['straight', 'Straight'], ['curved', 'Curved']]
-        .map(([v, l]) => `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`)
+    const curveOpts = [
+        ['straight', 'Straight'],
+        ['curved', 'Curved'],
+    ]
+        .map(
+            ([v, l]) =>
+                `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`,
+        )
         .join('');
     const symOpts = (field) =>
-        [['none', 'None'], ['dot', 'Dot'], ['square', 'Square']]
-            .map(([v, l]) => `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`)
+        [
+            ['none', 'None'],
+            ['dot', 'Dot'],
+            ['square', 'Square'],
+        ]
+            .map(
+                ([v, l]) =>
+                    `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`,
+            )
             .join('');
 
     container.innerHTML =
-        propSection('basic', 'Basic',
+        propSection(
+            'basic',
+            'Basic',
             `<div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Start</label><select id="p-start-sym">${symOpts('startSymbol')}</select></div>
     <div class="prop-group"><label>End</label><select id="p-end-sym">${symOpts('endSymbol')}</select></div>
-    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>`) +
-        propSection('style', 'Style',
-            `<div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', line.stroke, '#64748b')}</div>
+    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>`,
+        ) +
+        propSection(
+            'style',
+            'Style',
+            `${colorRow('p-stroke', 'Stroke', line.stroke, '#64748b')}
+    ${colorRow('p-label-color', 'Label', line.labelColor, '#000000')}
+    ${colorSharedPicker()}
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
-    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', line.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>`) +
-        propSection('layer', 'Layer',
-            `<div class="prop-group">${layerDropdownHtml(line)}</div>`);
+    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(line)}</div>`,
+        );
     bindPropSectionToggles(container);
     document.getElementById('p-curve-style').addEventListener('change', (e) => {
         line.curveStyle = e.target.value;
         pushHistory();
         render();
     });
-    document.getElementById('p-stroke-style').addEventListener('change', (e) => {
-        line.strokeStyle = e.target.value;
-        pushHistory();
-        render();
-    });
+    document
+        .getElementById('p-stroke-style')
+        .addEventListener('change', (e) => {
+            line.strokeStyle = e.target.value;
+            pushHistory();
+            render();
+        });
     document.getElementById('p-start-sym').addEventListener('change', (e) => {
         line.startSymbol = e.target.value;
         pushHistory();
@@ -4348,21 +4813,46 @@ function renderLineProps(container, line) {
         pushHistory();
         render();
     });
-    bindColorInput('p-stroke', '#64748b', (v) => { line.stroke = v || undefined; });
-    bindColorInput('p-label-color', '#000000', (v) => { line.labelColor = v || undefined; });
-    bindPropInput('p-label', (v) => { line.label = v; });
+    bindColorPanel(container, [
+        {
+            id: 'p-stroke',
+            defaultValue: '#64748b',
+            setter: (v) => {
+                line.stroke = v || undefined;
+            },
+        },
+        {
+            id: 'p-label-color',
+            defaultValue: '#000000',
+            setter: (v) => {
+                line.labelColor = v || undefined;
+            },
+        },
+    ]);
+    bindPropInput('p-label', (v) => {
+        line.label = v;
+    });
     bindFontControls(line, { size: 11 });
     bindLayerDropdown(line);
 }
 
 function renderAnnProps(container, ann) {
     const align = ann.align || 'left';
-    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
-        .map(([v, l]) => `<option value="${v}"${(ann.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
+    const dashOpts = [
+        ['solid', 'Solid'],
+        ['dashed', 'Dashed'],
+        ['dotted', 'Dotted'],
+    ]
+        .map(
+            ([v, l]) =>
+                `<option value="${v}"${(ann.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
+        )
         .join('');
 
     container.innerHTML =
-        propSection('basic', 'Basic',
+        propSection(
+            'basic',
+            'Basic',
             `<div class="prop-group">
       <label>Text</label>
       <textarea id="p-text" rows="3" style="width:100%;resize:vertical;box-sizing:border-box;font-family:inherit;font-size:12px;padding:4px">${esc(ann.text || '')}</textarea>
@@ -4374,11 +4864,16 @@ function renderAnnProps(container, ann) {
         <button class="font-btn${align === 'center' ? ' active' : ''}" id="p-align-center" title="Centre">↔</button>
         <button class="font-btn${align === 'right' ? ' active' : ''}" id="p-align-right"  title="Right">➡</button>
       </div>
-    </div>`) +
-        propSection('style', 'Style',
-            `<div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13 })}</div>
-    <div class="prop-group"><label>Color</label>${colorRow('p-color', ann.color, '#7c3aed')}</div>
-    <div class="prop-group"><label>Background</label>${colorRow('p-fill', ann.fill, '#ffffff')}</div>
+    </div>`,
+        ) +
+        propSection(
+            'style',
+            'Style',
+            `${colorRow('p-color', 'Color', ann.color, '#7c3aed')}
+    ${colorRow('p-fill', 'Background', ann.fill, '#ffffff')}
+    ${colorRow('p-stroke', 'Border', ann.stroke, '#475569')}
+    ${colorSharedPicker()}
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13 })}</div>
     <div class="prop-group">
       <label>Bg opacity</label>
       <div class="opacity-row">
@@ -4386,18 +4881,26 @@ function renderAnnProps(container, ann) {
         <span id="p-fill-opacity-val">${ann.fillOpacity ?? 100}%</span>
       </div>
     </div>
-    <div class="prop-group"><label>Border</label>${colorRow('p-stroke', ann.stroke, '#475569')}</div>
-    <div class="prop-group"><label>Border style</label><select id="p-stroke-style">${dashOpts}</select></div>`) +
-        propSection('geometry', 'Geometry',
+    <div class="prop-group"><label>Border style</label><select id="p-stroke-style">${dashOpts}</select></div>`,
+        ) +
+        propSection(
+            'geometry',
+            'Geometry',
             `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(ann.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(ann.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-ann-w" value="${Math.round(ann.width || annBBox(ann).w)}" min="40"></div>
-    <div class="prop-group"><label>Height</label><input type="number" id="p-ann-h" value="${Math.round(ann.height || annBBox(ann).h)}" min="10"></div>`) +
-        propSection('layer', 'Layer',
-            `<div class="prop-group">${layerDropdownHtml(ann)}</div>`);
+    <div class="prop-group"><label>Height</label><input type="number" id="p-ann-h" value="${Math.round(ann.height || annBBox(ann).h)}" min="10"></div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(ann)}</div>`,
+        );
     bindPropSectionToggles(container);
 
-    bindPropInput('p-text', (v) => { ann.text = v; });
+    bindPropInput('p-text', (v) => {
+        ann.text = v;
+    });
 
     ['left', 'center', 'right'].forEach((a) => {
         const btn = document.getElementById(`p-align-${a}`);
@@ -4411,8 +4914,29 @@ function renderAnnProps(container, ann) {
     });
 
     bindFontControls(ann, { size: 13 });
-    bindColorInput('p-color', '#7c3aed', (v) => { ann.color = v || undefined; });
-    bindColorInput('p-fill', '#ffffff', (v) => { ann.fill = v || undefined; });
+    bindColorPanel(container, [
+        {
+            id: 'p-color',
+            defaultValue: '#7c3aed',
+            setter: (v) => {
+                ann.color = v || undefined;
+            },
+        },
+        {
+            id: 'p-fill',
+            defaultValue: '#ffffff',
+            setter: (v) => {
+                ann.fill = v || undefined;
+            },
+        },
+        {
+            id: 'p-stroke',
+            defaultValue: '#475569',
+            setter: (v) => {
+                ann.stroke = v || undefined;
+            },
+        },
+    ]);
 
     const fillOpacitySlider = document.getElementById('p-fill-opacity');
     const fillOpacityVal = document.getElementById('p-fill-opacity-val');
@@ -4425,8 +4949,6 @@ function renderAnnProps(container, ann) {
         fillOpacitySlider.addEventListener('change', () => pushHistory());
     }
 
-    bindColorInput('p-stroke', '#475569', (v) => { ann.stroke = v || undefined; });
-
     const strokeStyleEl = document.getElementById('p-stroke-style');
     if (strokeStyleEl)
         strokeStyleEl.addEventListener('change', (e) => {
@@ -4435,19 +4957,41 @@ function renderAnnProps(container, ann) {
             render();
         });
 
-    bindPropInput('p-x', (v) => { ann.x = +v || 0; }, true);
-    bindPropInput('p-y', (v) => { ann.y = +v || 0; }, true);
-    bindPropInput('p-ann-w', (v) => {
-        const nw = Math.max(40, +v || 40);
-        const bb = annBBox(ann);
-        const nx = bb.x;
-        ann.width = nw;
-        const a = ann.align || 'left';
-        if (a === 'center') ann.x = nx + nw / 2;
-        else if (a === 'right') ann.x = nx + nw;
-        else ann.x = nx;
-    }, true);
-    bindPropInput('p-ann-h', (v) => { ann.height = Math.max(10, +v || 10); }, true);
+    bindPropInput(
+        'p-x',
+        (v) => {
+            ann.x = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-y',
+        (v) => {
+            ann.y = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-ann-w',
+        (v) => {
+            const nw = Math.max(40, +v || 40);
+            const bb = annBBox(ann);
+            const nx = bb.x;
+            ann.width = nw;
+            const a = ann.align || 'left';
+            if (a === 'center') ann.x = nx + nw / 2;
+            else if (a === 'right') ann.x = nx + nw;
+            else ann.x = nx;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-ann-h',
+        (v) => {
+            ann.height = Math.max(10, +v || 10);
+        },
+        true,
+    );
     bindLayerDropdown(ann);
 }
 
@@ -4545,16 +5089,21 @@ function setTool(tool) {
 
 // SVG inner markup for each shape type — used to update the Shape tool button icon
 const SHAPE_SVGS = {
-    box:           '<rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    circle:        '<ellipse cx="8" cy="8" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    oval:          '<ellipse cx="8" cy="8" rx="7" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    diamond:       '<polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    triangle:      '<polygon points="8,1 15,14 1,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    parallelogram: '<polygon points="4,3 15,3 12,13 1,13" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    document:      '<path d="M2,3 L14,3 L14,10 C10.5,10 10.5,13 7,13 C3.5,13 3.5,10 2,10 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    database:      '<path d="M2,5 A6,2 0 0 1 14,5 L14,11 A6,2 0 0 1 2,11 Z M2,5 A6,2 0 0 0 14,5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    wait:          '<path d="M2,3 L9,3 C14,3 14,13 9,13 L2,13 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    merge:         '<polygon points="1,2 15,2 8,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    box: '<rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    circle: '<ellipse cx="8" cy="8" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    oval: '<ellipse cx="8" cy="8" rx="7" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    diamond:
+        '<polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    triangle:
+        '<polygon points="8,1 15,14 1,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    parallelogram:
+        '<polygon points="4,3 15,3 12,13 1,13" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    document:
+        '<path d="M2,3 L14,3 L14,10 C10.5,10 10.5,13 7,13 C3.5,13 3.5,10 2,10 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    database:
+        '<path d="M2,5 A6,2 0 0 1 14,5 L14,11 A6,2 0 0 1 2,11 Z M2,5 A6,2 0 0 0 14,5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    wait: '<path d="M2,3 L9,3 C14,3 14,13 9,13 L2,13 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    merge: '<polygon points="1,2 15,2 8,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
 };
 
 function setCurrentShape(shape) {
@@ -4642,7 +5191,9 @@ function updateSnapButton() {
     if (!btn) return;
     btn.classList.toggle('btn-active', state.snapToGrid);
     btn.setAttribute('aria-pressed', String(state.snapToGrid));
-    btn.title = state.snapToGrid ? 'Snap to grid: ON (click to disable)' : 'Snap to grid: OFF (click to enable)';
+    btn.title = state.snapToGrid
+        ? 'Snap to grid: ON (click to disable)'
+        : 'Snap to grid: OFF (click to enable)';
 }
 
 function syncZoomSelect() {
@@ -4769,18 +5320,36 @@ function updatePresentationLabel() {
 function requestBrowserFullscreen() {
     const el = document.documentElement;
     try {
-        const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        const fn =
+            el.requestFullscreen ||
+            el.webkitRequestFullscreen ||
+            el.mozRequestFullScreen ||
+            el.msRequestFullscreen;
         if (fn) fn.call(el);
-    } catch (_) { /* unsupported or blocked — continue without native fullscreen */ }
+    } catch (_) {
+        /* unsupported or blocked — continue without native fullscreen */
+    }
 }
 
 function exitBrowserFullscreen() {
     try {
-        const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-        if (fn && (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement)) {
+        const fn =
+            document.exitFullscreen ||
+            document.webkitExitFullscreen ||
+            document.mozCancelFullScreen ||
+            document.msExitFullscreen;
+        if (
+            fn &&
+            (document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement)
+        ) {
             fn.call(document);
         }
-    } catch (_) { /* ignore */ }
+    } catch (_) {
+        /* ignore */
+    }
 }
 
 function enterPresentationMode() {
@@ -5152,7 +5721,11 @@ function renderLayersPanel() {
         const layer = layers[i];
         const isActive = layer.id === state.activeLayerId;
         const row = document.createElement('div');
-        row.className = 'layer-row' + (isActive ? ' layer-active' : '') + (!layer.visible ? ' layer-hidden' : '') + (layer.locked ? ' layer-locked' : '');
+        row.className =
+            'layer-row' +
+            (isActive ? ' layer-active' : '') +
+            (!layer.visible ? ' layer-hidden' : '') +
+            (layer.locked ? ' layer-locked' : '');
         row.dataset.layerId = layer.id;
         row.draggable = true;
 
@@ -5194,7 +5767,8 @@ function renderLayersPanel() {
         const del = document.createElement('button');
         del.className = 'layer-delete';
         del.title = 'Delete layer';
-        del.innerHTML = '<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 4h10M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>';
+        del.innerHTML =
+            '<svg viewBox="0 0 16 16" width="12" height="12"><path d="M3 4h10M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>';
         del.disabled = layers.length <= 1 || layer.locked;
         del.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -5216,17 +5790,21 @@ function renderLayersPanel() {
         });
         row.addEventListener('dragend', () => {
             row.classList.remove('dragging');
-            list.querySelectorAll('.drag-over-above,.drag-over-below').forEach((el) => {
-                el.classList.remove('drag-over-above', 'drag-over-below');
-            });
+            list.querySelectorAll('.drag-over-above,.drag-over-below').forEach(
+                (el) => {
+                    el.classList.remove('drag-over-above', 'drag-over-below');
+                },
+            );
         });
         row.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
             if (layer.id === dragSrcId) return;
-            list.querySelectorAll('.drag-over-above,.drag-over-below').forEach((el) => {
-                el.classList.remove('drag-over-above', 'drag-over-below');
-            });
+            list.querySelectorAll('.drag-over-above,.drag-over-below').forEach(
+                (el) => {
+                    el.classList.remove('drag-over-above', 'drag-over-below');
+                },
+            );
             const rect = row.getBoundingClientRect();
             const isAbove = e.clientY < rect.top + rect.height / 2;
             row.classList.add(isAbove ? 'drag-over-above' : 'drag-over-below');
@@ -5287,7 +5865,11 @@ function toggleLayerVisibility(layerId) {
     // Deselect elements on hidden layer
     if (!layer.visible) {
         for (const id of [...state.selected]) {
-            const el = state.nodes.get(id) || state.edges.get(id) || state.lines.get(id) || state.annotations.get(id);
+            const el =
+                state.nodes.get(id) ||
+                state.edges.get(id) ||
+                state.lines.get(id) ||
+                state.annotations.get(id);
             if (el && el.layerId === layerId) state.selected.delete(id);
         }
     }
@@ -5304,7 +5886,11 @@ function toggleLayerLock(layerId) {
     // Deselect elements on newly locked layer
     if (layer.locked) {
         for (const id of [...state.selected]) {
-            const el = state.nodes.get(id) || state.edges.get(id) || state.lines.get(id) || state.annotations.get(id);
+            const el =
+                state.nodes.get(id) ||
+                state.edges.get(id) ||
+                state.lines.get(id) ||
+                state.annotations.get(id);
             if (el && el.layerId === layerId) state.selected.delete(id);
         }
     }
@@ -5379,7 +5965,9 @@ function renameLayer(layerId, newName) {
 function startLayerRename(layerId) {
     // Find the current nameSpan from the live DOM (the single-click may have
     // triggered renderLayersPanel() before dblclick fired, detaching the old span)
-    const row = document.querySelector(`.layer-row[data-layer-id="${layerId}"]`);
+    const row = document.querySelector(
+        `.layer-row[data-layer-id="${layerId}"]`,
+    );
     if (!row) return;
     const nameSpan = row.querySelector('.layer-name');
     if (!nameSpan) return;
@@ -5397,8 +5985,14 @@ function startLayerRename(layerId) {
     };
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
-        if (e.key === 'Escape') { input.removeEventListener('blur', commit); renderLayersPanel(); }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            input.blur();
+        }
+        if (e.key === 'Escape') {
+            input.removeEventListener('blur', commit);
+            renderLayersPanel();
+        }
     });
 }
 
@@ -5812,8 +6406,13 @@ function init() {
     document.addEventListener('mousedown', (e) => {
         const popout = document.getElementById('shape-popout');
         const shapeBtn = document.getElementById('btn-shape-tool');
-        if (popout && isShapePopoutOpen() &&
-            !popout.contains(e.target) && e.target !== shapeBtn && !shapeBtn?.contains(e.target)) {
+        if (
+            popout &&
+            isShapePopoutOpen() &&
+            !popout.contains(e.target) &&
+            e.target !== shapeBtn &&
+            !shapeBtn?.contains(e.target)
+        ) {
             closeShapePopout();
         }
     });
@@ -5920,7 +6519,11 @@ function init() {
 
     // Exit presentation mode if the user leaves browser fullscreen externally (F11, browser button, etc.)
     const onFullscreenChange = () => {
-        const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        const fsEl =
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement;
         if (!fsEl && state.presentationMode) exitPresentationMode();
     };
     document.addEventListener('fullscreenchange', onFullscreenChange);

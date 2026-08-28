@@ -996,7 +996,7 @@
                         </tr>
                         <tr>
                             <td>Label colour</td>
-                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                            <td>Label text colour (default black)</td>
                         </tr>
                         <tr>
                             <td>Label pos</td>
@@ -1014,11 +1014,11 @@
                         </tr>
                         <tr>
                             <td>Fill</td>
-                            <td>Fill colour (colour picker + reset)</td>
+                            <td>Fill colour</td>
                         </tr>
                         <tr>
                             <td>Stroke</td>
-                            <td>Border colour (colour picker + reset)</td>
+                            <td>Border colour</td>
                         </tr>
                         <tr>
                             <td>Line style</td>
@@ -1061,7 +1061,7 @@
                         </tr>
                         <tr>
                             <td>Label colour</td>
-                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                            <td>Label text colour (default black)</td>
                         </tr>
                         <tr>
                             <td>Label pos</td>
@@ -1121,7 +1121,7 @@
                         </tr>
                         <tr>
                             <td>Label colour</td>
-                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                            <td>Label text colour (default black)</td>
                         </tr>
                         <tr>
                             <td>Label Font</td>
@@ -1165,7 +1165,7 @@
                         </tr>
                         <tr>
                             <td>Label colour</td>
-                            <td>Text colour for the label (colour picker + reset; default black)</td>
+                            <td>Label text colour (default black)</td>
                         </tr>
                         <tr>
                             <td>Label Font</td>
@@ -1228,23 +1228,37 @@
                         </tr>
                     </table>
 
-                    <h3>Colour Palette</h3>
+                    <h3>Colour Picker &amp; Palette</h3>
                     <p>
-                        Every colour picker row includes a <strong>palette strip</strong> showing up to
-                        <strong>6 saved colours</strong> as small swatches below the colour input.
+                        Colour properties (Fill, Stroke, Label colour, etc.) are grouped in the
+                        <strong>Style</strong> section of the Properties panel with a <strong>shared colour picker</strong>.
                     </p>
+                    <p><strong>How to change a colour:</strong></p>
+                    <ol>
+                        <li>Click a colour row (e.g. <strong>Fill</strong>, <strong>Stroke</strong>, or <strong>Label colour</strong>) to select it as the active property — the row highlights in blue.</li>
+                        <li>Click the <strong>colour swatch button</strong> to open the native colour picker, or click a <strong>palette swatch</strong> to apply a saved colour instantly.</li>
+                        <li>The hex value updates live as you pick.</li>
+                    </ol>
                     <table>
                         <tr>
                             <th>Action</th>
                             <th>How</th>
                         </tr>
                         <tr>
-                            <td>Save a colour</td>
-                            <td>Click the <strong>+</strong> button on any colour row to add the current colour to the palette</td>
+                            <td>Open colour picker</td>
+                            <td>Click the colour swatch button (the active row's colour is pre-loaded)</td>
                         </tr>
                         <tr>
-                            <td>Apply a saved colour</td>
-                            <td>Click any filled swatch to instantly apply that colour to the current property</td>
+                            <td>Apply palette colour</td>
+                            <td>Click any filled palette swatch</td>
+                        </tr>
+                        <tr>
+                            <td>Reset to default</td>
+                            <td>Click the <strong>↺</strong> button to reset the active colour property to its default</td>
+                        </tr>
+                        <tr>
+                            <td>Save to palette</td>
+                            <td>Click the <strong>+</strong> button to save the current colour — up to 6 slots</td>
                         </tr>
                         <tr>
                             <td>Replace oldest</td>
@@ -1259,11 +1273,7 @@
                             <td>Saved with the diagram (file export and auto-save); restored on reload</td>
                         </tr>
                     </table>
-                    <p>
-                        Empty slots appear as dashed grey boxes. The palette is shared across
-                        all colour rows in the same tab — colours saved from Fill also appear
-                        in Stroke, Label colour, and all other pickers.
-                    </p>
+                    <p>Empty palette slots are shown as dashed grey boxes.</p>
                 </section>
 
                 <!-- ── Z-Order ────────────────────────────────────────── -->
