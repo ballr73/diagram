@@ -81,7 +81,7 @@ open app.html
 
 ### Shapes
 
-Click the **Shape** button in the left toolbar to activate the draw tool. A small **triangle indicator** in the corner of the button shows that clicking it also opens the **shape type pop-out** — a floating panel where you can choose the shape type. The button icon updates to reflect the currently selected shape. Hovering over a pop-out icon shows its name as a tooltip. You can also change an existing shape's type in the Properties panel. Available shapes:
+Click the **Shape** button in the left toolbar to activate the draw tool. A small **triangle indicator** in the corner of the button shows that clicking it also opens the **shape type pop-out** — a floating panel where you can choose the shape type. The button icon updates to reflect the currently selected shape. Hovering over a pop-out icon shows its name as a tooltip. The shape type is set at creation time and cannot be changed afterwards. Available shapes:
 
 | Shape | Description |
 |-------|-------------|
@@ -331,7 +331,7 @@ Select an element with the **Select** tool and drag it.
 Select a shape — eight resize handles appear around it. Drag any handle to resize.
 
 ### Editing Labels
-**Double-click** any shape, annotation, or icon to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
+With the **Select** tool active, **double-click** any shape, annotation, or icon to edit its label inline. Press **Enter** or click elsewhere to confirm; **Escape** to cancel.
 
 > **Note:** Double-clicking a **connector** or **line** inserts a waypoint corner — use the Properties panel to edit their labels.
 
@@ -352,8 +352,7 @@ When one element is selected, the Properties panel on the right shows its editab
 
 | Property | Description |
 |----------|-------------|
-| Shape | Change the shape type |
-| Label | Text displayed inside the shape |
+| Label | Text displayed inside the shape (double-click the shape with the Select tool to edit inline) |
 | Label colour | Label text colour (default black) |
 | Label pos | 3×3 position picker — place the label at any corner, edge midpoint, or centre of the shape. For the four edge-centre positions (Top, Left, Bottom, Right), **click the active button a second time** to toggle the label between inside and outside the shape boundary. The button turns amber/dashed when outside is active. |
 | Font | Size, Bold, Italic, Underline |
@@ -707,7 +706,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Ctrl+Shift+0` | Fit diagram to window |
 | `Ctrl+Scroll` | Zoom in/out centred on pointer |
 | `Right-click drag` | Pan canvas |
-| `Dbl-click` shape/icon | Edit label inline |
+| `Dbl-click` shape/icon (Select tool) | Edit label inline |
 | `Dbl-click` connector/line | Add waypoint corner at click point |
 
 ---

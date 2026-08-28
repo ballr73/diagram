@@ -2102,6 +2102,12 @@ function getLineAt(x, y, threshold = 8) {
 let drag = null; // Active draw/move/resize drag descriptor
 let panDrag = null; // Active pan descriptor (right-mouse-button)
 
+// Manual double-click tracking for the select tool.
+// render() destroys/recreates SVG elements on the first click so the browser
+// never fires the native dblclick event on the re-created elements.
+let _lastClickTime = 0;
+let _lastClickId = null; // node/annotation id of the last single click
+
 function svgCoords(e) {
     const pt = svg.createSVGPoint();
     pt.x = e.clientX;
@@ -2291,6 +2297,21 @@ function onMouseUp(e) {
 // --- Select tool ---
 function selectMouseDown(p, hit, e) {
     if (hit.type === 'resize') {
+        // Check for double-click on already-selected node (hitTest returns
+        // 'resize' once resize handles are visible)
+        const now = Date.now();
+        if (_lastClickId === hit.nodeId && now - _lastClickTime < 400) {
+            _lastClickId = null;
+            _lastClickTime = 0;
+            state.selected.clear();
+            state.selected.add(hit.nodeId);
+            render();
+            updatePropertiesPanel();
+            startInlineEdit(hit.nodeId, 'node');
+            return;
+        }
+        _lastClickId = hit.nodeId;
+        _lastClickTime = now;
         const node = hit.node;
         drag = {
             type: 'resize',
@@ -2305,6 +2326,20 @@ function selectMouseDown(p, hit, e) {
     }
 
     if (hit.type === 'ann-resize') {
+        // Check for double-click on already-selected annotation
+        const now = Date.now();
+        if (_lastClickId === hit.annId && now - _lastClickTime < 400) {
+            _lastClickId = null;
+            _lastClickTime = 0;
+            state.selected.clear();
+            state.selected.add(hit.annId);
+            render();
+            updatePropertiesPanel();
+            startInlineEdit(hit.annId, 'annotation');
+            return;
+        }
+        _lastClickId = hit.annId;
+        _lastClickTime = now;
         const bb = annBBox(hit.ann);
         drag = {
             type: 'resize-ann',
@@ -2372,9 +2407,26 @@ function selectMouseDown(p, hit, e) {
         state.selectedWaypoint = null;
         if (e.shiftKey) {
             state.selected.add(hit.id);
-        } else if (!state.selected.has(hit.id)) {
-            state.selected.clear();
-            state.selected.add(hit.id);
+            _lastClickId = null;
+        } else {
+            const now = Date.now();
+            if (_lastClickId === hit.id && now - _lastClickTime < 400) {
+                // Double-click detected — open inline label editor
+                _lastClickId = null;
+                _lastClickTime = 0;
+                state.selected.clear();
+                state.selected.add(hit.id);
+                render();
+                updatePropertiesPanel();
+                startInlineEdit(hit.id, 'node');
+                return;
+            }
+            _lastClickId = hit.id;
+            _lastClickTime = now;
+            if (!state.selected.has(hit.id)) {
+                state.selected.clear();
+                state.selected.add(hit.id);
+            }
         }
         render();
         updatePropertiesPanel();
@@ -2421,9 +2473,26 @@ function selectMouseDown(p, hit, e) {
         state.selectedWaypoint = null;
         if (e.shiftKey) {
             state.selected.add(hit.id);
-        } else if (!state.selected.has(hit.id)) {
-            state.selected.clear();
-            state.selected.add(hit.id);
+            _lastClickId = null;
+        } else {
+            const now = Date.now();
+            if (_lastClickId === hit.id && now - _lastClickTime < 400) {
+                // Double-click detected — open inline label editor
+                _lastClickId = null;
+                _lastClickTime = 0;
+                state.selected.clear();
+                state.selected.add(hit.id);
+                render();
+                updatePropertiesPanel();
+                startInlineEdit(hit.id, 'annotation');
+                return;
+            }
+            _lastClickId = hit.id;
+            _lastClickTime = now;
+            if (!state.selected.has(hit.id)) {
+                state.selected.clear();
+                state.selected.add(hit.id);
+            }
         }
         render();
         updatePropertiesPanel();
@@ -2447,6 +2516,7 @@ function selectMouseDown(p, hit, e) {
 
     // Canvas: start rubber-band selection
     state.selectedWaypoint = null;
+    _lastClickId = null;
     if (!e.shiftKey) {
         state.selected.clear();
         render();
@@ -3265,14 +3335,6 @@ function onDblClick(e) {
         render();
         updatePropertiesPanel();
         return;
-    }
-
-    if (hit.type === 'node' || hit.type === 'annotation') {
-        state.selected.clear();
-        state.selected.add(hit.id);
-        render();
-        updatePropertiesPanel();
-        startInlineEdit(hit.id, hit.type);
     }
 }
 
@@ -4485,23 +4547,6 @@ function renderSymbolProps(container, node) {
 }
 
 function renderNodeProps(container, node) {
-    const shapeOpts = [
-        'box',
-        'circle',
-        'oval',
-        'diamond',
-        'triangle',
-        'parallelogram',
-        'document',
-        'database',
-        'wait',
-        'merge',
-    ]
-        .map(
-            (s) =>
-                `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`,
-        )
-        .join('');
     const dashOpts = [
         ['solid', 'Solid'],
         ['dashed', 'Dashed'],
@@ -4519,8 +4564,7 @@ function renderNodeProps(container, node) {
         propSection(
             'basic',
             'Basic',
-            `<div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
-    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+            `<div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
     <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`,
         ) +
         propSection(
@@ -4554,11 +4598,6 @@ function renderNodeProps(container, node) {
             `<div class="prop-group">${layerDropdownHtml(node)}</div>`,
         );
     bindPropSectionToggles(container);
-    document.getElementById('p-shape').addEventListener('change', (e) => {
-        node.shape = e.target.value;
-        pushHistory();
-        render();
-    });
     document
         .getElementById('p-stroke-style')
         .addEventListener('change', (e) => {
