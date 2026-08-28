@@ -1408,21 +1408,31 @@ function createShapeEl(node, sel) {
  * Compute SVG label coordinates from node.labelPos.
  * Positions: tl/tm/tr/ml/mm/mr/bl/bm/br
  * Default: 'mm' for regular nodes, 'bm' for symbol nodes.
+ * node.labelOutside=true moves edge-centre labels (tm/ml/bm/mr) outside the shape bounds.
  */
 function getLabelCoords(node) {
     const pos = node.labelPos || (node.type === 'symbol' ? 'bm' : 'mm');
     const PAD = 6;
+    const OUTSIDE_GAP = 8;
     const { x, y, width, height } = node;
     const row = pos[0]; // 't', 'm', 'b'
     const col = pos[1]; // 'l', 'm', 'r'
 
+    // Determine effective outside state.
+    // Symbol nodes default bm to outside (legacy behaviour); explicit false = inside.
+    const TOGGLE_POS = new Set(['tm', 'ml', 'bm', 'mr']);
+    const defaultOutside = node.type === 'symbol' && pos === 'bm';
+    const outside = TOGGLE_POS.has(pos)
+        ? (node.labelOutside !== undefined ? node.labelOutside : defaultOutside)
+        : false;
+
     let lx, textAnchor;
     if (col === 'l') {
-        lx = x + PAD;
-        textAnchor = 'start';
+        lx = outside ? x - PAD : x + PAD;
+        textAnchor = outside ? 'end' : 'start';
     } else if (col === 'r') {
-        lx = x + width - PAD;
-        textAnchor = 'end';
+        lx = outside ? x + width + PAD : x + width - PAD;
+        textAnchor = outside ? 'start' : 'end';
     } else {
         lx = x + width / 2;
         textAnchor = 'middle';
@@ -1430,11 +1440,16 @@ function getLabelCoords(node) {
 
     let ly, dominantBaseline;
     if (row === 't') {
-        ly = y + PAD;
-        dominantBaseline = 'hanging';
+        if (outside) {
+            ly = y - OUTSIDE_GAP;
+            dominantBaseline = 'auto';
+        } else {
+            ly = y + PAD;
+            dominantBaseline = 'hanging';
+        }
     } else if (row === 'b') {
-        if (node.type === 'symbol') {
-            ly = y + height + 8; // below icon with small gap
+        if (outside) {
+            ly = y + height + OUTSIDE_GAP;
             dominantBaseline = 'hanging';
         } else {
             ly = y + height - PAD;
@@ -4077,25 +4092,30 @@ function updatePaletteStrips() {
     });
 }
 
+/** The four edge-centre positions that support inside/outside toggle. */
+const TOGGLE_LABEL_POS = new Set(['tm', 'ml', 'bm', 'mr']);
+
 /** Generate the 3×3 label-position picker HTML. */
-function labelPosPickerHtml(current) {
+function labelPosPickerHtml(current, outside) {
     const positions = ['tl', 'tm', 'tr', 'ml', 'mm', 'mr', 'bl', 'bm', 'br'];
-    const titles = {
-        tl: 'Top left',
-        tm: 'Top centre',
-        tr: 'Top right',
-        ml: 'Middle left',
-        mm: 'Centre',
-        mr: 'Middle right',
-        bl: 'Bottom left',
-        bm: 'Bottom centre',
-        br: 'Bottom right',
+    const baseTitle = {
+        tl: 'Top left', tm: 'Top centre', tr: 'Top right',
+        ml: 'Middle left', mm: 'Centre', mr: 'Middle right',
+        bl: 'Bottom left', bm: 'Bottom centre', br: 'Bottom right',
     };
     return `<div class="pos-picker">${positions
-        .map(
-            (p) =>
-                `<button class="pos-btn${current === p ? ' active' : ''}" data-pos="${p}" title="${titles[p]}"></button>`,
-        )
+        .map((p) => {
+            const isActive = current === p;
+            const canToggle = TOGGLE_LABEL_POS.has(p);
+            const isOutside = isActive && canToggle && outside;
+            let cls = 'pos-btn';
+            if (isActive) cls += ' active';
+            if (isOutside) cls += ' pos-btn-outside';
+            let title = baseTitle[p];
+            if (isActive && canToggle) title += isOutside ? ' (outside — click to move inside)' : ' (inside — click to move outside)';
+            else if (canToggle) title += ' (click twice to place outside)';
+            return `<button class="${cls}" data-pos="${p}" title="${title}"></button>`;
+        })
         .join('')}</div>`;
 }
 
@@ -4103,13 +4123,19 @@ function labelPosPickerHtml(current) {
 function bindLabelPosPicker(node, defaultPos) {
     document.querySelectorAll('.pos-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-            node.labelPos = btn.dataset.pos;
-            document
-                .querySelectorAll('.pos-btn')
-                .forEach((b) => b.classList.remove('active'));
-            btn.classList.add('active');
+            const pos = btn.dataset.pos;
+            if (node.labelPos === pos && TOGGLE_LABEL_POS.has(pos)) {
+                // Already active toggle-capable position — flip inside/outside
+                const defaultOutside = node.type === 'symbol' && pos === 'bm';
+                const current = node.labelOutside !== undefined ? node.labelOutside : defaultOutside;
+                node.labelOutside = !current;
+            } else {
+                node.labelPos = pos;
+                node.labelOutside = undefined; // reset to natural default
+            }
             pushHistory();
             render();
+            updatePropertiesPanel();
         });
     });
 }
@@ -4122,11 +4148,12 @@ function renderSymbolProps(container, node) {
               .replace(/\.svg$/i, '')
         : '';
     const curPos = node.labelPos || 'bm';
+    const curOutside = node.labelOutside !== undefined ? node.labelOutside : (node.type === 'symbol' && curPos === 'bm');
     container.innerHTML =
         propSection('basic', 'Basic',
             `<div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
-    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>`) +
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`) +
         propSection('style', 'Style',
             `<div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>`) +
@@ -4164,11 +4191,12 @@ function renderNodeProps(container, node) {
         .map(([v, l]) => `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
         .join('');
     const curPos = node.labelPos || 'mm';
+    const curOutside = node.labelOutside !== undefined ? node.labelOutside : false;
     container.innerHTML =
         propSection('basic', 'Basic',
             `<div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
-    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>`) +
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`) +
         propSection('style', 'Style',
             `<div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>

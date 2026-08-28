@@ -1807,6 +1807,16 @@ kbd {
     background: #3b82f6;
 }
 
+/* Outside state: dashed border + amber accent to distinguish from inside */
+.pos-btn.pos-btn-outside.active {
+    border: 2px dashed #f59e0b;
+    background: #fef9c3;
+}
+
+.pos-btn.pos-btn-outside.active::after {
+    background: #f59e0b;
+}
+
 /* ============================================================
    Presentation Mode
    ============================================================ */

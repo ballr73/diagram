@@ -355,7 +355,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Shape | Change the shape type |
 | Label | Text displayed inside the shape |
 | Label colour | Text colour for the label (colour picker + reset; default black) |
-| Label pos | 3×3 position picker — place the label at any corner, edge midpoint, or centre of the shape |
+| Label pos | 3×3 position picker — place the label at any corner, edge midpoint, or centre of the shape. For the four edge-centre positions (Top, Left, Bottom, Right), **click the active button a second time** to toggle the label between inside and outside the shape boundary. The button turns amber/dashed when outside is active. |
 | Font | Size, Bold, Italic, Underline |
 | Fill | Fill colour (colour picker + reset) |
 | Stroke | Border colour (colour picker + reset) |
@@ -372,7 +372,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Icon | Icon name (read-only) |
 | Label | Text displayed relative to the icon (supports multi-line with `\n`) |
 | Label colour | Text colour for the label (colour picker + reset; default black) |
-| Label pos | 3×3 position picker — default is bottom-centre (below icon); can be placed on any side or inside |
+| Label pos | 3×3 position picker — default is bottom-centre (below icon). For the four edge-centre positions (Top, Left, Bottom, Right), **click the active button a second time** to toggle the label between inside and outside the icon bounds. |
 | Font | Size, Bold, Italic, Underline |
 | X / Y | Position on canvas |
 | Width / Height | Size |
