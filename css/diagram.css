@@ -1469,6 +1469,65 @@ kbd {
     color: #475569;
 }
 
+.color-save-palette {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 2px 6px;
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #64748b;
+    font-family: inherit;
+    transition:
+        border-color 0.1s,
+        color 0.1s,
+        background 0.1s;
+    flex-shrink: 0;
+}
+
+.color-save-palette:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+    background: #eef2ff;
+}
+
+.palette-strip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+
+.palette-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.palette-swatch:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px #6366f1;
+}
+
+.palette-swatch-empty {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    cursor: default;
+}
+
+.palette-swatch-empty:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 /* ============================================================
    Opacity control
    ============================================================ */

@@ -29,6 +29,7 @@ const state = {
     dirty: false, // true when there are unsaved changes
     snapToGrid: false, // snap shapes to grid when dragging
     presentationMode: false, // true while in presentation mode (read-only, chrome hidden)
+    palette: [], // saved colour palette for current tab (up to 6 hex strings)
 };
 
 /** Snap a value to the nearest grid point (only when snap is enabled). */
@@ -54,6 +55,7 @@ function createTab(name) {
         viewCenterY: 0,
         selected: new Set(),
         selectedWaypoint: null,
+        palette: [],
     };
 }
 
@@ -68,6 +70,7 @@ function flushTabState() {
     tab.selectedWaypoint = state.selectedWaypoint;
     tab.layers = state.layers;
     tab.activeLayerId = state.activeLayerId;
+    tab.palette = state.palette;
 }
 
 function loadTabToLiveState(index) {
@@ -89,6 +92,7 @@ function loadTabToLiveState(index) {
     state.viewCenterY = tab.viewCenterY;
     state.selected = tab.selected;
     state.selectedWaypoint = tab.selectedWaypoint;
+    state.palette = tab.palette || [];
     renderLayersPanel();
 }
 
@@ -225,6 +229,7 @@ function saveToLocalStorage() {
                 zoom: tab.zoom,
                 viewCenterX: tab.viewCenterX,
                 viewCenterY: tab.viewCenterY,
+                palette: tab.palette || [],
             })),
         };
         localStorage.setItem(LS_KEY, JSON.stringify(data));
@@ -269,6 +274,7 @@ function loadFromLocalStorage() {
                 if (td.zoom != null) tab.zoom = td.zoom;
                 if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
                 if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
+                tab.palette = Array.isArray(td.palette) ? [...td.palette] : [];
                 ensureLayerIds(tab, td.layers, td.activeLayerId);
                 return tab;
             });
@@ -508,6 +514,7 @@ function buildDiagramBlob() {
             zoom: tab.zoom,
             viewCenterX: tab.viewCenterX,
             viewCenterY: tab.viewCenterY,
+            palette: tab.palette || [],
         })),
     };
     return new Blob([JSON.stringify(data, null, 2)], {
@@ -563,6 +570,7 @@ function importDiagramData(data, filename) {
         if (td.zoom != null) tab.zoom = td.zoom;
         if (td.viewCenterX != null) tab.viewCenterX = td.viewCenterX;
         if (td.viewCenterY != null) tab.viewCenterY = td.viewCenterY;
+        tab.palette = Array.isArray(td.palette) ? [...td.palette] : [];
     };
 
     if (data.tabs) {
@@ -1292,6 +1300,7 @@ function applyFontStyle(el, item, defaults = {}) {
     el.style.fontWeight = bold ? 'bold' : 'normal';
     el.style.fontStyle = italic ? 'italic' : 'normal';
     el.style.textDecoration = underline ? 'underline' : 'none';
+    if (item.labelColor) el.style.fill = item.labelColor;
 }
 
 /** Apply stroke-dasharray and stroke-linecap for a given strokeStyle. */
@@ -3926,11 +3935,20 @@ function updatePropertiesPanel() {
 /** Helper: render a colour picker row and bind it to an object property. */
 function colorRow(id, currentValue, defaultValue) {
     const val = currentValue || defaultValue;
+    const palette = state.palette || [];
+    const swatches = Array.from({ length: 6 }, (_, i) => {
+        const c = palette[i];
+        return c
+            ? `<button class="palette-swatch" data-color="${c}" data-target="${id}" style="background:${c}" title="${c}"></button>`
+            : `<button class="palette-swatch palette-swatch-empty" data-target="${id}" data-empty="1" title="Empty slot"></button>`;
+    }).join('');
     return `<div class="color-row">
     <input type="color" id="${id}" value="${val}">
     <span class="color-hex" id="${id}-hex">${val}</span>
     <button class="color-reset" id="${id}-reset" title="Reset to default">Reset</button>
-  </div>`;
+    <button class="color-save-palette" id="${id}-save-pal" title="Save colour to palette">+</button>
+  </div>
+  <div class="palette-strip" id="${id}-palette">${swatches}</div>`;
 }
 
 /** Generate a layer <select> dropdown pre-selected to the element's current layer. */
@@ -3960,6 +3978,7 @@ function bindColorInput(id, defaultValue, setter) {
     const input = document.getElementById(id);
     const hex = document.getElementById(`${id}-hex`);
     const reset = document.getElementById(`${id}-reset`);
+    const savePal = document.getElementById(`${id}-save-pal`);
     if (!input) return;
     input.addEventListener('input', () => {
         hex.textContent = input.value;
@@ -3974,6 +3993,57 @@ function bindColorInput(id, defaultValue, setter) {
         pushHistory();
         render();
         updatePropertiesPanel();
+    });
+    if (savePal) {
+        savePal.addEventListener('click', () => {
+            const color = input.value;
+            if (!color) return;
+            const pal = state.palette;
+            const existing = pal.indexOf(color);
+            if (existing !== -1) return; // already in palette
+            if (pal.length < 6) {
+                pal.push(color);
+            } else {
+                pal.shift(); // remove oldest
+                pal.push(color);
+            }
+            flushTabState();
+            updatePaletteStrips();
+            saveToLocalStorage();
+        });
+    }
+    // Palette swatch clicks for this row
+    const strip = document.getElementById(`${id}-palette`);
+    if (strip) {
+        strip.addEventListener('click', (e) => {
+            const btn = e.target.closest('.palette-swatch');
+            if (!btn || btn.dataset.empty) return;
+            const color = btn.dataset.color;
+            if (!color) return;
+            input.value = color;
+            hex.textContent = color;
+            setter(color);
+            render();
+            pushHistory();
+        });
+    }
+}
+
+/**
+ * Refreshes all palette strips currently visible in the properties panel
+ * after the palette has been modified.
+ */
+function updatePaletteStrips() {
+    const palette = state.palette || [];
+    document.querySelectorAll('.palette-strip').forEach((strip) => {
+        const id = strip.id.replace(/-palette$/, '');
+        const swatches = Array.from({ length: 6 }, (_, i) => {
+            const c = palette[i];
+            return c
+                ? `<button class="palette-swatch" data-color="${c}" data-target="${id}" style="background:${c}" title="${c}"></button>`
+                : `<button class="palette-swatch palette-swatch-empty" data-target="${id}" data-empty="1" title="Empty slot"></button>`;
+        }).join('');
+        strip.innerHTML = swatches;
     });
 }
 
@@ -4025,6 +4095,7 @@ function renderSymbolProps(container, node) {
     container.innerHTML = `
     <div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>
     <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
@@ -4034,6 +4105,9 @@ function renderSymbolProps(container, node) {
     <div class="prop-group"><label>Layer</label>${layerDropdownHtml(node)}</div>
   `;
     bindFontControls(node, { size: 11 });
+    bindColorInput('p-label-color', '#000000', (v) => {
+        node.labelColor = v || undefined;
+    });
     bindPropInput('p-label', (v) => {
         node.label = v;
     });
@@ -4101,6 +4175,7 @@ function renderNodeProps(container, node) {
     container.innerHTML = `
     <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
     <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
@@ -4132,6 +4207,9 @@ function renderNodeProps(container, node) {
             render();
         });
     bindFontControls(node, { size: 13 });
+    bindColorInput('p-label-color', '#000000', (v) => {
+        node.labelColor = v || undefined;
+    });
     bindColorInput('p-fill', '#ffffff', (v) => {
         node.fill = v || undefined;
     });
@@ -4224,6 +4302,7 @@ function renderEdgeProps(container, edge) {
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
+    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', edge.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
     <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>
@@ -4248,6 +4327,9 @@ function renderEdgeProps(container, edge) {
         });
     bindColorInput('p-stroke', '#64748b', (v) => {
         edge.stroke = v || undefined;
+    });
+    bindColorInput('p-label-color', '#000000', (v) => {
+        edge.labelColor = v || undefined;
     });
     bindPropInput('p-label', (v) => {
         edge.label = v;
@@ -4296,6 +4378,7 @@ function renderLineProps(container, line) {
     <div class="prop-group"><label>Start</label><select id="p-start-sym">${symOpts('startSymbol')}</select></div>
     <div class="prop-group"><label>End</label><select id="p-end-sym">${symOpts('endSymbol')}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>
+    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', line.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>
     <div class="prop-group"><label>Layer</label>${layerDropdownHtml(line)}</div>
   `;
@@ -4323,6 +4406,9 @@ function renderLineProps(container, line) {
     });
     bindColorInput('p-stroke', '#64748b', (v) => {
         line.stroke = v || undefined;
+    });
+    bindColorInput('p-label-color', '#000000', (v) => {
+        line.labelColor = v || undefined;
     });
     bindPropInput('p-label', (v) => {
         line.label = v;
