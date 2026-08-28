@@ -3932,6 +3932,36 @@ function updatePropertiesPanel() {
     }
 }
 
+// ============================================================
+// Collapsible property sections
+// ============================================================
+
+/** Tracks which property sections are open; persists across selection changes. */
+const propSectionState = { basic: true, style: true, geometry: true, layer: true };
+
+/**
+ * Returns HTML for a collapsible `<details>` property section.
+ * @param {string} id    - Section key: 'basic' | 'style' | 'geometry' | 'layer'
+ * @param {string} title - Display heading
+ * @param {string} html  - Inner content (prop-group rows)
+ */
+function propSection(id, title, html) {
+    const open = propSectionState[id] !== false ? ' open' : '';
+    return `<details class="prop-section" data-section="${id}"${open}>
+  <summary class="prop-section-title">${title}</summary>
+  <div class="prop-section-body">${html}</div>
+</details>`;
+}
+
+/** Wire toggle listeners on all `<details class="prop-section">` inside container. */
+function bindPropSectionToggles(container) {
+    container.querySelectorAll('.prop-section').forEach((el) => {
+        el.addEventListener('toggle', () => {
+            propSectionState[el.dataset.section] = el.open;
+        });
+    });
+}
+
 /** Helper: render a colour picker row and bind it to an object property. */
 function colorRow(id, currentValue, defaultValue) {
     const val = currentValue || defaultValue;
@@ -4092,18 +4122,22 @@ function renderSymbolProps(container, node) {
               .replace(/\.svg$/i, '')
         : '';
     const curPos = node.labelPos || 'bm';
-    container.innerHTML = `
-    <div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
+    container.innerHTML =
+        propSection('basic', 'Basic',
+            `<div class="prop-group"><label>Icon</label><p class="prop-value" style="font-size:11px;word-break:break-all">${esc(iconName)}</p></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
-    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>
-    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>
-    <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>`) +
+        propSection('style', 'Style',
+            `<div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 11 })}</div>`) +
+        propSection('geometry', 'Geometry',
+            `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
-    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
-    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(node)}</div>
-  `;
+    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`) +
+        propSection('layer', 'Layer',
+            `<div class="prop-group">${layerDropdownHtml(node)}</div>`);
+    bindPropSectionToggles(container);
     bindFontControls(node, { size: 11 });
     bindColorInput('p-label-color', '#000000', (v) => {
         node.labelColor = v || undefined;
@@ -4112,71 +4146,31 @@ function renderSymbolProps(container, node) {
         node.label = v;
     });
     bindLabelPosPicker(node, 'bm');
-    bindPropInput(
-        'p-x',
-        (v) => {
-            node.x = +v || 0;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-y',
-        (v) => {
-            node.y = +v || 0;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-w',
-        (v) => {
-            node.width = Math.max(16, +v || 16);
-        },
-        true,
-    );
-    bindPropInput(
-        'p-h',
-        (v) => {
-            node.height = Math.max(16, +v || 16);
-        },
-        true,
-    );
+    bindPropInput('p-x', (v) => { node.x = +v || 0; }, true);
+    bindPropInput('p-y', (v) => { node.y = +v || 0; }, true);
+    bindPropInput('p-w', (v) => { node.width = Math.max(16, +v || 16); }, true);
+    bindPropInput('p-h', (v) => { node.height = Math.max(16, +v || 16); }, true);
     bindLayerDropdown(node);
 }
 
 function renderNodeProps(container, node) {
     const shapeOpts = [
-        'box',
-        'circle',
-        'oval',
-        'diamond',
-        'triangle',
-        'parallelogram',
-        'document',
-        'database',
-        'wait',
-        'merge',
+        'box', 'circle', 'oval', 'diamond', 'triangle',
+        'parallelogram', 'document', 'database', 'wait', 'merge',
     ]
-        .map(
-            (s) =>
-                `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`,
-        )
+        .map((s) => `<option value="${s}"${(node.shape || 'box') === s ? ' selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
         .join('');
-    const dashOpts = [
-        ['solid', 'Solid'],
-        ['dashed', 'Dashed'],
-        ['dotted', 'Dotted'],
-    ]
-        .map(
-            ([v, l]) =>
-                `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
-        )
+    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
+        .map(([v, l]) => `<option value="${v}"${(node.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
         .join('');
     const curPos = node.labelPos || 'mm';
-    container.innerHTML = `
-    <div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
+    container.innerHTML =
+        propSection('basic', 'Basic',
+            `<div class="prop-group"><label>Shape</label><select id="p-shape">${shapeOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
-    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>
+    <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos)}</div>`) +
+        propSection('style', 'Style',
+            `<div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', node.labelColor, '#000000')}</div>
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
     <div class="prop-group"><label>Fill</label>${colorRow('p-fill', node.fill, '#ffffff')}</div>
     <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', node.stroke, '#475569')}</div>
@@ -4187,36 +4181,29 @@ function renderNodeProps(container, node) {
         <input type="range" id="p-opacity" min="0" max="100" step="1" value="${node.opacity ?? 100}">
         <span id="p-opacity-val">${node.opacity ?? 100}%</span>
       </div>
-    </div>
-    <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
+    </div>`) +
+        propSection('geometry', 'Geometry',
+            `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
-    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>
-    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(node)}</div>
-  `;
+    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`) +
+        propSection('layer', 'Layer',
+            `<div class="prop-group">${layerDropdownHtml(node)}</div>`);
+    bindPropSectionToggles(container);
     document.getElementById('p-shape').addEventListener('change', (e) => {
         node.shape = e.target.value;
         pushHistory();
         render();
     });
-    document
-        .getElementById('p-stroke-style')
-        .addEventListener('change', (e) => {
-            node.strokeStyle = e.target.value;
-            pushHistory();
-            render();
-        });
+    document.getElementById('p-stroke-style').addEventListener('change', (e) => {
+        node.strokeStyle = e.target.value;
+        pushHistory();
+        render();
+    });
     bindFontControls(node, { size: 13 });
-    bindColorInput('p-label-color', '#000000', (v) => {
-        node.labelColor = v || undefined;
-    });
-    bindColorInput('p-fill', '#ffffff', (v) => {
-        node.fill = v || undefined;
-    });
-    bindColorInput('p-stroke', '#475569', (v) => {
-        node.stroke = v || undefined;
-    });
-    // Opacity slider
+    bindColorInput('p-label-color', '#000000', (v) => { node.labelColor = v || undefined; });
+    bindColorInput('p-fill', '#ffffff', (v) => { node.fill = v || undefined; });
+    bindColorInput('p-stroke', '#475569', (v) => { node.stroke = v || undefined; });
     const opacitySlider = document.getElementById('p-opacity');
     const opacityVal = document.getElementById('p-opacity-val');
     opacitySlider.addEventListener('input', () => {
@@ -4225,38 +4212,12 @@ function renderNodeProps(container, node) {
         render();
     });
     opacitySlider.addEventListener('change', () => pushHistory());
-    bindPropInput('p-label', (v) => {
-        node.label = v;
-    });
+    bindPropInput('p-label', (v) => { node.label = v; });
     bindLabelPosPicker(node, 'mm');
-    bindPropInput(
-        'p-x',
-        (v) => {
-            node.x = +v || 0;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-y',
-        (v) => {
-            node.y = +v || 0;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-w',
-        (v) => {
-            node.width = Math.max(40, +v || 40);
-        },
-        true,
-    );
-    bindPropInput(
-        'p-h',
-        (v) => {
-            node.height = Math.max(20, +v || 20);
-        },
-        true,
-    );
+    bindPropInput('p-x', (v) => { node.x = +v || 0; }, true);
+    bindPropInput('p-y', (v) => { node.y = +v || 0; }, true);
+    bindPropInput('p-w', (v) => { node.width = Math.max(40, +v || 40); }, true);
+    bindPropInput('p-h', (v) => { node.height = Math.max(20, +v || 20); }, true);
     bindLayerDropdown(node);
 }
 
@@ -4265,49 +4226,31 @@ function renderEdgeProps(container, edge) {
     const toNode = state.nodes.get(edge.to);
     const dir = edge.direction || 'forward';
     const curveStyle = edge.curveStyle || 'straight';
-    const dirOpts = [
-        ['forward', '→ Forward'],
-        ['back', '← Backward'],
-        ['both', '↔ Both'],
-        ['none', '— None'],
-    ]
-        .map(
-            ([v, label]) =>
-                `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`,
-        )
+    const dirOpts = [['forward', '→ Forward'], ['back', '← Backward'], ['both', '↔ Both'], ['none', '— None']]
+        .map(([v, label]) => `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`)
         .join('');
-    const dashOpts = [
-        ['solid', 'Solid'],
-        ['dashed', 'Dashed'],
-        ['dotted', 'Dotted'],
-    ]
-        .map(
-            ([v, l]) =>
-                `<option value="${v}"${(edge.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
-        )
+    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
+        .map(([v, l]) => `<option value="${v}"${(edge.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
         .join('');
-    const curveOpts = [
-        ['straight', 'Straight'],
-        ['curved', 'Curved'],
-    ]
-        .map(
-            ([v, l]) =>
-                `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`,
-        )
+    const curveOpts = [['straight', 'Straight'], ['curved', 'Curved']]
+        .map(([v, l]) => `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`)
         .join('');
 
-    container.innerHTML = `
-    <div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
+    container.innerHTML =
+        propSection('basic', 'Basic',
+            `<div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
-    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
-    <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
-    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', edge.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
-    <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>
-    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(edge)}</div>
-  `;
+    <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>`) +
+        propSection('style', 'Style',
+            `<div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', edge.stroke, '#64748b')}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
+    <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', edge.labelColor, '#000000')}</div>
+    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>`) +
+        propSection('layer', 'Layer',
+            `<div class="prop-group">${layerDropdownHtml(edge)}</div>`);
+    bindPropSectionToggles(container);
     document.getElementById('p-dir').addEventListener('change', (e) => {
         edge.direction = e.target.value;
         pushHistory();
@@ -4318,82 +4261,55 @@ function renderEdgeProps(container, edge) {
         pushHistory();
         render();
     });
-    document
-        .getElementById('p-stroke-style')
-        .addEventListener('change', (e) => {
-            edge.strokeStyle = e.target.value;
-            pushHistory();
-            render();
-        });
-    bindColorInput('p-stroke', '#64748b', (v) => {
-        edge.stroke = v || undefined;
+    document.getElementById('p-stroke-style').addEventListener('change', (e) => {
+        edge.strokeStyle = e.target.value;
+        pushHistory();
+        render();
     });
-    bindColorInput('p-label-color', '#000000', (v) => {
-        edge.labelColor = v || undefined;
-    });
-    bindPropInput('p-label', (v) => {
-        edge.label = v;
-    });
+    bindColorInput('p-stroke', '#64748b', (v) => { edge.stroke = v || undefined; });
+    bindColorInput('p-label-color', '#000000', (v) => { edge.labelColor = v || undefined; });
+    bindPropInput('p-label', (v) => { edge.label = v; });
     bindFontControls(edge, { size: 11 });
     bindLayerDropdown(edge);
 }
 
 function renderLineProps(container, line) {
     const curveStyle = line.curveStyle || 'straight';
-    const dashOpts = [
-        ['solid', 'Solid'],
-        ['dashed', 'Dashed'],
-        ['dotted', 'Dotted'],
-    ]
-        .map(
-            ([v, l]) =>
-                `<option value="${v}"${(line.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
-        )
+    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
+        .map(([v, l]) => `<option value="${v}"${(line.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
         .join('');
-    const curveOpts = [
-        ['straight', 'Straight'],
-        ['curved', 'Curved'],
-    ]
-        .map(
-            ([v, l]) =>
-                `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`,
-        )
+    const curveOpts = [['straight', 'Straight'], ['curved', 'Curved']]
+        .map(([v, l]) => `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`)
         .join('');
     const symOpts = (field) =>
-        [
-            ['none', 'None'],
-            ['dot', 'Dot'],
-            ['square', 'Square'],
-        ]
-            .map(
-                ([v, l]) =>
-                    `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`,
-            )
+        [['none', 'None'], ['dot', 'Dot'], ['square', 'Square']]
+            .map(([v, l]) => `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`)
             .join('');
 
-    container.innerHTML = `
-    <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
-    <div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', line.stroke, '#64748b')}</div>
-    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
+    container.innerHTML =
+        propSection('basic', 'Basic',
+            `<div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Start</label><select id="p-start-sym">${symOpts('startSymbol')}</select></div>
     <div class="prop-group"><label>End</label><select id="p-end-sym">${symOpts('endSymbol')}</select></div>
-    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>
+    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>`) +
+        propSection('style', 'Style',
+            `<div class="prop-group"><label>Stroke</label>${colorRow('p-stroke', line.stroke, '#64748b')}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Label colour</label>${colorRow('p-label-color', line.labelColor, '#000000')}</div>
-    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>
-    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(line)}</div>
-  `;
+    <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>`) +
+        propSection('layer', 'Layer',
+            `<div class="prop-group">${layerDropdownHtml(line)}</div>`);
+    bindPropSectionToggles(container);
     document.getElementById('p-curve-style').addEventListener('change', (e) => {
         line.curveStyle = e.target.value;
         pushHistory();
         render();
     });
-    document
-        .getElementById('p-stroke-style')
-        .addEventListener('change', (e) => {
-            line.strokeStyle = e.target.value;
-            pushHistory();
-            render();
-        });
+    document.getElementById('p-stroke-style').addEventListener('change', (e) => {
+        line.strokeStyle = e.target.value;
+        pushHistory();
+        render();
+    });
     document.getElementById('p-start-sym').addEventListener('change', (e) => {
         line.startSymbol = e.target.value;
         pushHistory();
@@ -4404,34 +4320,22 @@ function renderLineProps(container, line) {
         pushHistory();
         render();
     });
-    bindColorInput('p-stroke', '#64748b', (v) => {
-        line.stroke = v || undefined;
-    });
-    bindColorInput('p-label-color', '#000000', (v) => {
-        line.labelColor = v || undefined;
-    });
-    bindPropInput('p-label', (v) => {
-        line.label = v;
-    });
+    bindColorInput('p-stroke', '#64748b', (v) => { line.stroke = v || undefined; });
+    bindColorInput('p-label-color', '#000000', (v) => { line.labelColor = v || undefined; });
+    bindPropInput('p-label', (v) => { line.label = v; });
     bindFontControls(line, { size: 11 });
     bindLayerDropdown(line);
 }
 
 function renderAnnProps(container, ann) {
     const align = ann.align || 'left';
-    const dashOpts = [
-        ['solid', 'Solid'],
-        ['dashed', 'Dashed'],
-        ['dotted', 'Dotted'],
-    ]
-        .map(
-            ([v, l]) =>
-                `<option value="${v}"${(ann.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`,
-        )
+    const dashOpts = [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]
+        .map(([v, l]) => `<option value="${v}"${(ann.strokeStyle || 'solid') === v ? ' selected' : ''}>${l}</option>`)
         .join('');
 
-    container.innerHTML = `
-    <div class="prop-group">
+    container.innerHTML =
+        propSection('basic', 'Basic',
+            `<div class="prop-group">
       <label>Text</label>
       <textarea id="p-text" rows="3" style="width:100%;resize:vertical;box-sizing:border-box;font-family:inherit;font-size:12px;padding:4px">${esc(ann.text || '')}</textarea>
     </div>
@@ -4442,8 +4346,9 @@ function renderAnnProps(container, ann) {
         <button class="font-btn${align === 'center' ? ' active' : ''}" id="p-align-center" title="Centre">↔</button>
         <button class="font-btn${align === 'right' ? ' active' : ''}" id="p-align-right"  title="Right">➡</button>
       </div>
-    </div>
-    <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13 })}</div>
+    </div>`) +
+        propSection('style', 'Style',
+            `<div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13 })}</div>
     <div class="prop-group"><label>Color</label>${colorRow('p-color', ann.color, '#7c3aed')}</div>
     <div class="prop-group"><label>Background</label>${colorRow('p-fill', ann.fill, '#ffffff')}</div>
     <div class="prop-group">
@@ -4454,20 +4359,18 @@ function renderAnnProps(container, ann) {
       </div>
     </div>
     <div class="prop-group"><label>Border</label>${colorRow('p-stroke', ann.stroke, '#475569')}</div>
-    <div class="prop-group"><label>Border style</label><select id="p-stroke-style">${dashOpts}</select></div>
-    <div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(ann.x)}"></div>
+    <div class="prop-group"><label>Border style</label><select id="p-stroke-style">${dashOpts}</select></div>`) +
+        propSection('geometry', 'Geometry',
+            `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(ann.x)}"></div>
     <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(ann.y)}"></div>
     <div class="prop-group"><label>Width</label><input type="number" id="p-ann-w" value="${Math.round(ann.width || annBBox(ann).w)}" min="40"></div>
-    <div class="prop-group"><label>Height</label><input type="number" id="p-ann-h" value="${Math.round(ann.height || annBBox(ann).h)}" min="10"></div>
-    <div class="prop-group"><label>Layer</label>${layerDropdownHtml(ann)}</div>
-  `;
+    <div class="prop-group"><label>Height</label><input type="number" id="p-ann-h" value="${Math.round(ann.height || annBBox(ann).h)}" min="10"></div>`) +
+        propSection('layer', 'Layer',
+            `<div class="prop-group">${layerDropdownHtml(ann)}</div>`);
+    bindPropSectionToggles(container);
 
-    // Text (textarea works with bindPropInput since it fires 'input' and 'change')
-    bindPropInput('p-text', (v) => {
-        ann.text = v;
-    });
+    bindPropInput('p-text', (v) => { ann.text = v; });
 
-    // Alignment buttons
     ['left', 'center', 'right'].forEach((a) => {
         const btn = document.getElementById(`p-align-${a}`);
         if (!btn) return;
@@ -4480,12 +4383,8 @@ function renderAnnProps(container, ann) {
     });
 
     bindFontControls(ann, { size: 13 });
-    bindColorInput('p-color', '#7c3aed', (v) => {
-        ann.color = v || undefined;
-    });
-    bindColorInput('p-fill', '#ffffff', (v) => {
-        ann.fill = v || undefined;
-    });
+    bindColorInput('p-color', '#7c3aed', (v) => { ann.color = v || undefined; });
+    bindColorInput('p-fill', '#ffffff', (v) => { ann.fill = v || undefined; });
 
     const fillOpacitySlider = document.getElementById('p-fill-opacity');
     const fillOpacityVal = document.getElementById('p-fill-opacity-val');
@@ -4498,9 +4397,7 @@ function renderAnnProps(container, ann) {
         fillOpacitySlider.addEventListener('change', () => pushHistory());
     }
 
-    bindColorInput('p-stroke', '#475569', (v) => {
-        ann.stroke = v || undefined;
-    });
+    bindColorInput('p-stroke', '#475569', (v) => { ann.stroke = v || undefined; });
 
     const strokeStyleEl = document.getElementById('p-stroke-style');
     if (strokeStyleEl)
@@ -4510,41 +4407,19 @@ function renderAnnProps(container, ann) {
             render();
         });
 
-    bindPropInput(
-        'p-x',
-        (v) => {
-            ann.x = +v || 0;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-y',
-        (v) => {
-            ann.y = +v || 0;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-ann-w',
-        (v) => {
-            const nw = Math.max(40, +v || 40);
-            const bb = annBBox(ann);
-            const nx = bb.x; // keep top-left fixed when typing into width field
-            ann.width = nw;
-            const align = ann.align || 'left';
-            if (align === 'center') ann.x = nx + nw / 2;
-            else if (align === 'right') ann.x = nx + nw;
-            else ann.x = nx;
-        },
-        true,
-    );
-    bindPropInput(
-        'p-ann-h',
-        (v) => {
-            ann.height = Math.max(10, +v || 10);
-        },
-        true,
-    );
+    bindPropInput('p-x', (v) => { ann.x = +v || 0; }, true);
+    bindPropInput('p-y', (v) => { ann.y = +v || 0; }, true);
+    bindPropInput('p-ann-w', (v) => {
+        const nw = Math.max(40, +v || 40);
+        const bb = annBBox(ann);
+        const nx = bb.x;
+        ann.width = nw;
+        const a = ann.align || 'left';
+        if (a === 'center') ann.x = nx + nw / 2;
+        else if (a === 'right') ann.x = nx + nw;
+        else ann.x = nx;
+    }, true);
+    bindPropInput('p-ann-h', (v) => { ann.height = Math.max(10, +v || 10); }, true);
     bindLayerDropdown(ann);
 }
 

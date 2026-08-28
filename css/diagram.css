@@ -1014,13 +1014,14 @@ input.inline-input {
 }
 
 #properties-content {
-    padding: 12px;
+    padding: 0;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
 }
 
 .no-selection {
+    padding: 12px;
     color: #94a3b8;
     font-style: italic;
     font-size: 12px;
@@ -1028,6 +1029,58 @@ input.inline-input {
 
 .prop-group {
     margin-bottom: 10px;
+}
+
+/* ============================================================
+   Collapsible property sections
+   ============================================================ */
+.prop-section {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.prop-section:last-child {
+    border-bottom: none;
+}
+
+.prop-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    background: #f1f5f9;
+}
+
+.prop-section-title::-webkit-details-marker {
+    display: none;
+}
+
+.prop-section-title::after {
+    content: '▸';
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+}
+
+.prop-section[open] > .prop-section-title::after {
+    transform: rotate(90deg);
+}
+
+.prop-section-title:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.prop-section-body {
+    padding: 10px 14px 4px;
 }
 
 .prop-group label {
