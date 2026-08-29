@@ -4618,7 +4618,8 @@ function renderNodeProps(container, node) {
         propSection(
             'basic',
             'Basic',
-            `<div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
+            `<div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
+    <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(node.label || '')}"></div>
     <div class="prop-group"><label>Label pos</label>${labelPosPickerHtml(curPos, curOutside)}</div>`,
         ) +
         propSection(
@@ -4629,7 +4630,6 @@ function renderNodeProps(container, node) {
     ${colorRow('p-stroke', 'Stroke', node.stroke, '#475569')}
     ${colorSharedPicker()}
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 })}</div>
-    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group">
       <label>Opacity</label>
       <div class="opacity-row">
@@ -4773,6 +4773,7 @@ function renderEdgeProps(container, edge) {
             'Basic',
             `<div class="prop-group"><label>Start</label>${markerPickerHtml('p-start-marker', startMk)}</div>
     <div class="prop-group"><label>End</label>${markerPickerHtml('p-end-marker', endMk)}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
@@ -4784,7 +4785,6 @@ function renderEdgeProps(container, edge) {
             `${colorRow('p-stroke', 'Stroke', edge.stroke, '#64748b')}
     ${colorRow('p-label-color', 'Label', edge.labelColor, '#000000')}
     ${colorSharedPicker()}
-    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(edge, { size: 11 })}</div>`,
         ) +
         propSection(
@@ -4889,6 +4889,7 @@ function renderLineProps(container, line) {
             'Basic',
             `<div class="prop-group"><label>Start</label>${markerPickerHtml('p-start-marker', startMk)}</div>
     <div class="prop-group"><label>End</label>${markerPickerHtml('p-end-marker', endMk)}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>`,
         ) +
@@ -4898,7 +4899,6 @@ function renderLineProps(container, line) {
             `${colorRow('p-stroke', 'Stroke', line.stroke, '#64748b')}
     ${colorRow('p-label-color', 'Label', line.labelColor, '#000000')}
     ${colorSharedPicker()}
-    <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Label Font</label>${fontControlsHtml(line, { size: 11 })}</div>`,
         ) +
         propSection(
