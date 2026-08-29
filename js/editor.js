@@ -75,6 +75,53 @@ function flushTabState() {
     tab.palette = state.palette;
 }
 
+/**
+ * Migrate legacy `direction` property to `startMarker`/`endMarker`.
+ * Mutates the edge object in place; safe to call on already-migrated edges.
+ */
+function migrateEdge(e) {
+    if (e.startMarker !== undefined || e.endMarker !== undefined) return e;
+    const dir = e.direction || 'forward';
+    if (dir === 'back') {
+        e.startMarker = 'arrow';
+        e.endMarker = 'none';
+    } else if (dir === 'both') {
+        e.startMarker = 'arrow';
+        e.endMarker = 'arrow';
+    } else if (dir === 'none') {
+        e.startMarker = 'none';
+        e.endMarker = 'none';
+    } else {
+        // 'forward' (default)
+        e.startMarker = 'none';
+        e.endMarker = 'arrow';
+    }
+    delete e.direction;
+    return e;
+}
+
+/**
+ * Migrate legacy `startSymbol`/`endSymbol` to `startMarker`/`endMarker`.
+ * Also renames 'dot' → 'circle'. Safe to call on already-migrated lines.
+ */
+function migrateLine(l) {
+    if (l.startMarker === undefined && l.startSymbol !== undefined) {
+        const sym = l.startSymbol || 'none';
+        l.startMarker = sym === 'dot' ? 'circle' : sym;
+        delete l.startSymbol;
+    } else if (l.startMarker === undefined) {
+        l.startMarker = 'none';
+    }
+    if (l.endMarker === undefined && l.endSymbol !== undefined) {
+        const sym = l.endSymbol || 'none';
+        l.endMarker = sym === 'dot' ? 'circle' : sym;
+        delete l.endSymbol;
+    } else if (l.endMarker === undefined) {
+        l.endMarker = 'none';
+    }
+    return l;
+}
+
 function loadTabToLiveState(index) {
     const tab = state.tabs[index];
     if (!tab) return;
@@ -255,18 +302,16 @@ function loadFromLocalStorage() {
             state.tabs = data.tabs.map((td, i) => {
                 const tab = createTab(td.name || `tab-${i + 1}`);
                 (td.nodes || []).forEach((n) => tab.nodes.set(n.id, { ...n }));
-                (td.edges || []).forEach((e) =>
-                    tab.edges.set(e.id, {
-                        ...e,
-                        waypoints: (e.waypoints || []).map((wp) => ({ ...wp })),
-                    }),
-                );
-                (td.lines || []).forEach((l) =>
-                    tab.lines.set(l.id, {
-                        ...l,
-                        waypoints: (l.waypoints || []).map((wp) => ({ ...wp })),
-                    }),
-                );
+                (td.edges || []).forEach((e) => {
+                    const edge = { ...e, waypoints: (e.waypoints || []).map((wp) => ({ ...wp })) };
+                    migrateEdge(edge);
+                    tab.edges.set(edge.id, edge);
+                });
+                (td.lines || []).forEach((l) => {
+                    const line = { ...l, waypoints: (l.waypoints || []).map((wp) => ({ ...wp })) };
+                    migrateLine(line);
+                    tab.lines.set(line.id, line);
+                });
                 (td.annotations || []).forEach((a) =>
                     tab.annotations.set(a.id, { ...a }),
                 );
@@ -300,18 +345,16 @@ function loadFromLocalStorage() {
             tab.selected.clear();
             tab.selectedWaypoint = null;
             (data.nodes || []).forEach((n) => tab.nodes.set(n.id, { ...n }));
-            (data.edges || []).forEach((e) =>
-                tab.edges.set(e.id, {
-                    ...e,
-                    waypoints: (e.waypoints || []).map((wp) => ({ ...wp })),
-                }),
-            );
-            (data.lines || []).forEach((l) =>
-                tab.lines.set(l.id, {
-                    ...l,
-                    waypoints: (l.waypoints || []).map((wp) => ({ ...wp })),
-                }),
-            );
+            (data.edges || []).forEach((e) => {
+                const edge = { ...e, waypoints: (e.waypoints || []).map((wp) => ({ ...wp })) };
+                migrateEdge(edge);
+                tab.edges.set(edge.id, edge);
+            });
+            (data.lines || []).forEach((l) => {
+                const line = { ...l, waypoints: (l.waypoints || []).map((wp) => ({ ...wp })) };
+                migrateLine(line);
+                tab.lines.set(line.id, line);
+            });
             (data.annotations || []).forEach((a) =>
                 tab.annotations.set(a.id, { ...a }),
             );
@@ -547,18 +590,16 @@ function importDiagramData(data, filename) {
         throw new Error('Missing version field');
     const loadTabData = (tab, td) => {
         (td.nodes || []).forEach((n) => tab.nodes.set(n.id, { ...n }));
-        (td.edges || []).forEach((e) =>
-            tab.edges.set(e.id, {
-                ...e,
-                waypoints: (e.waypoints || []).map((wp) => ({ ...wp })),
-            }),
-        );
-        (td.lines || []).forEach((l) =>
-            tab.lines.set(l.id, {
-                ...l,
-                waypoints: (l.waypoints || []).map((wp) => ({ ...wp })),
-            }),
-        );
+        (td.edges || []).forEach((e) => {
+            const edge = { ...e, waypoints: (e.waypoints || []).map((wp) => ({ ...wp })) };
+            migrateEdge(edge);
+            tab.edges.set(edge.id, edge);
+        });
+        (td.lines || []).forEach((l) => {
+            const line = { ...l, waypoints: (l.waypoints || []).map((wp) => ({ ...wp })) };
+            migrateLine(line);
+            tab.lines.set(line.id, line);
+        });
         (td.annotations || []).forEach((a) =>
             tab.annotations.set(a.id, { ...a }),
         );
@@ -1595,7 +1636,6 @@ function renderEdgeGroup(edge) {
     const pts = edgePoints(edge);
     if (!pts) return null;
     const sel = state.selected.has(edge.id);
-    const dir = edge.direction || 'forward';
     const curved = edge.curveStyle === 'curved';
 
     const g = svgEl('g', { 'data-id': edge.id, 'data-type': 'edge' });
@@ -1606,10 +1646,20 @@ function renderEdgeGroup(edge) {
     const selStroke = '#2563eb';
     const strokeColor = sel ? selStroke : edge.stroke || defaultStroke;
     const strokeWidth = sel ? '2' : '1.5';
-    const endUrl = sel ? 'url(#arrowhead-sel)' : 'url(#arrowhead)';
-    const startUrl = sel
-        ? 'url(#arrowhead-start-sel)'
-        : 'url(#arrowhead-start)';
+
+    const startMk = edge.startMarker || 'none';
+    const endMk = edge.endMarker || 'arrow';
+
+    // Resolve marker URL: arrows use directional markers; circle/square are symmetric
+    const markerUrl = (sym, pos) => {
+        if (sym === 'none') return null;
+        if (sym === 'arrow')
+            return sel
+                ? `url(#arrow-${pos}-marker-sel)`
+                : `url(#arrow-${pos}-marker)`;
+        const base = sym === 'circle' ? 'dot' : sym;
+        return sel ? `url(#${base}-marker-sel)` : `url(#${base}-marker)`;
+    };
 
     if (curved) {
         const pathD = buildPathD(pts, true);
@@ -1623,10 +1673,10 @@ function renderEdgeGroup(edge) {
             class: 'edge-line' + (sel ? ' selected' : ''),
             fill: 'none',
         };
-        if (dir === 'forward' || dir === 'both')
-            pathAttrs['marker-end'] = endUrl;
-        if (dir === 'back' || dir === 'both')
-            pathAttrs['marker-start'] = startUrl;
+        const endMkUrl = markerUrl(endMk, 'end');
+        const startMkUrl = markerUrl(startMk, 'start');
+        if (endMkUrl) pathAttrs['marker-end'] = endMkUrl;
+        if (startMkUrl) pathAttrs['marker-start'] = startMkUrl;
 
         const lineEl = svgEl('path', pathAttrs);
         lineEl.style.stroke = strokeColor;
@@ -1662,10 +1712,10 @@ function renderEdgeGroup(edge) {
             points: pointsStr,
             class: 'edge-line' + (sel ? ' selected' : ''),
         };
-        if (dir === 'forward' || dir === 'both')
-            lineAttrs['marker-end'] = endUrl;
-        if (dir === 'back' || dir === 'both')
-            lineAttrs['marker-start'] = startUrl;
+        const endMkUrl2 = markerUrl(endMk, 'end');
+        const startMkUrl2 = markerUrl(startMk, 'start');
+        if (endMkUrl2) lineAttrs['marker-end'] = endMkUrl2;
+        if (startMkUrl2) lineAttrs['marker-start'] = startMkUrl2;
 
         const lineEl = svgEl('polyline', lineAttrs);
         lineEl.style.stroke = strokeColor;
@@ -1853,8 +1903,19 @@ function renderLineGroup(line) {
     const strokeColor = sel ? selStroke : line.stroke || defaultStroke;
     const strokeWidth = sel ? '2' : '1.5';
 
-    const startSym = line.startSymbol || 'none';
-    const endSym = line.endSymbol || 'none';
+    const startMk = line.startMarker || 'none';
+    const endMk = line.endMarker || 'none';
+
+    // Resolve marker URL (same logic as edges)
+    const markerUrl = (sym, pos) => {
+        if (sym === 'none') return null;
+        if (sym === 'arrow')
+            return sel
+                ? `url(#arrow-${pos}-marker-sel)`
+                : `url(#arrow-${pos}-marker)`;
+        const base = sym === 'circle' ? 'dot' : sym;
+        return sel ? `url(#${base}-marker-sel)` : `url(#${base}-marker)`;
+    };
 
     const g = svgEl('g', { 'data-id': line.id, 'data-type': 'line' });
     if (isLayerLocked(line.layerId)) g.classList.add('layer-locked');
@@ -1867,14 +1928,10 @@ function renderLineGroup(line) {
             class: 'edge-line' + (sel ? ' selected' : ''),
             fill: 'none',
         };
-        if (startSym !== 'none')
-            pathAttrs['marker-start'] = sel
-                ? `url(#${startSym}-marker-sel)`
-                : `url(#${startSym}-marker)`;
-        if (endSym !== 'none')
-            pathAttrs['marker-end'] = sel
-                ? `url(#${endSym}-marker-sel)`
-                : `url(#${endSym}-marker)`;
+        const endMkUrl = markerUrl(endMk, 'end');
+        const startMkUrl = markerUrl(startMk, 'start');
+        if (endMkUrl) pathAttrs['marker-end'] = endMkUrl;
+        if (startMkUrl) pathAttrs['marker-start'] = startMkUrl;
         const lineEl = svgEl('path', pathAttrs);
         lineEl.style.stroke = strokeColor;
         lineEl.style.strokeWidth = strokeWidth;
@@ -1905,14 +1962,10 @@ function renderLineGroup(line) {
             points: pointsStr,
             class: 'edge-line' + (sel ? ' selected' : ''),
         };
-        if (startSym !== 'none')
-            lineAttrs['marker-start'] = sel
-                ? `url(#${startSym}-marker-sel)`
-                : `url(#${startSym}-marker)`;
-        if (endSym !== 'none')
-            lineAttrs['marker-end'] = sel
-                ? `url(#${endSym}-marker-sel)`
-                : `url(#${endSym}-marker)`;
+        const endMkUrl2 = markerUrl(endMk, 'end');
+        const startMkUrl2 = markerUrl(startMk, 'start');
+        if (endMkUrl2) lineAttrs['marker-end'] = endMkUrl2;
+        if (startMkUrl2) lineAttrs['marker-start'] = startMkUrl2;
         const lineEl = svgEl('polyline', lineAttrs);
         lineEl.style.stroke = strokeColor;
         lineEl.style.strokeWidth = strokeWidth;
@@ -2958,7 +3011,8 @@ function dragEnd(p) {
             from: d.fromId,
             to: target.id,
             label: '',
-            direction: 'forward',
+            startMarker: 'none',
+            endMarker: 'arrow',
             layerId: state.activeLayerId,
         });
         state.selected.clear();
@@ -2981,8 +3035,8 @@ function dragEnd(p) {
             x2: p.x,
             y2: p.y,
             waypoints: [],
-            startSymbol: 'none',
-            endSymbol: 'none',
+            startMarker: 'none',
+            endMarker: 'none',
             label: '',
             layerId: state.activeLayerId,
         });
@@ -4675,19 +4729,24 @@ function renderNodeProps(container, node) {
 function renderEdgeProps(container, edge) {
     const fromNode = state.nodes.get(edge.from);
     const toNode = state.nodes.get(edge.to);
-    const dir = edge.direction || 'forward';
     const curveStyle = edge.curveStyle || 'straight';
-    const dirOpts = [
-        ['forward', '→ Forward'],
-        ['back', '← Backward'],
-        ['both', '↔ Both'],
-        ['none', '— None'],
-    ]
-        .map(
-            ([v, label]) =>
-                `<option value="${v}"${dir === v ? ' selected' : ''}>${label}</option>`,
-        )
-        .join('');
+    const startMk = edge.startMarker || 'none';
+    const endMk = edge.endMarker || 'arrow';
+
+    // SVG icon for each marker type (28×18 viewport) — uses currentColor for theming
+    const mkIcon = {
+        none:   `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        arrow:  `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="2"/><path d="M18,4 L26,9 L18,14 Z" fill="currentColor" stroke="none"/></svg>`,
+        circle: `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="9" r="4" fill="currentColor" stroke="none"/></svg>`,
+        square: `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="19" y2="9" stroke="currentColor" stroke-width="2"/><rect x="19" y="5" width="8" height="8" fill="currentColor" stroke="none"/></svg>`,
+    };
+    const markerPickerHtml = (pickerId, current) =>
+        `<div class="marker-picker" id="${pickerId}">${
+            ['none', 'arrow', 'circle', 'square']
+                .map(v => `<button class="marker-btn${current === v ? ' active' : ''}" data-value="${v}" title="${v.charAt(0).toUpperCase() + v.slice(1)}">${mkIcon[v]}</button>`)
+                .join('')
+        }</div>`;
+
     const dashOpts = [
         ['solid', 'Solid'],
         ['dashed', 'Dashed'],
@@ -4712,7 +4771,8 @@ function renderEdgeProps(container, edge) {
         propSection(
             'basic',
             'Basic',
-            `<div class="prop-group"><label>Direction</label><select id="p-dir">${dirOpts}</select></div>
+            `<div class="prop-group"><label>Start</label>${markerPickerHtml('p-start-marker', startMk)}</div>
+    <div class="prop-group"><label>End</label>${markerPickerHtml('p-end-marker', endMk)}</div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
     <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
@@ -4733,11 +4793,23 @@ function renderEdgeProps(container, edge) {
             `<div class="prop-group">${layerDropdownHtml(edge)}</div>`,
         );
     bindPropSectionToggles(container);
-    document.getElementById('p-dir').addEventListener('change', (e) => {
-        edge.direction = e.target.value;
-        pushHistory();
-        render();
-    });
+
+    // Wire marker pickers — click a button to activate
+    const bindMarkerPicker = (pickerId, setter) => {
+        const picker = container.querySelector(`#${pickerId}`);
+        if (!picker) return;
+        picker.querySelectorAll('.marker-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                picker.querySelectorAll('.marker-btn').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                setter(btn.dataset.value);
+                pushHistory();
+                render();
+            });
+        });
+    };
+    bindMarkerPicker('p-start-marker', (v) => { edge.startMarker = v; });
+    bindMarkerPicker('p-end-marker',   (v) => { edge.endMarker = v; });
     document.getElementById('p-curve-style').addEventListener('change', (e) => {
         edge.curveStyle = e.target.value;
         pushHistory();
@@ -4775,6 +4847,8 @@ function renderEdgeProps(container, edge) {
 
 function renderLineProps(container, line) {
     const curveStyle = line.curveStyle || 'straight';
+    const startMk = line.startMarker || 'none';
+    const endMk = line.endMarker || 'none';
     const dashOpts = [
         ['solid', 'Solid'],
         ['dashed', 'Dashed'],
@@ -4794,25 +4868,28 @@ function renderLineProps(container, line) {
                 `<option value="${v}"${curveStyle === v ? ' selected' : ''}>${l}</option>`,
         )
         .join('');
-    const symOpts = (field) =>
-        [
-            ['none', 'None'],
-            ['dot', 'Dot'],
-            ['square', 'Square'],
-        ]
-            .map(
-                ([v, l]) =>
-                    `<option value="${v}"${(line[field] || 'none') === v ? ' selected' : ''}>${l}</option>`,
-            )
-            .join('');
+
+    // Same icon picker as connectors
+    const mkIcon = {
+        none:   `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        arrow:  `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="2"/><path d="M18,4 L26,9 L18,14 Z" fill="currentColor" stroke="none"/></svg>`,
+        circle: `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="9" r="4" fill="currentColor" stroke="none"/></svg>`,
+        square: `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="19" y2="9" stroke="currentColor" stroke-width="2"/><rect x="19" y="5" width="8" height="8" fill="currentColor" stroke="none"/></svg>`,
+    };
+    const markerPickerHtml = (pickerId, current) =>
+        `<div class="marker-picker" id="${pickerId}">${
+            ['none', 'arrow', 'circle', 'square']
+                .map(v => `<button class="marker-btn${current === v ? ' active' : ''}" data-value="${v}" title="${v.charAt(0).toUpperCase() + v.slice(1)}">${mkIcon[v]}</button>`)
+                .join('')
+        }</div>`;
 
     container.innerHTML =
         propSection(
             'basic',
             'Basic',
-            `<div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
-    <div class="prop-group"><label>Start</label><select id="p-start-sym">${symOpts('startSymbol')}</select></div>
-    <div class="prop-group"><label>End</label><select id="p-end-sym">${symOpts('endSymbol')}</select></div>
+            `<div class="prop-group"><label>Start</label>${markerPickerHtml('p-start-marker', startMk)}</div>
+    <div class="prop-group"><label>End</label>${markerPickerHtml('p-end-marker', endMk)}</div>
+    <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(line.label || '')}"></div>`,
         ) +
         propSection(
@@ -4842,16 +4919,23 @@ function renderLineProps(container, line) {
             pushHistory();
             render();
         });
-    document.getElementById('p-start-sym').addEventListener('change', (e) => {
-        line.startSymbol = e.target.value;
-        pushHistory();
-        render();
-    });
-    document.getElementById('p-end-sym').addEventListener('change', (e) => {
-        line.endSymbol = e.target.value;
-        pushHistory();
-        render();
-    });
+
+    // Wire marker pickers
+    const bindMarkerPicker = (pickerId, setter) => {
+        const picker = container.querySelector(`#${pickerId}`);
+        if (!picker) return;
+        picker.querySelectorAll('.marker-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                picker.querySelectorAll('.marker-btn').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                setter(btn.dataset.value);
+                pushHistory();
+                render();
+            });
+        });
+    };
+    bindMarkerPicker('p-start-marker', (v) => { line.startMarker = v; });
+    bindMarkerPicker('p-end-marker',   (v) => { line.endMarker = v; });
     bindColorPanel(container, [
         {
             id: 'p-stroke',

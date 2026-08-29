@@ -492,27 +492,27 @@
                         <li>A connector with an arrowhead is created</li>
                     </ol>
 
-                    <h3>Direction options</h3>
+                    <h3>Endpoint marker options</h3>
                     <table>
                         <tr>
                             <th>Option</th>
                             <th>Appearance</th>
                         </tr>
                         <tr>
-                            <td>→ Forward</td>
-                            <td>Arrow pointing to target</td>
+                            <td>None</td>
+                            <td>No marker at this end</td>
                         </tr>
                         <tr>
-                            <td>← Backward</td>
-                            <td>Arrow pointing to source</td>
+                            <td>Arrow</td>
+                            <td>Arrowhead pointing in the connector's direction</td>
                         </tr>
                         <tr>
-                            <td>↔ Both</td>
-                            <td>Arrows at both ends</td>
+                            <td>Circle</td>
+                            <td>Filled circle</td>
                         </tr>
                         <tr>
-                            <td>— None</td>
-                            <td>Plain line, no arrows</td>
+                            <td>Square</td>
+                            <td>Filled square</td>
                         </tr>
                     </table>
 
@@ -585,7 +585,9 @@
                     <h2>Lines</h2>
                     <p>
                         Free-floating lines not attached to any shape. Unlike
-                        connectors, lines have no direction or arrowhead.
+                        connectors, lines are not anchored to shapes — they are
+                        decorative or structural. Each end supports the same
+                        markers as connectors.
                     </p>
                     <ol>
                         <li>
@@ -597,9 +599,10 @@
                         </li>
                     </ol>
                     <p>
-                        <strong>End symbols</strong> (Properties panel): each
+                        <strong>End markers</strong> (Properties panel): each
                         end can independently show <strong>None</strong>,
-                        <strong>Dot</strong>, or <strong>Square</strong>.
+                        <strong>Arrow</strong>, <strong>Circle</strong>, or
+                        <strong>Square</strong>.
                     </p>
                     <table>
                         <tr>
@@ -1094,8 +1097,12 @@
                             <th>Description</th>
                         </tr>
                         <tr>
-                            <td>Direction</td>
-                            <td>→ Forward / ← Backward / ↔ Both / — None</td>
+                            <td>Start</td>
+                            <td>Marker at the start of the connector: None, Arrow, Circle, Square</td>
+                        </tr>
+                        <tr>
+                            <td>End</td>
+                            <td>Marker at the end of the connector: None, Arrow, Circle, Square (default: Arrow)</td>
                         </tr>
                         <tr>
                             <td>Connector</td>
@@ -1137,6 +1144,14 @@
                             <th>Description</th>
                         </tr>
                         <tr>
+                            <td>Start</td>
+                            <td>Marker at start: None, Arrow, Circle, Square</td>
+                        </tr>
+                        <tr>
+                            <td>End</td>
+                            <td>Marker at end: None, Arrow, Circle, Square</td>
+                        </tr>
+                        <tr>
                             <td>Connector</td>
                             <td>Straight (default) or Curved</td>
                         </tr>
@@ -1147,14 +1162,6 @@
                         <tr>
                             <td>Line style</td>
                             <td>Solid / Dashed / Dotted</td>
-                        </tr>
-                        <tr>
-                            <td>Start</td>
-                            <td>End symbol at start: None / Dot / Square</td>
-                        </tr>
-                        <tr>
-                            <td>End</td>
-                            <td>End symbol at end: None / Dot / Square</td>
                         </tr>
                         <tr>
                             <td>Label</td>

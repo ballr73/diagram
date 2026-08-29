@@ -102,14 +102,14 @@ Click the **Shape** button in the left toolbar to activate the draw tool. A smal
 2. Drag from the edge of a source shape to a target shape
 3. A connector with an arrowhead is created
 
-Connector direction, style, and curve type can be changed in the Properties panel.
+Connector endpoints, style, and curve type can be changed in the Properties panel.
 
-| Direction option | Appearance |
-|-----------------|------------|
-| → Forward | Arrow pointing to target |
-| ← Backward | Arrow pointing to source |
-| ↔ Both | Arrows at both ends |
-| — None | Plain line, no arrows |
+| Marker option | Appearance |
+|--------------|------------|
+| None | No marker at this end |
+| Arrow | Arrowhead pointing in the connector's direction |
+| Circle | Filled circle |
+| Square | Filled square |
 
 ### Curved connectors
 
@@ -147,12 +147,12 @@ By default, connectors attach automatically at the point on each node's border t
 
 ### Lines
 
-Free-floating lines not attached to any shape. Unlike connectors, lines have no direction or arrowhead — they are purely decorative or structural.
+Free-floating lines not attached to any shape. Unlike connectors, lines are not anchored to shapes — they are decorative or structural. Each end supports the same markers as connectors.
 
 1. Select the **Line** tool (`L`)
 2. Click and drag anywhere on the canvas to draw the line
 
-**End symbols** (set in Properties panel): each end can independently show **None**, **Dot**, or **Square**.
+**End markers** (set in Properties panel): each end can independently show **None**, **Arrow**, **Circle**, or **Square**.
 
 Lines support all the same editing actions as connectors, including curved mode:
 
@@ -381,7 +381,8 @@ When one element is selected, the Properties panel on the right shows its editab
 
 | Property | Description |
 |----------|-------------|
-| Direction | → Forward / ← Backward / ↔ Both / — None |
+| Start | Marker at the start of the connector: None, Arrow, Circle, Square |
+| End | Marker at the end of the connector: None, Arrow, Circle, Square (default: Arrow) |
 | Connector | Straight (default) or Curved — switches between polyline and Catmull-Rom spline |
 | Line style | Solid / Dashed / Dotted |
 | Stroke | Line colour |
@@ -394,11 +395,11 @@ When one element is selected, the Properties panel on the right shows its editab
 
 | Property | Description |
 |----------|-------------|
+| Start | Marker at start point: None, Arrow, Circle, Square |
+| End | Marker at end point: None, Arrow, Circle, Square |
 | Connector | Straight (default) or Curved |
 | Stroke | Line colour |
 | Line style | Solid / Dashed / Dotted |
-| Start | End symbol at start point: None / Dot / Square |
-| End | End symbol at end point: None / Dot / Square |
 | Label | Text displayed at the midpoint |
 | Label colour | Label text colour (default black) |
 | Label Font | Size, Bold, Italic, Underline |
