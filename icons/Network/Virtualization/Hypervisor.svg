@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hardware layer (bottom) -->
+  <rect x="6" y="48" width="52" height="10" rx="2"/>
+  <line x1="18" y1="48" x2="18" y2="58"/>
+  <line x1="32" y1="48" x2="32" y2="58"/>
+  <line x1="46" y1="48" x2="46" y2="58"/>
+  <!-- Hypervisor layer (middle) -->
+  <rect x="6" y="36" width="52" height="10" rx="2"/>
+  <line x1="14" y1="39" x2="50" y2="39"/>
+  <line x1="14" y1="43" x2="42" y2="43"/>
+  <!-- VM layer (top, 3 VMs) -->
+  <rect x="6" y="10" width="15" height="24" rx="2"/>
+  <rect x="24" y="10" width="15" height="24" rx="2"/>
+  <rect x="42" y="10" width="15" height="24" rx="2"/>
+  <line x1="6" y1="16" x2="21" y2="16"/>
+  <line x1="24" y1="16" x2="39" y2="16"/>
+  <line x1="42" y1="16" x2="57" y2="16"/>
+</svg>

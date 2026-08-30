@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- NAS body -->
+  <rect x="14" y="8" width="36" height="48" rx="3"/>
+  <!-- Drive bays (4 drives) -->
+  <rect x="18" y="14" width="28" height="8" rx="1"/>
+  <rect x="18" y="24" width="28" height="8" rx="1"/>
+  <rect x="18" y="34" width="28" height="8" rx="1"/>
+  <rect x="18" y="44" width="28" height="8" rx="1"/>
+  <!-- Drive activity dots -->
+  <circle cx="42" cy="18" r="2" fill="#000000"/>
+  <circle cx="42" cy="28" r="2" fill="#000000"/>
+  <circle cx="42" cy="38" r="2" fill="#000000"/>
+  <circle cx="42" cy="48" r="2" fill="#000000"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Input node -->
+  <circle cx="10" cy="32" r="6"/>
+  <!-- Central distributor -->
+  <rect x="22" y="26" width="20" height="12" rx="3"/>
+  <!-- Output nodes -->
+  <circle cx="54" cy="16" r="6"/>
+  <circle cx="54" cy="32" r="6"/>
+  <circle cx="54" cy="48" r="6"/>
+  <!-- Lines from input to distributor -->
+  <line x1="16" y1="32" x2="22" y2="32"/>
+  <!-- Lines from distributor to outputs -->
+  <line x1="42" y1="29" x2="48" y2="19"/>
+  <line x1="42" y1="32" x2="48" y2="32"/>
+  <line x1="42" y1="35" x2="48" y2="45"/>
+</svg>

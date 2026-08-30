@@ -1359,16 +1359,44 @@
     ]
   },
   "Network": {
-    "General": [
+    "Core": [
+      "Access-Point.svg",
       "Cloud.svg",
       "Database.svg",
       "Firewall.svg",
+      "Internet.svg",
+      "Laptop.svg",
+      "Load-Balancer.svg",
       "Mobile-Device.svg",
       "Network-Device.svg",
+      "Proxy.svg",
       "Router.svg",
       "Server.svg",
       "Switch.svg",
+      "VPN-Gateway.svg",
       "Workstation.svg"
+    ],
+    "Infrastructure": [
+      "Modem.svg",
+      "NAS.svg",
+      "Patch-Panel.svg",
+      "Rack.svg",
+      "SAN.svg",
+      "Storage-Array.svg"
+    ],
+    "IoT": [
+      "Edge-Device.svg",
+      "Sensor.svg"
+    ],
+    "Security": [
+      "IDS-IPS.svg",
+      "Identity-Provider.svg",
+      "WAF.svg"
+    ],
+    "Virtualization": [
+      "Container.svg",
+      "Hypervisor.svg",
+      "VM.svg"
     ]
   }
 }

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Array chassis -->
+  <rect x="6" y="10" width="52" height="44" rx="3"/>
+  <!-- Drive rows (3 rows x 4 drives) -->
+  <rect x="10" y="16" width="10" height="8" rx="1"/>
+  <rect x="22" y="16" width="10" height="8" rx="1"/>
+  <rect x="34" y="16" width="10" height="8" rx="1"/>
+  <rect x="46" y="16" width="10" height="8" rx="1"/>
+  <rect x="10" y="26" width="10" height="8" rx="1"/>
+  <rect x="22" y="26" width="10" height="8" rx="1"/>
+  <rect x="34" y="26" width="10" height="8" rx="1"/>
+  <rect x="46" y="26" width="10" height="8" rx="1"/>
+  <rect x="10" y="36" width="10" height="8" rx="1"/>
+  <rect x="22" y="36" width="10" height="8" rx="1"/>
+  <rect x="34" y="36" width="10" height="8" rx="1"/>
+  <rect x="46" y="36" width="10" height="8" rx="1"/>
+  <!-- Controller ports -->
+  <line x1="14" y1="48" x2="14" y2="52"/>
+  <line x1="24" y1="48" x2="24" y2="52"/>
+  <line x1="40" y1="48" x2="40" y2="52"/>
+  <line x1="50" y1="48" x2="50" y2="52"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Sensor body -->
+  <rect x="22" y="28" width="20" height="24" rx="3"/>
+  <!-- Sensor probe tip -->
+  <path d="M27,52 L27,58 Q27,60 32,60 Q37,60 37,58 L37,52"/>
+  <!-- Detection waves (outward arcs) -->
+  <path d="M18,22 Q22,16 32,16 Q42,16 46,22" fill="none"/>
+  <path d="M12,16 Q18,8 32,8 Q46,8 52,16" fill="none"/>
+  <!-- Sensor face dot -->
+  <circle cx="32" cy="36" r="4" fill="#000000"/>
+  <!-- Status LED -->
+  <circle cx="32" cy="46" r="2"/>
+</svg>

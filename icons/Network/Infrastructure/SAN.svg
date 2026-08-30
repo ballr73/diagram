@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- SAN fabric switch (top) -->
+  <rect x="16" y="6" width="32" height="10" rx="2"/>
+  <!-- Storage arrays (bottom two) -->
+  <rect x="6" y="44" width="22" height="14" rx="2"/>
+  <rect x="36" y="44" width="22" height="14" rx="2"/>
+  <!-- Fabric connections -->
+  <line x1="22" y1="16" x2="14" y2="44"/>
+  <line x1="32" y1="16" x2="32" y2="44"/>
+  <line x1="42" y1="16" x2="50" y2="44"/>
+  <!-- Drive slots in storage -->
+  <line x1="10" y1="50" x2="24" y2="50"/>
+  <line x1="10" y1="54" x2="24" y2="54"/>
+  <line x1="40" y1="50" x2="54" y2="50"/>
+  <line x1="40" y1="54" x2="54" y2="54"/>
+</svg>

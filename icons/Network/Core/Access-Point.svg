@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Device body -->
+  <rect x="20" y="38" width="24" height="14" rx="3"/>
+  <!-- Signal waves -->
+  <path d="M20,32 Q32,22 44,32" fill="none"/>
+  <path d="M14,26 Q32,12 50,26" fill="none"/>
+  <path d="M8,20 Q32,4 56,20" fill="none"/>
+  <!-- Antenna -->
+  <line x1="32" y1="38" x2="32" y2="32"/>
+  <circle cx="32" cy="32" r="2" fill="#000000"/>
+  <!-- Status LED -->
+  <circle cx="32" cy="46" r="2" fill="#000000"/>
+</svg>
