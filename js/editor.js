@@ -5624,11 +5624,12 @@ function buildIconPanel(manifest) {
 
         const providerHeader = document.createElement('div');
         providerHeader.className = 'icon-provider-header';
-        providerHeader.innerHTML = `<span class="icon-chevron open">▶</span><span>${provider}</span>`;
+        providerHeader.innerHTML = `<span class="icon-chevron">▶</span><span>${provider}</span>`;
         providerDiv.appendChild(providerHeader);
 
         const providerBody = document.createElement('div');
         providerBody.className = 'icon-provider-body';
+        providerBody.style.display = 'none';
 
         for (const [category, files] of Object.entries(categories)) {
             const catDiv = document.createElement('div');
@@ -5727,10 +5728,13 @@ function filterIconPanel(query) {
             (el) => el.classList.remove('open'),
         );
         tree.querySelectorAll('.icon-provider-body').forEach(
-            (el) => (el.style.display = ''),
+            (el) => (el.style.display = 'none'),
         );
         tree.querySelectorAll('.icon-provider-header .icon-chevron').forEach(
-            (el) => el.classList.add('open'),
+            (el) => el.classList.remove('open'),
+        );
+        tree.querySelectorAll('.icon-category').forEach(
+            (el) => (el.style.display = ''),
         );
         return;
     }
