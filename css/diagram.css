@@ -984,23 +984,6 @@ input.inline-input {
 /* ============================================================
    Properties panel
    ============================================================ */
-#right-panel {
-    display: flex;
-    flex-direction: column;
-    width: 210px;
-    flex-shrink: 0;
-    border-left: 1px solid #e2e8f0;
-    overflow: hidden;
-}
-
-#properties-panel {
-    flex: 1;
-    min-height: 0;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-}
-
 #properties-header {
     padding: 10px 14px 8px;
     font-weight: 600;
@@ -1011,6 +994,59 @@ input.inline-input {
     border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#btn-collapse-props {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 0 0 6px;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+}
+#btn-collapse-props:hover { color: #1e293b; }
+
+/* Collapsed state */
+#right-panel {
+    display: flex;
+    flex-direction: column;
+    width: 210px;
+    flex-shrink: 0;
+    border-left: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: width 0.2s ease;
+}
+
+#properties-panel {
+    flex: 1;
+    min-height: 0;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+#right-panel.props-collapsed {
+    width: 28px;
+}
+#right-panel.props-collapsed #properties-header span,
+#right-panel.props-collapsed #properties-content,
+#right-panel.props-collapsed #layers-panel {
+    display: none;
+}
+#right-panel.props-collapsed #properties-header {
+    padding: 10px 4px 8px;
+    justify-content: center;
+    border-bottom: none;
+}
+#right-panel.props-collapsed #btn-collapse-props {
+    padding: 0;
 }
 
 #properties-content {

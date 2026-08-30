@@ -6753,6 +6753,24 @@ function init() {
     // Initialise icon library panel
     initIconLibrary();
 
+    // Collapsible properties panel
+    (function () {
+        const rightPanel = document.getElementById('right-panel');
+        const btn = document.getElementById('btn-collapse-props');
+        const collapsed = localStorage.getItem('propsPanelCollapsed') === 'true';
+        if (collapsed) {
+            rightPanel.classList.add('props-collapsed');
+            btn.textContent = '›';
+            btn.title = 'Expand properties panel';
+        }
+        btn.addEventListener('click', () => {
+            const isCollapsed = rightPanel.classList.toggle('props-collapsed');
+            btn.textContent = isCollapsed ? '›' : '‹';
+            btn.title = isCollapsed ? 'Expand properties panel' : 'Collapse properties panel';
+            localStorage.setItem('propsPanelCollapsed', isCollapsed);
+        });
+    })();
+
     // Initialise menu bar
     initMenuBar();
 
