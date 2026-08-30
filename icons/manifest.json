@@ -1357,5 +1357,18 @@
       "Workflows.svg",
       "Workload-Identity-Pool.svg"
     ]
+  },
+  "Network": {
+    "General": [
+      "Cloud.svg",
+      "Database.svg",
+      "Firewall.svg",
+      "Mobile-Device.svg",
+      "Network-Device.svg",
+      "Router.svg",
+      "Server.svg",
+      "Switch.svg",
+      "Workstation.svg"
+    ]
   }
 }

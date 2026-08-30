@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Router body (rounded box) -->
+  <rect x="16" y="22" width="32" height="20" rx="4"/>
+  <!-- Ports -->
+  <line x1="23" y1="22" x2="23" y2="18"/>
+  <line x1="32" y1="22" x2="32" y2="18"/>
+  <line x1="41" y1="22" x2="41" y2="18"/>
+  <!-- Arrows indicating routing (left, right, up, down) -->
+  <!-- Left arrow -->
+  <line x1="8" y1="32" x2="16" y2="32"/>
+  <polyline points="11,29 8,32 11,35"/>
+  <!-- Right arrow -->
+  <line x1="48" y1="32" x2="56" y2="32"/>
+  <polyline points="53,29 56,32 53,35"/>
+  <!-- Down arrow -->
+  <line x1="32" y1="42" x2="32" y2="52"/>
+  <polyline points="29,49 32,52 35,49"/>
+  <!-- Status LED -->
+  <circle cx="44" cy="34" r="2" fill="#000000"/>
+</svg>

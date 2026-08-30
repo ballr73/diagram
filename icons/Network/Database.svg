@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Top ellipse cap -->
+  <ellipse cx="32" cy="14" rx="20" ry="6"/>
+  <!-- Cylinder body sides -->
+  <line x1="12" y1="14" x2="12" y2="34"/>
+  <line x1="52" y1="14" x2="52" y2="34"/>
+  <!-- Middle divider ellipse -->
+  <path d="M12,24 Q12,30 32,30 Q52,30 52,24"/>
+  <!-- Middle divider ellipse (upper arc only) -->
+  <!-- Bottom ellipse -->
+  <path d="M12,34 Q12,40 32,40 Q52,40 52,34"/>
+  <!-- Bottom cap sides -->
+  <line x1="12" y1="34" x2="12" y2="50"/>
+  <line x1="52" y1="34" x2="52" y2="50"/>
+  <!-- Bottom ellipse full -->
+  <ellipse cx="32" cy="50" rx="20" ry="6"/>
+</svg>
