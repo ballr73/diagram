@@ -58,7 +58,7 @@ open app.html
 ```
 
 - **Left toolbar** — drawing tools (compact icon-only buttons) and icon library toggle
-- **Icon library panel** — collapsible sidebar with 1,241 AWS, Azure & GCP SVG icons, searchable
+- **Icon library panel** — collapsible sidebar with 1,270 SVG icons (AWS, Azure, GCP & Network), searchable
 - **Diagram name bar** — slim bar above the menu bar showing the current diagram name ("Untitled diagram" until saved)
 - **Menu bar** — File, Edit, View, and Arrange menus with keyboard shortcuts shown on each item
 - **Top toolbar** — quick-access icon buttons for the most common actions
@@ -185,13 +185,24 @@ Free-floating text labels not attached to any shape. Place them by clicking on a
 
 Press `I` or click the **Icons** button in the left toolbar to open the icon library panel.
 
-The library contains **1,241 SVG icons** across three cloud providers:
+The library contains **1,270 SVG icons** across four providers:
 
 | Provider | Icons | Layout |
 |----------|-------|--------|
 | **AWS** | ~615 icons across 26 categories | `icons/AWS/<Category>/` |
 | **Azure** | ~410 icons across 29 categories | `icons/Azure/<Category>/` |
 | **GCP** | 216 icons | `icons/GCP/` |
+| **Network** | 29 icons across 5 categories | `icons/Network/<Category>/` |
+
+The **Network** icon set contains mono-colour (black & white) SVG symbols for network topology diagrams, organised into categories:
+
+| Category | Icons |
+|----------|-------|
+| **Core** | Server, Router, Switch, Workstation, Laptop, Mobile Device, Database, Firewall, Cloud, Load Balancer, Network Device, Access Point, VPN Gateway, Proxy, Internet |
+| **Infrastructure** | Modem, Patch Panel, Rack, NAS, SAN, Storage Array |
+| **Security** | WAF, IDS/IPS, Identity Provider |
+| **Virtualization** | VM, Hypervisor, Container |
+| **IoT** | Sensor, Edge Device |
 
 ### Placing icons
 
@@ -721,7 +732,7 @@ editor.js                         — All editor logic (~3,530 lines)
 diagram.css                       — UI and SVG styling (~1,100 lines)
 README.md                         — This file
 azure-aks-architecture.json       — Example: Azure AKS multi-region architecture diagram
-icons/                            — SVG icon library (1,241 icons total)
+icons/                            — SVG icon library (1,270 icons total)
   AWS/                            — 26 AWS service categories
   Azure/                          — 29 Azure service categories
   GCP/                            — 216 GCP icons (flat, no subcategories)
