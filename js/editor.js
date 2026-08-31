@@ -1387,9 +1387,12 @@ function createShapeEl(node, sel) {
         case 'circle':
             el = svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls });
             break;
-        case 'oval':
-            el = svgEl('ellipse', { cx, cy, rx: w / 2, ry: h / 2, class: cls });
+        case 'oval': {
+            const r = h / 2;
+            const stadiumPath = `M ${x + r},${y} L ${x + w - r},${y} A ${r},${r} 0 0,1 ${x + w - r},${y + h} L ${x + r},${y + h} A ${r},${r} 0 0,1 ${x + r},${y} Z`;
+            el = svgEl('path', { d: stadiumPath, class: cls });
             break;
+        }
         case 'diamond': {
             const pts = `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`;
             el = svgEl('polygon', { points: pts, class: cls });
@@ -5214,7 +5217,7 @@ function setTool(tool) {
 const SHAPE_SVGS = {
     box: '<rect x="2" y="4" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     circle: '<ellipse cx="8" cy="8" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="1.5"/>',
-    oval: '<ellipse cx="8" cy="8" rx="7" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    oval: '<path d="M 5.5,3.5 L 10.5,3.5 A 4.5,4.5 0 0,1 10.5,12.5 L 5.5,12.5 A 4.5,4.5 0 0,1 5.5,3.5 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     diamond:
         '<polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     triangle:
