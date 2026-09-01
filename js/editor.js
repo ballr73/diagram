@@ -5796,13 +5796,15 @@ function initIconLibrary() {
     canvasContainer.addEventListener('dragover', (e) => {
         if (e.dataTransfer.types.includes('text/icon-path')) {
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
+            e.dataTransfer.dropEffect = isLayerLocked(state.activeLayerId) ? 'none' : 'copy';
         }
     });
     canvasContainer.addEventListener('drop', (e) => {
         const iconPath = e.dataTransfer.getData('text/icon-path');
         if (!iconPath) return;
         e.preventDefault();
+
+        if (isLayerLocked(state.activeLayerId)) return;
 
         // Convert screen coordinates to diagram coordinates
         const pt = svg.createSVGPoint();
