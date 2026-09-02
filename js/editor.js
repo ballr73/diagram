@@ -1663,6 +1663,19 @@ function renderNodeGroup(node) {
         g.appendChild(headerLbl);
 
         // Row cells
+        const rowAlign = node.rowAlign || 'center';
+        const rowPad = 6;
+        let rowLblX, rowTextAnchor;
+        if (rowAlign === 'left') {
+            rowLblX = node.x + rowPad;
+            rowTextAnchor = 'start';
+        } else if (rowAlign === 'right') {
+            rowLblX = node.x + node.width - rowPad;
+            rowTextAnchor = 'end';
+        } else {
+            rowLblX = node.x + node.width / 2;
+            rowTextAnchor = 'middle';
+        }
         rows.forEach((rowText, i) => {
             const ry = node.y + headerH + i * rowH;
             const rowRect = svgEl('rect', {
@@ -1680,9 +1693,9 @@ function renderNodeGroup(node) {
             g.appendChild(rowRect);
 
             const rowLbl = svgEl('text', {
-                x: node.x + node.width / 2,
+                x: rowLblX,
                 y: ry + rowH / 2,
-                'text-anchor': 'middle',
+                'text-anchor': rowTextAnchor,
                 'dominant-baseline': 'middle',
                 class: 'node-label',
             });
@@ -3356,7 +3369,9 @@ function startInlineEdit(id, type, opts) {
                 cellIndex === -1
                     ? item.headerText || ''
                     : (item.rows && item.rows[cellIndex]) || '';
-            input.style.cssText = 'width:100%;height:100%;';
+            const inputAlign =
+                cellIndex === -1 ? 'center' : item.rowAlign || 'center';
+            input.style.cssText = `width:100%;height:100%;text-align:${inputAlign};`;
             fo.appendChild(input);
             uiLayer.appendChild(fo);
             requestAnimationFrame(() => {
@@ -4946,6 +4961,19 @@ function renderTableProps(container, node) {
         },
     };
 
+    const rowAlign = node.rowAlign || 'center';
+    const alignIcon = {
+        left: `<svg width="18" height="14" viewBox="0 0 18 14"><line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" stroke-width="2"/><line x1="1" y1="7" x2="11" y2="7" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="2"/></svg>`,
+        center: `<svg width="18" height="14" viewBox="0 0 18 14"><line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" stroke-width="2"/><line x1="4" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="2"/><line x1="2" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/></svg>`,
+        right: `<svg width="18" height="14" viewBox="0 0 18 14"><line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" stroke-width="2"/><line x1="7" y1="7" x2="17" y2="7" stroke="currentColor" stroke-width="2"/><line x1="4" y1="12" x2="17" y2="12" stroke="currentColor" stroke-width="2"/></svg>`,
+    };
+    const alignPickerHtml = `<div class="font-controls">${['left', 'center', 'right']
+        .map(
+            (a) =>
+                `<button class="font-btn${rowAlign === a ? ' active' : ''}" id="p-row-align-${a}" title="${a.charAt(0).toUpperCase() + a.slice(1)}">${alignIcon[a]}</button>`,
+        )
+        .join('')}</div>`;
+
     container.innerHTML =
         propSection(
             'basic',
@@ -4969,6 +4997,7 @@ function renderTableProps(container, node) {
     ${colorRow('p-row-stroke', 'Stroke', node.stroke, '#475569')}
     ${colorSharedPicker()}
     <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 }, 'p-row-')}</div>
+    <div class="prop-group"><label>Align</label>${alignPickerHtml}</div>
     <div class="prop-group"><label>Line style</label><select id="p-row-stroke-style">${dashOpts('strokeStyle')}</select></div>
     <div class="prop-group">
       <label>Opacity</label>
@@ -5007,6 +5036,17 @@ function renderTableProps(container, node) {
             pushHistory();
             render();
         });
+
+    ['left', 'center', 'right'].forEach((a) => {
+        const btn = document.getElementById(`p-row-align-${a}`);
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            node.rowAlign = a;
+            pushHistory();
+            render();
+            updatePropertiesPanel();
+        });
+    });
 
     bindFontControls(headerFontProxy, { size: 13, bold: true }, 'p-header-');
     bindFontControls(node, { size: 13 }, 'p-row-');
