@@ -937,18 +937,31 @@ function tableLayout(node) {
     return { rows, headerH, rowH };
 }
 
-/** Bounding rect of a table cell. cellIndex -1 = header, else row index. */
+/** Bounding rect of a table cell. cellIndex -1 = header, else row index.
+ *  Row index is clamped to the current row count so stale references
+ *  (e.g. an edge bound to a row deleted via the Rows count control) still
+ *  resolve to a valid, visible cell instead of falling outside the shape. */
 function tableCellRect(node, cellIndex) {
-    const { headerH, rowH } = tableLayout(node);
+    const { rows, headerH, rowH } = tableLayout(node);
     if (cellIndex === -1) {
         return { x: node.x, y: node.y, width: node.width, height: headerH };
     }
+    const idx = Math.max(0, Math.min(rows.length - 1, cellIndex));
     return {
         x: node.x,
-        y: node.y + headerH + cellIndex * rowH,
+        y: node.y + headerH + idx * rowH,
         width: node.width,
         height: rowH,
     };
+}
+
+/** Geometry to anchor an edge endpoint to: for table nodes with a bound
+ *  row/header index, returns that cell's rect; otherwise the node itself. */
+function edgeAnchorGeom(node, rowIndex) {
+    if (node.shape === 'table' && rowIndex !== undefined && rowIndex !== null) {
+        return tableCellRect(node, rowIndex);
+    }
+    return node;
 }
 
 /** Which table cell (-1 = header, else row index) contains diagram-space y coordinate py. */
@@ -1155,28 +1168,30 @@ function edgePoints(edge) {
     const to = state.nodes.get(edge.to);
     if (!from || !to) return null;
     const wps = edge.waypoints || [];
+    const fromGeom = edgeAnchorGeom(from, edge.fromRowIndex);
+    const toGeom = edgeAnchorGeom(to, edge.toRowIndex);
     // Determine aim targets for borderIntersect, honouring anchor offsets
     let fromAim, toAim;
     if (edge.fromAnchorOffset) {
-        const fc = nodeCenter(from);
+        const fc = nodeCenter(fromGeom);
         fromAim = {
             x: fc.x + edge.fromAnchorOffset.dx,
             y: fc.y + edge.fromAnchorOffset.dy,
         };
     } else {
-        fromAim = wps.length > 0 ? wps[0] : nodeCenter(to);
+        fromAim = wps.length > 0 ? wps[0] : nodeCenter(toGeom);
     }
     if (edge.toAnchorOffset) {
-        const tc = nodeCenter(to);
+        const tc = nodeCenter(toGeom);
         toAim = {
             x: tc.x + edge.toAnchorOffset.dx,
             y: tc.y + edge.toAnchorOffset.dy,
         };
     } else {
-        toAim = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(from);
+        toAim = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(fromGeom);
     }
-    const p1 = borderIntersect(from, fromAim);
-    const p2 = borderIntersect(to, toAim);
+    const p1 = borderIntersect(fromGeom, fromAim);
+    const p2 = borderIntersect(toGeom, toAim);
     return [p1, ...wps, p2];
 }
 
@@ -1639,6 +1654,7 @@ function renderNodeGroup(node) {
             width: node.width,
             height: headerH,
             class: 'node-shape' + selCls,
+            'data-cell-index': -1,
         });
         headerRect.style.fillOpacity = opacity;
         applyStrokeStyle(headerRect, node.headerStrokeStyle);
@@ -1692,6 +1708,7 @@ function renderNodeGroup(node) {
                 width: node.width,
                 height: rowH,
                 class: 'node-shape' + selCls,
+                'data-cell-index': i,
             });
             rowRect.style.fillOpacity = opacity;
             applyStrokeStyle(rowRect, node.strokeStyle);
@@ -2741,8 +2758,16 @@ function connectorMouseDown(p, hit) {
     if (isLayerLocked(state.activeLayerId)) return;
     const node = getNodeAt(p.x, p.y);
     if (!node) return;
-    drag = { type: 'draw-edge', fromId: node.id, startX: p.x, startY: p.y };
-    const fc = nodeCenter(node);
+    const fromRowIndex =
+        node.shape === 'table' ? tableCellIndexAt(node, p.y) : undefined;
+    drag = {
+        type: 'draw-edge',
+        fromId: node.id,
+        fromRowIndex,
+        startX: p.x,
+        startY: p.y,
+    };
+    const fc = nodeCenter(edgeAnchorGeom(node, fromRowIndex));
     uiLayer.appendChild(
         svgEl('line', {
             id: 'tmp',
@@ -2944,10 +2969,21 @@ function dragMove(p) {
             const nodeId = drag.which === 'from' ? edge.from : edge.to;
             const node = state.nodes.get(nodeId);
             if (node) {
-                const c = nodeCenter(node);
-                const offset = { dx: p.x - c.x, dy: p.y - c.y };
-                if (drag.which === 'from') edge.fromAnchorOffset = offset;
-                else edge.toAnchorOffset = offset;
+                if (node.shape === 'table') {
+                    const idx = tableCellIndexAt(node, p.y);
+                    if (drag.which === 'from') {
+                        edge.fromRowIndex = idx;
+                        edge.fromAnchorOffset = undefined;
+                    } else {
+                        edge.toRowIndex = idx;
+                        edge.toAnchorOffset = undefined;
+                    }
+                } else {
+                    const c = nodeCenter(node);
+                    const offset = { dx: p.x - c.x, dy: p.y - c.y };
+                    if (drag.which === 'from') edge.fromAnchorOffset = offset;
+                    else edge.toAnchorOffset = offset;
+                }
                 drag.moved = true;
                 render();
             }
@@ -3027,7 +3063,7 @@ function dragMove(p) {
         if (!tmp) return;
         const from = state.nodes.get(drag.fromId);
         if (!from) return;
-        const p1 = borderIntersect(from, p);
+        const p1 = borderIntersect(edgeAnchorGeom(from, drag.fromRowIndex), p);
         tmp.setAttribute('x1', p1.x);
         tmp.setAttribute('y1', p1.y);
         tmp.setAttribute('x2', p.x);
@@ -3035,8 +3071,17 @@ function dragMove(p) {
         // Highlight hovered target
         clearClass('connector-hover');
         const target = getNodeAt(p.x, p.y);
-        if (target && target.id !== drag.fromId)
-            addClassToNode(target.id, 'connector-hover');
+        if (target && target.id !== drag.fromId) {
+            if (target.shape === 'table') {
+                addClassToTableCell(
+                    target.id,
+                    tableCellIndexAt(target, p.y),
+                    'connector-hover',
+                );
+            } else {
+                addClassToNode(target.id, 'connector-hover');
+            }
+        }
         return;
     }
 
@@ -3152,7 +3197,7 @@ function dragEnd(p) {
         const target = getNodeAt(p.x, p.y);
         if (!target || target.id === d.fromId) return;
         const id = genId();
-        state.edges.set(id, {
+        const edge = {
             id,
             from: d.fromId,
             to: target.id,
@@ -3160,7 +3205,11 @@ function dragEnd(p) {
             startMarker: 'none',
             endMarker: 'arrow',
             layerId: state.activeLayerId,
-        });
+        };
+        if (d.fromRowIndex !== undefined) edge.fromRowIndex = d.fromRowIndex;
+        if (target.shape === 'table')
+            edge.toRowIndex = tableCellIndexAt(target, p.y);
+        state.edges.set(id, edge);
         state.selected.clear();
         state.selected.add(id);
         pushHistory();
@@ -3296,6 +3345,14 @@ function clearClass(cls) {
 
 function addClassToNode(nodeId, cls) {
     const el = shapesLayer.querySelector(`[data-id="${nodeId}"] .node-shape`);
+    if (el) el.classList.add(cls);
+}
+
+/** Highlight a specific table cell (-1 = header, else row index) by node id. */
+function addClassToTableCell(nodeId, cellIndex, cls) {
+    const el = shapesLayer.querySelector(
+        `[data-id="${nodeId}"] [data-cell-index="${cellIndex}"]`,
+    );
     if (el) el.classList.add(cls);
 }
 
@@ -5199,6 +5256,32 @@ function renderEdgeProps(container, edge) {
         )
         .join('');
 
+    // For edges attached to a Table shape, offer a row/header picker so the
+    // connector can bind to a specific cell instead of the whole shape.
+    const nodeDisplayName = (n) =>
+        n ? n.headerText || n.label || n.id : '';
+    const rowSelectHtml = (which, node, current) => {
+        if (!node || node.shape !== 'table') return '';
+        const rows = node.rows || [];
+        // Clamp for display so a stale index (row deleted after binding)
+        // still shows the cell it now visually resolves to.
+        const displayCurrent =
+            typeof current === 'number' && current >= 0
+                ? Math.min(current, rows.length - 1)
+                : current;
+        const opts = [
+            `<option value="">Whole shape</option>`,
+            `<option value="-1"${displayCurrent === -1 ? ' selected' : ''}>Header</option>`,
+        ].concat(
+            rows.map(
+                (r, i) =>
+                    `<option value="${i}"${displayCurrent === i ? ' selected' : ''}>${esc(r || `Row ${i + 1}`)}</option>`,
+            ),
+        );
+        const label = which === 'from' ? 'From row' : 'To row';
+        return `<div class="prop-group"><label>${label}</label><select id="p-${which}-row">${opts.join('')}</select></div>`;
+    };
+
     container.innerHTML =
         propSection(
             'basic',
@@ -5208,8 +5291,10 @@ function renderEdgeProps(container, edge) {
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
-    <div class="prop-group"><label>From</label><span class="prop-value">${esc(fromNode ? fromNode.label || fromNode.id : edge.from)}</span></div>
-    <div class="prop-group"><label>To</label><span class="prop-value">${esc(toNode ? toNode.label || toNode.id : edge.to)}</span></div>`,
+    <div class="prop-group"><label>From</label><span class="prop-value">${esc(nodeDisplayName(fromNode) || edge.from)}</span></div>
+    ${rowSelectHtml('from', fromNode, edge.fromRowIndex)}
+    <div class="prop-group"><label>To</label><span class="prop-value">${esc(nodeDisplayName(toNode) || edge.to)}</span></div>
+    ${rowSelectHtml('to', toNode, edge.toRowIndex)}`,
         ) +
         propSection(
             'style',
@@ -5246,6 +5331,18 @@ function renderEdgeProps(container, edge) {
         edge.curveStyle = e.target.value;
         pushHistory();
         render();
+    });
+    ['from', 'to'].forEach((which) => {
+        const sel = document.getElementById(`p-${which}-row`);
+        if (!sel) return;
+        sel.addEventListener('change', (e) => {
+            const v = e.target.value;
+            const idx = v === '' ? undefined : parseInt(v, 10);
+            if (which === 'from') edge.fromRowIndex = idx;
+            else edge.toRowIndex = idx;
+            pushHistory();
+            render();
+        });
     });
     document
         .getElementById('p-stroke-style')
