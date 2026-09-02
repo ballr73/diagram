@@ -27,9 +27,11 @@
                 <div class="nav-section">Tools</div>
                 <a href="#drawing-tools">Drawing Tools</a>
                 <a href="#shapes">Shapes</a>
+                <a href="#tables">Tables</a>
                 <a href="#connectors">Connectors</a>
                 <a href="#lines">Lines</a>
                 <a href="#text-annotations">Text Annotations</a>
+                <a href="#url-links">URL Links</a>
                 <a href="#icon-library">Icon Library</a>
 
                 <div class="nav-section">Editing</div>
@@ -414,6 +416,13 @@
                             </td>
                         </tr>
                         <tr>
+                            <td><strong>URL Link</strong></td>
+                            <td><kbd>U</kbd></td>
+                            <td>
+                                Click on the canvas to place a URL link object
+                            </td>
+                        </tr>
+                        <tr>
                             <td><strong>Icons</strong></td>
                             <td><kbd>I</kbd></td>
                             <td>Toggle the icon library panel</td>
@@ -477,7 +486,56 @@
                             <td>Merge</td>
                             <td>Inverted triangle (apex at bottom)</td>
                         </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Header row + N data rows, with independent header/row styling (see <a href="#tables">Tables</a>)</td>
+                        </tr>
                     </table>
+                </section>
+
+                <!-- ── Tables ─────────────────────────────────────────── -->
+                <section id="tables">
+                    <h2>Tables</h2>
+                    <p>
+                        The <strong>Table</strong> shape (chosen from the Shape pop-out) draws a header
+                        box stacked above N row boxes.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Header &amp; row text:</strong> editable
+                            <strong>inline only</strong> — double-click the header or a row to type
+                            directly into it. There is no "Label" field for tables in the Properties panel.
+                        </li>
+                        <li>
+                            <strong>Row count:</strong> set the number of rows from the
+                            <strong>Rows</strong> field in the Properties panel.
+                        </li>
+                        <li>
+                            <strong>Row alignment:</strong> each row's text can be aligned
+                            <strong>left</strong>, <strong>center</strong>, or <strong>right</strong>
+                            using the alignment icon buttons in the Row Style section.
+                        </li>
+                        <li>
+                            <strong>Independent styling:</strong> Header Style and Row Style
+                            (fill, stroke, font, line style) are separate sections in the Properties panel.
+                        </li>
+                        <li>
+                            <strong>Duplicating tables:</strong> each copy gets its own independent
+                            row array — editing one table's rows never affects another.
+                        </li>
+                        <li>
+                            <strong>Row-level connections:</strong> connectors can bind to a
+                            <strong>specific row</strong> rather than the whole table (e.g. row 1 of
+                            Table A connects to row 3 of Table B). Change the bound row afterwards
+                            using the <strong>From row</strong> / <strong>To row</strong> dropdowns in
+                            the connector's Properties panel.
+                        </li>
+                        <li>
+                            <strong>Anchor restriction:</strong> connectors bound to a table row only
+                            anchor on the row's <strong>left or right edge</strong> — top/bottom
+                            anchoring is disabled for rows.
+                        </li>
+                    </ul>
                 </section>
 
                 <!-- ── Connectors ─────────────────────────────────────── -->
@@ -677,6 +735,43 @@
                             <strong>Formatting:</strong> font size, bold,
                             italic, underline, text colour, background fill,
                             background opacity, border (Properties panel)
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- ── URL Links ──────────────────────────────────────── -->
+                <section id="url-links">
+                    <h2>URL Links</h2>
+                    <p>
+                        A text label that opens a web page when clicked. Place one by clicking on an
+                        empty area of the canvas with the <strong>URL Link</strong> tool (<kbd>U</kbd>).
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Placement:</strong> click the canvas to place a link (default text
+                            "Link", blue, underlined) — an inline editor for the URL opens immediately.
+                        </li>
+                        <li>
+                            <strong>Editing the URL:</strong> double-click the link (Select tool) to
+                            reopen the single-line URL editor.
+                        </li>
+                        <li>
+                            <strong>Editing the text:</strong> the visible label text can
+                            <strong>only</strong> be changed from the <strong>Text</strong> field in the
+                            Properties panel — it is not editable inline.
+                        </li>
+                        <li>
+                            <strong>Navigating:</strong> <kbd>Ctrl</kbd>+click (or <kbd>Cmd</kbd>+click
+                            on macOS) the link with the Select tool active to open the URL in a new
+                            browser tab. Ctrl+click on a link with no URL set does nothing.
+                        </li>
+                        <li>
+                            <strong>Styling:</strong> colour, font size, bold, italic, underline, and
+                            opacity (Properties panel) — no background fill or border.
+                        </li>
+                        <li>
+                            Behaves like a text annotation for layers, groups, align/distribute,
+                            copy/paste, and undo/redo.
                         </li>
                     </ul>
                 </section>
@@ -1076,6 +1171,62 @@
                         </tr>
                     </table>
 
+                    <h3>Table properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Rows</td>
+                            <td>Number of data rows — increase/decrease to add or remove rows (header/row text is edited inline, not here)</td>
+                        </tr>
+                        <tr>
+                            <td>Header Style: Fill / Stroke</td>
+                            <td>Header box fill and border colour</td>
+                        </tr>
+                        <tr>
+                            <td>Header Style: Font</td>
+                            <td>Size, Bold, Italic, Underline for the header text</td>
+                        </tr>
+                        <tr>
+                            <td>Header Style: Line style</td>
+                            <td>Solid / Dashed / Dotted header border</td>
+                        </tr>
+                        <tr>
+                            <td>Row Style: Fill / Stroke</td>
+                            <td>Row box fill and border colour (applies to all rows)</td>
+                        </tr>
+                        <tr>
+                            <td>Row Style: Font</td>
+                            <td>Size, Bold, Italic, Underline for row text</td>
+                        </tr>
+                        <tr>
+                            <td>Row Style: Alignment</td>
+                            <td>Left / Center / Right icon buttons controlling row text alignment</td>
+                        </tr>
+                        <tr>
+                            <td>Row Style: Line style</td>
+                            <td>Solid / Dashed / Dotted row border</td>
+                        </tr>
+                        <tr>
+                            <td>Row Style: Opacity</td>
+                            <td>Row fill opacity 0–100%</td>
+                        </tr>
+                        <tr>
+                            <td>X / Y</td>
+                            <td>Position on canvas</td>
+                        </tr>
+                        <tr>
+                            <td>Width / Height</td>
+                            <td>Size (header/row heights recompute automatically)</td>
+                        </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the table to a different layer</td>
+                        </tr>
+                    </table>
+
                     <h3>Icon (symbol) properties</h3>
                     <table>
                         <tr>
@@ -1164,6 +1315,10 @@
                         <tr>
                             <td>Label Font</td>
                             <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                        <tr>
+                            <td>From row / To row</td>
+                            <td>For connectors bound to a Table shape endpoint — choose which row (or the header) the connector anchors to</td>
                         </tr>
                         <tr>
                             <td>Layer</td>
@@ -1263,6 +1418,38 @@
                         <tr>
                             <td>Layer</td>
                             <td>Move the annotation to a different layer</td>
+                        </tr>
+                    </table>
+
+                    <h3>URL properties</h3>
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Text</td>
+                            <td>The visible link label (this is the <strong>only</strong> place the text can be edited)</td>
+                        </tr>
+                        <tr>
+                            <td>URL</td>
+                            <td>The destination web address (also editable inline via double-click)</td>
+                        </tr>
+                        <tr>
+                            <td>Color</td>
+                            <td>Link text colour (default blue)</td>
+                        </tr>
+                        <tr>
+                            <td>Font</td>
+                            <td>Size, Bold, Italic, Underline</td>
+                        </tr>
+                        <tr>
+                            <td>Opacity</td>
+                            <td>Whole-object opacity 0–100%</td>
+                        </tr>
+                        <tr>
+                            <td>Layer</td>
+                            <td>Move the link to a different layer</td>
                         </tr>
                     </table>
 
@@ -1771,6 +1958,10 @@
                             <td>Text tool</td>
                         </tr>
                         <tr>
+                            <td><kbd>U</kbd></td>
+                            <td>URL Link tool</td>
+                        </tr>
+                        <tr>
                             <td><kbd>I</kbd></td>
                             <td>Toggle icon library panel</td>
                         </tr>
@@ -1864,6 +2055,10 @@
                         <tr>
                             <td>Dbl-click connector/line</td>
                             <td>Add waypoint corner at click point</td>
+                        </tr>
+                        <tr>
+                            <td>Ctrl+click URL link (Select tool)</td>
+                            <td>Open the link's URL in a new browser tab</td>
                         </tr>
                     </table>
                 </section>

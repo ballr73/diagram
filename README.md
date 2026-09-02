@@ -77,6 +77,7 @@ open app.html
 | **Connect** | `C` | Drag from one shape to another to draw a connector |
 | **Line** | `L` | Click and drag to draw a free-floating line |
 | **Text** | `T` | Click on the canvas to place a standalone text annotation |
+| **URL Link** | `U` | Click on the canvas to place a URL link object |
 | **Icons** | `I` | Toggle the icon library panel |
 
 ### Shapes
@@ -95,6 +96,19 @@ Click the **Shape** button in the left toolbar to activate the draw tool. A smal
 | Database | Cylinder (rectangle with elliptic caps) |
 | Wait | D-shape — straight left side, curved right edge |
 | Merge | Inverted triangle (apex at bottom) |
+| Table | Header row + N data rows, with independent header/row styling (see [Tables](#tables)) |
+
+### Tables
+
+The **Table** shape (chosen from the Shape pop-out) draws a header box stacked above N row boxes.
+
+- **Header & row text**: editable **inline only** — double-click the header or a row to type directly into it. There is no "Label" field in the Properties panel for tables.
+- **Row count**: set the number of rows from the **Rows** field in the Properties panel (grows/shrinks the table by adding or removing rows).
+- **Row alignment**: each row's text can be aligned **left**, **center**, or **right** using the alignment icon buttons in the Properties panel (Row Style section).
+- **Independent styling**: **Header Style** (fill, stroke, font, line style) and **Row Style** (fill, stroke, font, line style, opacity) are configured as separate sections in the Properties panel, so the header can look different from the rows.
+- **Duplicating tables**: each copy gets its own independent row array — editing rows on one table's duplicate never affects the original or other duplicates.
+- **Row-level connections**: connectors can bind to a **specific row** rather than the whole table — e.g. row 1 of Table A connects to row 3 of Table B. Drag a connector from/to a row to bind it there; the bound row can also be changed afterwards using the **From row** / **To row** dropdowns in the connector's Properties panel.
+- **Anchor restriction**: connectors bound to a table row only anchor on the row's **left or right edge** (top/bottom anchoring is disabled for rows, since rows are stacked vertically).
 
 ### Connectors
 
@@ -178,6 +192,17 @@ Free-floating text labels not attached to any shape. Place them by clicking on a
 - **Resize**: select a text annotation — eight resize handles appear; drag to change width/height
 - **Alignment**: left / centre / right (Properties panel)
 - **Formatting**: font size, bold, italic, underline, text colour, background fill, border colour and style (Properties panel)
+
+### URL Links
+
+A text label that opens a web page when clicked. Place one by clicking on an empty area of the canvas with the **URL Link** tool (`U`).
+
+- **Placement**: click the canvas to place a link (default text "Link", blue, underlined) — an inline editor for the URL opens immediately so you can type or paste the destination
+- **Editing the URL**: double-click the link (Select tool) to reopen the single-line URL editor
+- **Editing the text**: the visible label text can **only** be changed from the **Text** field in the Properties panel — it is not editable inline
+- **Navigating**: **Ctrl+click** (or **Cmd+click** on macOS) the link with the Select tool active to open the URL in a new browser tab. Ctrl+click on a link with no URL set does nothing.
+- **Styling**: colour, font size, bold, italic, underline, and opacity (Properties panel) — no background fill or border, keeping it a plain hyperlink-style label
+- Behaves like a text annotation for layers, groups, align/distribute, copy/paste, and undo/redo
 
 ---
 
@@ -375,6 +400,23 @@ When one element is selected, the Properties panel on the right shows its editab
 | Width / Height | Size |
 | Layer | Move the shape to a different layer |
 
+### Table properties
+
+| Property | Description |
+|----------|-------------|
+| Rows | Number of data rows — increase/decrease to add or remove rows (header text and row text are edited inline, not here) |
+| Header Style: Fill / Stroke | Header box fill and border colour |
+| Header Style: Font | Size, Bold, Italic, Underline for the header text |
+| Header Style: Line style | Solid / Dashed / Dotted header border |
+| Row Style: Fill / Stroke | Row box fill and border colour (applies to all rows) |
+| Row Style: Font | Size, Bold, Italic, Underline for row text |
+| Row Style: Alignment | Left / Center / Right — icon buttons controlling row text alignment |
+| Row Style: Line style | Solid / Dashed / Dotted row border |
+| Row Style: Opacity | Row fill opacity 0–100% |
+| X / Y | Position on canvas |
+| Width / Height | Size (header/row heights recompute automatically) |
+| Layer | Move the table to a different layer |
+
 ### Icon (symbol) properties
 
 | Property | Description |
@@ -400,6 +442,7 @@ When one element is selected, the Properties panel on the right shows its editab
 | Label | Text displayed along the connector |
 | Label colour | Label text colour (default black) |
 | Label Font | Size, Bold, Italic, Underline |
+| From row / To row | For connectors bound to a **Table** shape endpoint — choose which row (or the header) the connector anchors to |
 | Layer | Move the connector to a different layer |
 
 ### Line properties
@@ -430,6 +473,17 @@ When one element is selected, the Properties panel on the right shows its editab
 | X / Y | Anchor position on canvas |
 | Width / Height | Explicit box size; drag resize handles to set visually |
 | Layer | Move the annotation to a different layer |
+
+### URL properties
+
+| Property | Description |
+|----------|-------------|
+| Text | The visible link label (this is the **only** place the text can be edited) |
+| URL | The destination web address (also editable inline via double-click) |
+| Color | Link text colour (default blue) |
+| Font | Size, Bold, Italic, Underline |
+| Opacity | Whole-object opacity 0–100% |
+| Layer | Move the link to a different layer |
 
 ### Colour Picker &amp; Palette
 
@@ -697,6 +751,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `C` | Connector tool |
 | `L` | Line tool |
 | `T` | Text tool |
+| `U` | URL Link tool |
 | `I` | Toggle icon library panel |
 | `Delete` / `Backspace` | Delete selected elements (or remove focused waypoint) |
 | `P` | Enter presentation mode |
@@ -720,6 +775,7 @@ Up to 100 undo steps are retained. Every edit — drawing, moving, resizing, lab
 | `Right-click drag` | Pan canvas |
 | `Dbl-click` shape/icon (Select tool) | Edit label inline |
 | `Dbl-click` connector/line | Add waypoint corner at click point |
+| `Ctrl+click` URL link (Select tool) | Open the link's URL in a new browser tab |
 
 ---
 
