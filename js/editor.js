@@ -2205,6 +2205,11 @@ function renderAnnotationGroup(ann) {
 
     const g = svgEl('g', { 'data-id': ann.id, 'data-type': 'annotation' });
     if (isLayerLocked(ann.layerId)) g.classList.add('layer-locked');
+    g.style.opacity = (ann.opacity ?? 100) / 100;
+    if (ann.isUrl) {
+        g.style.cursor = 'pointer';
+        g.appendChild(svgEl('title', {}, ann.url || 'Link'));
+    }
 
     if (ann.fill || ann.stroke) {
         const rect = svgEl('rect', {
@@ -2477,6 +2482,9 @@ function onMouseDown(e) {
         case 'text':
             textMouseDown(p, hit);
             break;
+        case 'url':
+            urlMouseDown(p, hit);
+            break;
     }
 }
 
@@ -2702,6 +2710,13 @@ function selectMouseDown(p, hit, e) {
     }
 
     if (hit.type === 'annotation') {
+        if ((e.ctrlKey || e.metaKey) && hit.ann.isUrl && hit.ann.url) {
+            let url = hit.ann.url.trim();
+            if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url))
+                url = 'https://' + url;
+            window.open(url, '_blank', 'noopener');
+            return;
+        }
         state.selectedWaypoint = null;
         if (e.shiftKey) {
             state.selected.add(hit.id);
@@ -2841,6 +2856,32 @@ function textMouseDown(p, hit) {
         x: p.x,
         y: p.y + 5,
         text: 'Text',
+        layerId: state.activeLayerId,
+    });
+    state.selected.clear();
+    state.selected.add(id);
+    render();
+    updatePropertiesPanel();
+    startInlineEdit(id, 'annotation');
+    pushHistory();
+}
+
+function urlMouseDown(p, hit) {
+    // Only place a new URL object on empty canvas; clicking existing items
+    // with the URL tool active does nothing (use Select tool to interact).
+    if (hit.type !== 'canvas') return;
+    if (isLayerLocked(state.activeLayerId)) return;
+    const id = genId();
+    state.annotations.set(id, {
+        id,
+        x: p.x,
+        y: p.y + 5,
+        text: 'Link',
+        url: '',
+        isUrl: true,
+        color: '#2563eb',
+        fontUnderline: true,
+        opacity: 100,
         layerId: state.activeLayerId,
     });
     state.selected.clear();
@@ -3390,6 +3431,55 @@ function startInlineEdit(id, type, opts) {
         if (!ann) return;
         const bb = annBBox(ann);
         const pad = 8;
+
+        // URL objects: single-line input editing the URL only (text is
+        // editable exclusively via the Properties panel).
+        if (ann.isUrl) {
+            const fw = Math.max(200, bb.w + pad * 2);
+            const fh = bb.h + pad * 2;
+            const fo = svgEl('foreignObject', {
+                id: 'inline-editor',
+                x: bb.x - pad,
+                y: bb.y - pad,
+                width: fw,
+                height: fh,
+            });
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'inline-input';
+            input.value = ann.url || '';
+            input.placeholder = 'https://...';
+            input.style.cssText = `width:100%;height:100%;box-sizing:border-box;font-size:${ann.fontSize || 13}px;`;
+            fo.appendChild(input);
+            uiLayer.appendChild(fo);
+            requestAnimationFrame(() => {
+                input.focus();
+                input.select();
+            });
+            const commit = () => {
+                const val = input.value;
+                clearInlineEditor();
+                if (state.annotations.has(id)) state.annotations.get(id).url = val;
+                pushHistory();
+                render();
+                updatePropertiesPanel();
+            };
+            input.addEventListener('blur', commit);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.removeEventListener('blur', commit);
+                    commit();
+                }
+                if (e.key === 'Escape') {
+                    input.removeEventListener('blur', commit);
+                    clearInlineEditor();
+                }
+                e.stopPropagation();
+            });
+            return;
+        }
+
         const fw = Math.max(160, bb.w + pad * 2);
         const fh = Math.max(60, bb.h + pad * 2 + 10);
         const fo = svgEl('foreignObject', {
@@ -3710,6 +3800,7 @@ function onKeyDown(e) {
         c: 'connector',
         l: 'line',
         t: 'text',
+        u: 'url',
     };
     if (
         !e.ctrlKey &&
@@ -4515,7 +4606,8 @@ function updatePropertiesPanel() {
     } else if (line) {
         renderLineProps(content, line);
     } else if (ann) {
-        renderAnnProps(content, ann);
+        if (ann.isUrl) renderUrlProps(content, ann);
+        else renderAnnProps(content, ann);
     }
 }
 
@@ -5508,6 +5600,73 @@ function renderLineProps(container, line) {
     });
     bindFontControls(line, { size: 11 });
     bindLayerDropdown(line);
+}
+
+function renderUrlProps(container, ann) {
+    container.innerHTML =
+        propSection(
+            'basic',
+            'Basic',
+            `<div class="prop-group">
+      <label>Text</label>
+      <input type="text" id="p-text" value="${esc(ann.text || '')}">
+    </div>
+    <div class="prop-group">
+      <label>URL</label>
+      <input type="text" id="p-url" placeholder="https://..." value="${esc(ann.url || '')}">
+    </div>`,
+        ) +
+        propSection(
+            'style',
+            'Style',
+            `${colorRow('p-color', 'Color', ann.color, '#2563eb')}
+    ${colorSharedPicker()}
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(ann, { size: 13, underline: true })}</div>
+    <div class="prop-group">
+      <label>Opacity</label>
+      <div class="opacity-row">
+        <input type="range" id="p-opacity" min="0" max="100" step="1" value="${ann.opacity ?? 100}">
+        <span id="p-opacity-val">${ann.opacity ?? 100}%</span>
+      </div>
+    </div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(ann)}</div>`,
+        );
+    bindPropSectionToggles(container);
+
+    bindPropInput('p-text', (v) => {
+        ann.text = v;
+    });
+    bindPropInput('p-url', (v) => {
+        ann.url = v;
+    });
+
+    bindColorPanel(container, [
+        {
+            id: 'p-color',
+            defaultValue: '#2563eb',
+            setter: (v) => {
+                ann.color = v || undefined;
+            },
+        },
+    ]);
+    bindFontControls(ann, { size: 13, underline: true });
+
+    const opacitySlider = document.getElementById('p-opacity');
+    const opacityVal = document.getElementById('p-opacity-val');
+    if (opacitySlider) {
+        opacitySlider.addEventListener('input', () => {
+            ann.opacity = +opacitySlider.value;
+            opacityVal.textContent = ann.opacity + '%';
+            render();
+        });
+        opacitySlider.addEventListener('change', () => pushHistory());
+    }
+
+    bindLayerDropdown(ann);
 }
 
 function renderAnnProps(container, ann) {
