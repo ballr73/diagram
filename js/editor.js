@@ -205,9 +205,17 @@ function isLayerLocked(layerId) {
 // ============================================================
 // History (snapshot-based undo/redo)
 // ============================================================
+/** Shallow-clone a node, deep-cloning array fields (e.g. table `rows`) so
+ *  clones never share mutable array references with the original. */
+function cloneNode(node) {
+    const copy = { ...node };
+    if (Array.isArray(node.rows)) copy.rows = [...node.rows];
+    return copy;
+}
+
 function snapshot() {
     return {
-        nodes: new Map([...state.nodes].map(([k, v]) => [k, { ...v }])),
+        nodes: new Map([...state.nodes].map(([k, v]) => [k, cloneNode(v)])),
         edges: new Map(
             [...state.edges].map(([k, v]) => [
                 k,
@@ -395,7 +403,7 @@ function redo() {
 
 function restoreSnapshot(snap) {
     state.nodes.clear();
-    [...snap.nodes].forEach(([k, v]) => state.nodes.set(k, { ...v }));
+    [...snap.nodes].forEach(([k, v]) => state.nodes.set(k, cloneNode(v)));
     state.edges.clear();
     [...snap.edges].forEach(([k, v]) =>
         state.edges.set(k, {
@@ -4145,7 +4153,7 @@ function copySelected() {
         const edge = state.edges.get(id);
         const line = state.lines.get(id);
         const ann = state.annotations.get(id);
-        if (node) state.clipboard.nodes.push({ ...node });
+        if (node) state.clipboard.nodes.push(cloneNode(node));
         if (edge) state.clipboard.edges.push({ ...edge });
         if (line)
             state.clipboard.lines.push({
@@ -4159,7 +4167,7 @@ function copySelected() {
         if (state.selected.has(mid)) continue; // already added above
         const node = state.nodes.get(mid);
         const ann = state.annotations.get(mid);
-        if (node) state.clipboard.nodes.push({ ...node });
+        if (node) state.clipboard.nodes.push(cloneNode(node));
         if (ann) state.clipboard.annotations.push({ ...ann });
     }
     updateEditButtons();
@@ -4199,7 +4207,7 @@ function pasteClipboard() {
         const newId = genId();
         idMap.set(node.id, newId);
         const pasted = {
-            ...node,
+            ...cloneNode(node),
             id: newId,
             x: node.x + off,
             y: node.y + off,
