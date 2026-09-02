@@ -964,6 +964,28 @@ function edgeAnchorGeom(node, rowIndex) {
     return node;
 }
 
+/** Returns true if `rowIndex` denotes a bound table row/header anchor. */
+function isTableRowAnchor(node, rowIndex) {
+    return (
+        node.shape === 'table' && rowIndex !== undefined && rowIndex !== null
+    );
+}
+
+/** Border point for an edge endpoint aimed at `aim`. Table row/header cells
+ *  are thin horizontal bands, so connectors may only leave/enter via the
+ *  left or right edge (never the top/bottom) — pick whichever side is
+ *  closer to the horizontal direction of `aim`, at the cell's vertical
+ *  center. Non-table anchors keep the normal all-round border intersect. */
+function edgeAnchorBorderPoint(node, rowIndex, aim) {
+    const geom = edgeAnchorGeom(node, rowIndex);
+    if (isTableRowAnchor(node, rowIndex)) {
+        const cy = geom.y + geom.height / 2;
+        const x = aim.x >= geom.x + geom.width / 2 ? geom.x + geom.width : geom.x;
+        return { x, y: cy };
+    }
+    return borderIntersect(geom, aim);
+}
+
 /** Which table cell (-1 = header, else row index) contains diagram-space y coordinate py. */
 function tableCellIndexAt(node, py) {
     const { rows, headerH, rowH } = tableLayout(node);
@@ -1190,8 +1212,8 @@ function edgePoints(edge) {
     } else {
         toAim = wps.length > 0 ? wps[wps.length - 1] : nodeCenter(fromGeom);
     }
-    const p1 = borderIntersect(fromGeom, fromAim);
-    const p2 = borderIntersect(toGeom, toAim);
+    const p1 = edgeAnchorBorderPoint(from, edge.fromRowIndex, fromAim);
+    const p2 = edgeAnchorBorderPoint(to, edge.toRowIndex, toAim);
     return [p1, ...wps, p2];
 }
 
@@ -2767,7 +2789,7 @@ function connectorMouseDown(p, hit) {
         startX: p.x,
         startY: p.y,
     };
-    const fc = nodeCenter(edgeAnchorGeom(node, fromRowIndex));
+    const fc = edgeAnchorBorderPoint(node, fromRowIndex, p);
     uiLayer.appendChild(
         svgEl('line', {
             id: 'tmp',
@@ -3063,7 +3085,7 @@ function dragMove(p) {
         if (!tmp) return;
         const from = state.nodes.get(drag.fromId);
         if (!from) return;
-        const p1 = borderIntersect(edgeAnchorGeom(from, drag.fromRowIndex), p);
+        const p1 = edgeAnchorBorderPoint(from, drag.fromRowIndex, p);
         tmp.setAttribute('x1', p1.x);
         tmp.setAttribute('y1', p1.y);
         tmp.setAttribute('x2', p.x);
