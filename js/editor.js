@@ -919,6 +919,39 @@ function shapeVertices(node) {
     }
 }
 
+/** Compute the table's header height, per-row height, and row array. */
+function tableLayout(node) {
+    const rows =
+        node.rows && node.rows.length ? node.rows : ['Row 1'];
+    const headerH = Math.min(28, Math.max(14, node.height * 0.4));
+    const bodyH = Math.max(0, node.height - headerH);
+    const rowH = bodyH / rows.length;
+    return { rows, headerH, rowH };
+}
+
+/** Bounding rect of a table cell. cellIndex -1 = header, else row index. */
+function tableCellRect(node, cellIndex) {
+    const { headerH, rowH } = tableLayout(node);
+    if (cellIndex === -1) {
+        return { x: node.x, y: node.y, width: node.width, height: headerH };
+    }
+    return {
+        x: node.x,
+        y: node.y + headerH + cellIndex * rowH,
+        width: node.width,
+        height: rowH,
+    };
+}
+
+/** Which table cell (-1 = header, else row index) contains diagram-space y coordinate py. */
+function tableCellIndexAt(node, py) {
+    const { rows, headerH, rowH } = tableLayout(node);
+    const localY = py - node.y;
+    if (localY <= headerH) return -1;
+    const idx = Math.floor((localY - headerH) / rowH);
+    return Math.max(0, Math.min(rows.length - 1, idx));
+}
+
 /** Intersection of ray from (cx,cy) toward (px,py) with an ellipse of semi-axes (rx,ry). */
 function ellipseIntersect(cx, cy, rx, ry, px, py) {
     const dx = px - cx,
@@ -1586,6 +1619,77 @@ function renderNodeGroup(node) {
             }
             g.appendChild(lbl);
         }
+    } else if (node.shape === 'table') {
+        const { rows, headerH, rowH } = tableLayout(node);
+        const selCls = sel ? ' selected' : '';
+        const opacity = (node.opacity ?? 100) / 100;
+
+        // Header cell
+        const headerRect = svgEl('rect', {
+            x: node.x,
+            y: node.y,
+            width: node.width,
+            height: headerH,
+            class: 'node-shape' + selCls,
+        });
+        headerRect.style.fillOpacity = opacity;
+        applyStrokeStyle(headerRect, node.headerStrokeStyle);
+        if (node.headerFill)
+            headerRect.style.setProperty('--node-fill', node.headerFill);
+        else headerRect.style.setProperty('--node-fill', '#e2e8f0');
+        if (node.headerStroke)
+            headerRect.style.setProperty('--node-stroke', node.headerStroke);
+        g.appendChild(headerRect);
+
+        const headerLbl = svgEl('text', {
+            x: node.x + node.width / 2,
+            y: node.y + headerH / 2,
+            'text-anchor': 'middle',
+            'dominant-baseline': 'middle',
+            class: 'node-label',
+        });
+        headerLbl.textContent = node.headerText || '';
+        applyFontStyle(
+            headerLbl,
+            {
+                fontSize: node.headerFontSize,
+                fontBold: node.headerFontBold,
+                fontItalic: node.headerFontItalic,
+                fontUnderline: node.headerFontUnderline,
+                labelColor: node.headerLabelColor,
+            },
+            { size: 13, bold: true },
+        );
+        g.appendChild(headerLbl);
+
+        // Row cells
+        rows.forEach((rowText, i) => {
+            const ry = node.y + headerH + i * rowH;
+            const rowRect = svgEl('rect', {
+                x: node.x,
+                y: ry,
+                width: node.width,
+                height: rowH,
+                class: 'node-shape' + selCls,
+            });
+            rowRect.style.fillOpacity = opacity;
+            applyStrokeStyle(rowRect, node.strokeStyle);
+            if (node.fill) rowRect.style.setProperty('--node-fill', node.fill);
+            if (node.stroke)
+                rowRect.style.setProperty('--node-stroke', node.stroke);
+            g.appendChild(rowRect);
+
+            const rowLbl = svgEl('text', {
+                x: node.x + node.width / 2,
+                y: ry + rowH / 2,
+                'text-anchor': 'middle',
+                'dominant-baseline': 'middle',
+                class: 'node-label',
+            });
+            rowLbl.textContent = rowText || '';
+            applyFontStyle(rowLbl, node, { size: 13 });
+            g.appendChild(rowLbl);
+        });
     } else {
         const shapeEl = createShapeEl(node, sel);
         shapeEl.style.fillOpacity = (node.opacity ?? 100) / 100;
@@ -2363,7 +2467,13 @@ function selectMouseDown(p, hit, e) {
             state.selected.add(hit.nodeId);
             render();
             updatePropertiesPanel();
-            startInlineEdit(hit.nodeId, 'node');
+            {
+                const cellIndex =
+                    hit.node.shape === 'table'
+                        ? tableCellIndexAt(hit.node, p.y)
+                        : undefined;
+                startInlineEdit(hit.nodeId, 'node', { cellIndex });
+            }
             return;
         }
         _lastClickId = hit.nodeId;
@@ -2474,7 +2584,13 @@ function selectMouseDown(p, hit, e) {
                 state.selected.add(hit.id);
                 render();
                 updatePropertiesPanel();
-                startInlineEdit(hit.id, 'node');
+                {
+                    const cellIndex =
+                        hit.node.shape === 'table'
+                            ? tableCellIndexAt(hit.node, p.y)
+                            : undefined;
+                    startInlineEdit(hit.id, 'node', { cellIndex });
+                }
                 return;
             }
             _lastClickId = hit.id;
@@ -2984,16 +3100,22 @@ function dragEnd(p) {
             wait: 'Wait',
             merge: 'Merge',
         };
-        state.nodes.set(id, {
+        const newNode = {
             id,
             x: Math.min(px, d.startX),
             y: Math.min(py, d.startY),
             width: w,
             height: h,
-            label: defaultLabels[shape] || 'Shape',
             shape,
             layerId: state.activeLayerId,
-        });
+        };
+        if (shape === 'table') {
+            newNode.headerText = 'Header';
+            newNode.rows = ['Row 1', 'Row 2', 'Row 3'];
+        } else {
+            newNode.label = defaultLabels[shape] || 'Shape';
+        }
+        state.nodes.set(id, newNode);
         state.selected.clear();
         state.selected.add(id);
         pushHistory();
@@ -3159,7 +3281,7 @@ function addClassToNode(nodeId, cls) {
 // ============================================================
 // Inline Editing
 // ============================================================
-function startInlineEdit(id, type) {
+function startInlineEdit(id, type, opts) {
     clearInlineEditor();
 
     // Annotations use a resizable textarea to support multi-line text
@@ -3217,6 +3339,56 @@ function startInlineEdit(id, type) {
     if (type === 'node') {
         item = state.nodes.get(id);
         if (!item) return;
+        if (item.shape === 'table') {
+            const cellIndex = opts && opts.cellIndex !== undefined ? opts.cellIndex : -1;
+            const rect = tableCellRect(item, cellIndex);
+            const fo = svgEl('foreignObject', {
+                id: 'inline-editor',
+                x: rect.x + 4,
+                y: rect.y + rect.height / 2 - 14,
+                width: Math.max(40, rect.width - 8),
+                height: 28,
+            });
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'inline-input';
+            input.value =
+                cellIndex === -1
+                    ? item.headerText || ''
+                    : (item.rows && item.rows[cellIndex]) || '';
+            input.style.cssText = 'width:100%;height:100%;';
+            fo.appendChild(input);
+            uiLayer.appendChild(fo);
+            requestAnimationFrame(() => {
+                input.focus();
+                input.select();
+            });
+            const commit = () => {
+                const val = input.value;
+                clearInlineEditor();
+                const n = state.nodes.get(id);
+                if (n) {
+                    if (cellIndex === -1) n.headerText = val;
+                    else if (n.rows) n.rows[cellIndex] = val;
+                }
+                pushHistory();
+                render();
+                updatePropertiesPanel();
+            };
+            input.addEventListener('blur', commit);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.blur();
+                }
+                if (e.key === 'Escape') {
+                    input.removeEventListener('blur', commit);
+                    clearInlineEditor();
+                }
+                e.stopPropagation();
+            });
+            return;
+        }
         cx = item.x + item.width / 2;
         cy = item.y + item.height / 2;
         w = Math.max(80, item.width - 8);
@@ -4231,6 +4403,8 @@ function updatePropertiesPanel() {
     if (node) {
         if (node.type === 'symbol') {
             renderSymbolProps(content, node);
+        } else if (node.shape === 'table') {
+            renderTableProps(content, node);
         } else {
             renderNodeProps(content, node);
         }
@@ -4729,6 +4903,213 @@ function renderNodeProps(container, node) {
     bindLayerDropdown(node);
 }
 
+function renderTableProps(container, node) {
+    if (!node.rows || node.rows.length === 0) node.rows = ['Row 1'];
+    const dashOpts = (styleField) =>
+        [
+            ['solid', 'Solid'],
+            ['dashed', 'Dashed'],
+            ['dotted', 'Dotted'],
+        ]
+            .map(
+                ([v, l]) =>
+                    `<option value="${v}"${(node[styleField] || 'solid') === v ? ' selected' : ''}>${l}</option>`,
+            )
+            .join('');
+
+    // Read-only proxy objects so shared fontControlsHtml/applyFontStyle can
+    // read header-prefixed fields as if they were plain fontSize/fontBold/...
+    const headerFontProxy = {
+        get fontSize() {
+            return node.headerFontSize;
+        },
+        set fontSize(v) {
+            node.headerFontSize = v;
+        },
+        get fontBold() {
+            return node.headerFontBold;
+        },
+        set fontBold(v) {
+            node.headerFontBold = v;
+        },
+        get fontItalic() {
+            return node.headerFontItalic;
+        },
+        set fontItalic(v) {
+            node.headerFontItalic = v;
+        },
+        get fontUnderline() {
+            return node.headerFontUnderline;
+        },
+        set fontUnderline(v) {
+            node.headerFontUnderline = v;
+        },
+    };
+
+    container.innerHTML =
+        propSection(
+            'basic',
+            'Basic',
+            `<div class="prop-group"><label>Rows</label><input type="number" id="p-row-count" min="1" max="30" value="${node.rows.length}"></div>`,
+        ) +
+        propSection(
+            'headerStyle',
+            'Header Style',
+            `${colorRow('p-header-label-color', 'Label', node.headerLabelColor, '#000000')}
+    ${colorRow('p-header-fill', 'Fill', node.headerFill, '#e2e8f0')}
+    ${colorRow('p-header-stroke', 'Stroke', node.headerStroke, '#475569')}
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(headerFontProxy, { size: 13, bold: true }, 'p-header-')}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-header-stroke-style">${dashOpts('headerStrokeStyle')}</select></div>`,
+        ) +
+        propSection(
+            'rowStyle',
+            'Row Style',
+            `${colorRow('p-row-label-color', 'Label', node.labelColor, '#000000')}
+    ${colorRow('p-row-fill', 'Fill', node.fill, '#ffffff')}
+    ${colorRow('p-row-stroke', 'Stroke', node.stroke, '#475569')}
+    ${colorSharedPicker()}
+    <div class="prop-group"><label>Font</label>${fontControlsHtml(node, { size: 13 }, 'p-row-')}</div>
+    <div class="prop-group"><label>Line style</label><select id="p-row-stroke-style">${dashOpts('strokeStyle')}</select></div>
+    <div class="prop-group">
+      <label>Opacity</label>
+      <div class="opacity-row">
+        <input type="range" id="p-opacity" min="0" max="100" step="1" value="${node.opacity ?? 100}">
+        <span id="p-opacity-val">${node.opacity ?? 100}%</span>
+      </div>
+    </div>`,
+        ) +
+        propSection(
+            'geometry',
+            'Geometry',
+            `<div class="prop-group"><label>X</label><input type="number" id="p-x" value="${Math.round(node.x)}"></div>
+    <div class="prop-group"><label>Y</label><input type="number" id="p-y" value="${Math.round(node.y)}"></div>
+    <div class="prop-group"><label>Width</label><input type="number" id="p-w" value="${Math.round(node.width)}"></div>
+    <div class="prop-group"><label>Height</label><input type="number" id="p-h" value="${Math.round(node.height)}"></div>`,
+        ) +
+        propSection(
+            'layer',
+            'Layer',
+            `<div class="prop-group">${layerDropdownHtml(node)}</div>`,
+        );
+    bindPropSectionToggles(container);
+
+    document
+        .getElementById('p-header-stroke-style')
+        .addEventListener('change', (e) => {
+            node.headerStrokeStyle = e.target.value;
+            pushHistory();
+            render();
+        });
+    document
+        .getElementById('p-row-stroke-style')
+        .addEventListener('change', (e) => {
+            node.strokeStyle = e.target.value;
+            pushHistory();
+            render();
+        });
+
+    bindFontControls(headerFontProxy, { size: 13, bold: true }, 'p-header-');
+    bindFontControls(node, { size: 13 }, 'p-row-');
+
+    bindColorPanel(container, [
+        {
+            id: 'p-header-label-color',
+            defaultValue: '#000000',
+            setter: (v) => {
+                node.headerLabelColor = v || undefined;
+            },
+        },
+        {
+            id: 'p-header-fill',
+            defaultValue: '#e2e8f0',
+            setter: (v) => {
+                node.headerFill = v || undefined;
+            },
+        },
+        {
+            id: 'p-header-stroke',
+            defaultValue: '#475569',
+            setter: (v) => {
+                node.headerStroke = v || undefined;
+            },
+        },
+        {
+            id: 'p-row-label-color',
+            defaultValue: '#000000',
+            setter: (v) => {
+                node.labelColor = v || undefined;
+            },
+        },
+        {
+            id: 'p-row-fill',
+            defaultValue: '#ffffff',
+            setter: (v) => {
+                node.fill = v || undefined;
+            },
+        },
+        {
+            id: 'p-row-stroke',
+            defaultValue: '#475569',
+            setter: (v) => {
+                node.stroke = v || undefined;
+            },
+        },
+    ]);
+
+    const opacitySlider = document.getElementById('p-opacity');
+    const opacityVal = document.getElementById('p-opacity-val');
+    opacitySlider.addEventListener('input', () => {
+        node.opacity = parseInt(opacitySlider.value, 10);
+        opacityVal.textContent = node.opacity + '%';
+        render();
+    });
+    opacitySlider.addEventListener('change', () => pushHistory());
+
+    document.getElementById('p-row-count').addEventListener('change', (e) => {
+        const n = Math.max(1, Math.min(30, parseInt(e.target.value, 10) || 1));
+        if (!node.rows) node.rows = [];
+        if (n > node.rows.length) {
+            for (let i = node.rows.length; i < n; i++)
+                node.rows.push(`Row ${i + 1}`);
+        } else if (n < node.rows.length) {
+            node.rows.length = n;
+        }
+        pushHistory();
+        render();
+        updatePropertiesPanel();
+    });
+
+    bindPropInput(
+        'p-x',
+        (v) => {
+            node.x = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-y',
+        (v) => {
+            node.y = +v || 0;
+        },
+        true,
+    );
+    bindPropInput(
+        'p-w',
+        (v) => {
+            node.width = Math.max(40, +v || 40);
+        },
+        true,
+    );
+    bindPropInput(
+        'p-h',
+        (v) => {
+            node.height = Math.max(20, +v || 20);
+        },
+        true,
+    );
+    bindLayerDropdown(node);
+}
+
 function renderEdgeProps(container, edge) {
     const fromNode = state.nodes.get(edge.from);
     const toNode = state.nodes.get(edge.to);
@@ -5132,7 +5513,7 @@ function bindPropInput(id, setter, isNumber) {
 }
 
 /** Generate HTML for font control row (size select + B/I/U buttons). */
-function fontControlsHtml(item, defaults = {}) {
+function fontControlsHtml(item, defaults = {}, idPrefix = 'p-') {
     const curSize =
         item.fontSize !== undefined ? item.fontSize : defaults.size || 13;
     const bold =
@@ -5155,19 +5536,19 @@ function fontControlsHtml(item, defaults = {}) {
         .join('');
 
     return `<div class="font-controls">
-    <select class="font-size-select" id="p-fontsize">${sizeOpts}</select>
-    <button class="font-btn${bold ? ' active' : ''}" id="p-bold"      title="Bold"><b>B</b></button>
-    <button class="font-btn${italic ? ' active' : ''}" id="p-italic"    title="Italic"><i>I</i></button>
-    <button class="font-btn${under ? ' active' : ''}" id="p-underline" title="Underline"><u>U</u></button>
+    <select class="font-size-select" id="${idPrefix}fontsize">${sizeOpts}</select>
+    <button class="font-btn${bold ? ' active' : ''}" id="${idPrefix}bold"      title="Bold"><b>B</b></button>
+    <button class="font-btn${italic ? ' active' : ''}" id="${idPrefix}italic"    title="Italic"><i>I</i></button>
+    <button class="font-btn${under ? ' active' : ''}" id="${idPrefix}underline" title="Underline"><u>U</u></button>
   </div>`;
 }
 
 /** Wire up font control inputs, calling setter(field, value) on change. */
-function bindFontControls(item, defaults = {}) {
-    const sizeEl = document.getElementById('p-fontsize');
-    const boldEl = document.getElementById('p-bold');
-    const italEl = document.getElementById('p-italic');
-    const underEl = document.getElementById('p-underline');
+function bindFontControls(item, defaults = {}, idPrefix = 'p-') {
+    const sizeEl = document.getElementById(`${idPrefix}fontsize`);
+    const boldEl = document.getElementById(`${idPrefix}bold`);
+    const italEl = document.getElementById(`${idPrefix}italic`);
+    const underEl = document.getElementById(`${idPrefix}underline`);
     if (!sizeEl) return;
 
     sizeEl.addEventListener('change', () => {
@@ -5230,6 +5611,7 @@ const SHAPE_SVGS = {
         '<path d="M2,5 A6,2 0 0 1 14,5 L14,11 A6,2 0 0 1 2,11 Z M2,5 A6,2 0 0 0 14,5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     wait: '<path d="M2,3 L9,3 C14,3 14,13 9,13 L2,13 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     merge: '<polygon points="1,2 15,2 8,14" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    table: '<rect x="1" y="2" width="14" height="12" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="1" y1="6" x2="15" y2="6" stroke="currentColor" stroke-width="1.5"/><line x1="1" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="1.5"/>',
 };
 
 function setCurrentShape(shape) {
