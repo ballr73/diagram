@@ -116,7 +116,7 @@ The **Table** shape (chosen from the Shape pop-out) draws a header box stacked a
 2. Drag from the edge of a source shape to a target shape
 3. A connector with an arrowhead is created
 
-Connector endpoints, style, and curve type can be changed in the Properties panel.
+Connector endpoints, style, and curve type can be changed in the Properties panel. Start/End markers are chosen from a **graphical dropdown** — click the icon button to open a pop-up grid of options (no text labels), click one to apply it.
 
 | Marker option | Appearance |
 |--------------|------------|
@@ -124,6 +124,14 @@ Connector endpoints, style, and curve type can be changed in the Properties pane
 | Arrow | Arrowhead pointing in the connector's direction |
 | Circle | Filled circle |
 | Square | Filled square |
+| One | Single tick mark (ER: exactly one) |
+| Only one | Double tick mark (ER: one and only one — mandatory, max 1) |
+| Many | Crow's-foot fork (ER: many, unspecified minimum) |
+| One or many | Tick mark + crow's-foot (ER: mandatory, max many) |
+| Zero or one | Hollow circle + tick mark (ER: optional, max one) |
+| Zero or many | Hollow circle + crow's-foot (ER: optional, max many) |
+
+The last six use standard **Entity-Relationship ("Crow's Foot") notation**, useful for database/data-model diagrams — mix and match Start/End markers to express cardinality (e.g. "Zero or many" at one end and "One" at the other).
 
 ### Curved connectors
 

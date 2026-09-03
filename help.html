@@ -551,6 +551,11 @@
                     </ol>
 
                     <h3>Endpoint marker options</h3>
+                    <p>
+                        Start/End markers are chosen from a <strong>graphical dropdown</strong> in the
+                        Properties panel — click the icon button to open a pop-up grid of options (no
+                        text labels), then click one to apply it.
+                    </p>
                     <table>
                         <tr>
                             <th>Option</th>
@@ -572,7 +577,36 @@
                             <td>Square</td>
                             <td>Filled square</td>
                         </tr>
+                        <tr>
+                            <td>One</td>
+                            <td>Single tick mark (ER: exactly one)</td>
+                        </tr>
+                        <tr>
+                            <td>Only one</td>
+                            <td>Double tick mark (ER: one and only one — mandatory, max 1)</td>
+                        </tr>
+                        <tr>
+                            <td>Many</td>
+                            <td>Crow's-foot fork (ER: many, unspecified minimum)</td>
+                        </tr>
+                        <tr>
+                            <td>One or many</td>
+                            <td>Tick mark + crow's-foot (ER: mandatory, max many)</td>
+                        </tr>
+                        <tr>
+                            <td>Zero or one</td>
+                            <td>Hollow circle + tick mark (ER: optional, max one)</td>
+                        </tr>
+                        <tr>
+                            <td>Zero or many</td>
+                            <td>Hollow circle + crow's-foot (ER: optional, max many)</td>
+                        </tr>
                     </table>
+                    <p>
+                        The last six use standard <strong>Entity-Relationship ("Crow's Foot") notation</strong>,
+                        useful for database/data-model diagrams — mix and match Start/End markers to
+                        express cardinality (e.g. "Zero or many" at one end and "One" at the other).
+                    </p>
 
                     <h3>Curved connectors</h3>
                     <p>
