@@ -48,3 +48,4 @@ logs/
 test-results/
 playwright-report/
 coverage/
+report.*.json

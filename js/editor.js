@@ -684,6 +684,8 @@ function getSVGEmbedStyles() {
     .arrow-fill-sel { fill: currentColor; }
     .line-sym-fill     { fill: currentColor; }
     .line-sym-fill-sel { fill: currentColor; }
+    .er-marker-line   { stroke: currentColor; stroke-width: 1.5; fill: none; }
+    .er-marker-circle { fill: none; stroke: currentColor; stroke-width: 1.5; }
     .line-endpoint-handle { display: none; }
   `;
 }
@@ -1818,12 +1820,21 @@ function renderEdgeGroup(edge) {
     const endMk = edge.endMarker || 'arrow';
 
     // Resolve marker URL: arrows use directional markers; circle/square are symmetric
+    const ER_MARKERS = new Set([
+        'one',
+        'only-one',
+        'many',
+        'one-or-many',
+        'zero-or-one',
+        'zero-or-many',
+    ]);
     const markerUrl = (sym, pos) => {
         if (sym === 'none') return null;
         if (sym === 'arrow')
             return sel
                 ? `url(#arrow-${pos}-marker-sel)`
                 : `url(#arrow-${pos}-marker)`;
+        if (ER_MARKERS.has(sym)) return `url(#${sym}-${pos}-marker)`;
         const base = sym === 'circle' ? 'dot' : sym;
         return sel ? `url(#${base}-marker-sel)` : `url(#${base}-marker)`;
     };
@@ -5342,13 +5353,41 @@ function renderEdgeProps(container, edge) {
         arrow:  `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="2"/><path d="M18,4 L26,9 L18,14 Z" fill="currentColor" stroke="none"/></svg>`,
         circle: `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="9" r="4" fill="currentColor" stroke="none"/></svg>`,
         square: `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="19" y2="9" stroke="currentColor" stroke-width="2"/><rect x="19" y="5" width="8" height="8" fill="currentColor" stroke="none"/></svg>`,
+        'one':          `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="2"/><line x1="20" y1="4" x2="20" y2="14" stroke="currentColor" stroke-width="2"/></svg>`,
+        'only-one':     `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="2"/><line x1="20" y1="4" x2="20" y2="14" stroke="currentColor" stroke-width="2"/><line x1="16" y1="4" x2="16" y2="14" stroke="currentColor" stroke-width="2"/></svg>`,
+        'many':         `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="2"/><path d="M24,9 L16,3 M24,9 L16,15" stroke="currentColor" stroke-width="2" fill="none"/></svg>`,
+        'one-or-many':  `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="2"/><path d="M24,9 L14,3 M24,9 L14,15" stroke="currentColor" stroke-width="2" fill="none"/><line x1="19" y1="4" x2="19" y2="14" stroke="currentColor" stroke-width="2"/></svg>`,
+        'zero-or-one':  `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="2"/><line x1="20" y1="4" x2="20" y2="14" stroke="currentColor" stroke-width="2"/><circle cx="11" cy="9" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+        'zero-or-many': `<svg width="28" height="18" viewBox="0 0 28 18"><line x1="4" y1="9" x2="24" y2="9" stroke="currentColor" stroke-width="2"/><path d="M24,9 L16,3 M24,9 L16,15" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="9" cy="9" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
     };
-    const markerPickerHtml = (pickerId, current) =>
-        `<div class="marker-picker" id="${pickerId}">${
-            ['none', 'arrow', 'circle', 'square']
-                .map(v => `<button class="marker-btn${current === v ? ' active' : ''}" data-value="${v}" title="${v.charAt(0).toUpperCase() + v.slice(1)}">${mkIcon[v]}</button>`)
-                .join('')
-        }</div>`;
+    const markerLabels = {
+        none: 'None',
+        arrow: 'Arrow',
+        circle: 'Circle',
+        square: 'Square',
+        'one': 'One',
+        'only-one': 'Only one',
+        'many': 'Many',
+        'one-or-many': 'One or many',
+        'zero-or-one': 'Zero or one',
+        'zero-or-many': 'Zero or many',
+    };
+    const markerValues = [
+        'none', 'arrow', 'circle', 'square',
+        'one', 'only-one', 'many', 'one-or-many', 'zero-or-one', 'zero-or-many',
+    ];
+    const markerDropdownHtml = (pickerId, current) =>
+        `<div class="marker-dropdown" id="${pickerId}">
+    <button type="button" class="marker-dropdown-toggle" title="${markerLabels[current] || 'None'}">
+        ${mkIcon[current] || mkIcon.none}
+        <span class="marker-dropdown-caret">▾</span>
+    </button>
+    <div class="marker-dropdown-menu">${
+        markerValues
+            .map(v => `<button type="button" class="marker-dropdown-option${current === v ? ' active' : ''}" data-value="${v}" title="${markerLabels[v]}">${mkIcon[v]}</button>`)
+            .join('')
+    }</div>
+</div>`;
 
     const dashOpts = [
         ['solid', 'Solid'],
@@ -5400,8 +5439,8 @@ function renderEdgeProps(container, edge) {
         propSection(
             'basic',
             'Basic',
-            `<div class="prop-group"><label>Start</label>${markerPickerHtml('p-start-marker', startMk)}</div>
-    <div class="prop-group"><label>End</label>${markerPickerHtml('p-end-marker', endMk)}</div>
+            `<div class="prop-group"><label>Start</label>${markerDropdownHtml('p-start-marker', startMk)}</div>
+    <div class="prop-group"><label>End</label>${markerDropdownHtml('p-end-marker', endMk)}</div>
     <div class="prop-group"><label>Line style</label><select id="p-stroke-style">${dashOpts}</select></div>
     <div class="prop-group"><label>Connector</label><select id="p-curve-style">${curveOpts}</select></div>
     <div class="prop-group"><label>Label</label><input type="text" id="p-label" value="${esc(edge.label || '')}"></div>
@@ -5425,22 +5464,9 @@ function renderEdgeProps(container, edge) {
         );
     bindPropSectionToggles(container);
 
-    // Wire marker pickers — click a button to activate
-    const bindMarkerPicker = (pickerId, setter) => {
-        const picker = container.querySelector(`#${pickerId}`);
-        if (!picker) return;
-        picker.querySelectorAll('.marker-btn').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                picker.querySelectorAll('.marker-btn').forEach((b) => b.classList.remove('active'));
-                btn.classList.add('active');
-                setter(btn.dataset.value);
-                pushHistory();
-                render();
-            });
-        });
-    };
-    bindMarkerPicker('p-start-marker', (v) => { edge.startMarker = v; });
-    bindMarkerPicker('p-end-marker',   (v) => { edge.endMarker = v; });
+    // Wire marker dropdowns — click toggle to open/close, click an option to set
+    bindMarkerDropdown(container, 'p-start-marker', (v) => { edge.startMarker = v; });
+    bindMarkerDropdown(container, 'p-end-marker',   (v) => { edge.endMarker = v; });
     document.getElementById('p-curve-style').addEventListener('change', (e) => {
         edge.curveStyle = e.target.value;
         pushHistory();
@@ -5836,6 +5862,53 @@ function bindPropInput(id, setter, isNumber) {
         render();
     });
     el.addEventListener('change', () => pushHistory());
+}
+
+let _markerDropdownDocListenerAdded = false;
+
+/** Close any currently-open marker dropdown menus. */
+function closeAllMarkerDropdowns() {
+    document
+        .querySelectorAll('.marker-dropdown.open')
+        .forEach((el) => el.classList.remove('open'));
+}
+
+/**
+ * Wire a graphical marker dropdown (built by markerDropdownHtml) inside
+ * `container`: click the toggle button to open/close the option menu,
+ * click an option to apply it via `setter` and close the menu.
+ */
+function bindMarkerDropdown(container, pickerId, setter) {
+    const root = container.querySelector(`#${pickerId}`);
+    if (!root) return;
+    const toggle = root.querySelector('.marker-dropdown-toggle');
+    const menu = root.querySelector('.marker-dropdown-menu');
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wasOpen = root.classList.contains('open');
+        closeAllMarkerDropdowns();
+        if (!wasOpen) root.classList.add('open');
+    });
+
+    menu.querySelectorAll('.marker-dropdown-option').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setter(btn.dataset.value);
+            closeAllMarkerDropdowns();
+            pushHistory();
+            render();
+        });
+    });
+
+    // Register a single document-level outside-click closer (once, not per render)
+    if (!_markerDropdownDocListenerAdded) {
+        _markerDropdownDocListenerAdded = true;
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.marker-dropdown')) closeAllMarkerDropdowns();
+        });
+    }
 }
 
 /** Generate HTML for font control row (size select + B/I/U buttons). */

@@ -842,6 +842,18 @@ body,
     stroke: none;
 }
 
+/* ER (Crow's Foot) connector end markers */
+.er-marker-line {
+    stroke: currentColor;
+    stroke-width: 1.5;
+    fill: none;
+}
+.er-marker-circle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
 /* ============================================================
    SVG — Line endpoint handles
    ============================================================ */
@@ -1953,6 +1965,97 @@ kbd {
 }
 
 .marker-btn.active {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+/* ── Marker dropdown (connector endpoints — graphical, closed by default) ── */
+.marker-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.marker-dropdown-toggle {
+    width: 44px;
+    height: 24px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #f8fafc;
+    cursor: pointer;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #64748b;
+}
+
+.marker-dropdown-toggle svg {
+    display: block;
+    overflow: visible;
+}
+
+.marker-dropdown-caret {
+    font-size: 9px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.marker-dropdown-toggle:hover,
+.marker-dropdown.open .marker-dropdown-toggle {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.marker-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 20;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 6px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: max-content;
+}
+
+.marker-dropdown.open .marker-dropdown-menu {
+    display: grid;
+}
+
+.marker-dropdown-option {
+    width: 32px;
+    height: 24px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #f8fafc;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #64748b;
+}
+
+.marker-dropdown-option svg {
+    display: block;
+    overflow: visible;
+}
+
+.marker-dropdown-option:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.marker-dropdown-option.active {
     border-color: #3b82f6;
     background: #dbeafe;
     color: #3b82f6;

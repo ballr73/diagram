@@ -1677,6 +1677,167 @@
                                     class="line-sym-fill-sel"
                                 />
                             </marker>
+                            <!-- ER (Crow's Foot) connector end markers -->
+                            <marker
+                                id="one-end-marker"
+                                markerWidth="14"
+                                markerHeight="14"
+                                refX="14"
+                                refY="7"
+                                orient="auto"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path d="M10,3 L10,11" class="er-marker-line" />
+                            </marker>
+                            <marker
+                                id="one-start-marker"
+                                markerWidth="14"
+                                markerHeight="14"
+                                refX="14"
+                                refY="7"
+                                orient="auto-start-reverse"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path d="M10,3 L10,11" class="er-marker-line" />
+                            </marker>
+                            <marker
+                                id="only-one-end-marker"
+                                markerWidth="20"
+                                markerHeight="14"
+                                refX="20"
+                                refY="7"
+                                orient="auto"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M16,3 L16,11 M10,3 L10,11"
+                                    class="er-marker-line"
+                                />
+                            </marker>
+                            <marker
+                                id="only-one-start-marker"
+                                markerWidth="20"
+                                markerHeight="14"
+                                refX="20"
+                                refY="7"
+                                orient="auto-start-reverse"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M16,3 L16,11 M10,3 L10,11"
+                                    class="er-marker-line"
+                                />
+                            </marker>
+                            <marker
+                                id="many-end-marker"
+                                markerWidth="14"
+                                markerHeight="14"
+                                refX="14"
+                                refY="7"
+                                orient="auto"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M14,7 L4,1 M14,7 L4,13"
+                                    class="er-marker-line"
+                                />
+                            </marker>
+                            <marker
+                                id="many-start-marker"
+                                markerWidth="14"
+                                markerHeight="14"
+                                refX="14"
+                                refY="7"
+                                orient="auto-start-reverse"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M14,7 L4,1 M14,7 L4,13"
+                                    class="er-marker-line"
+                                />
+                            </marker>
+                            <marker
+                                id="one-or-many-end-marker"
+                                markerWidth="20"
+                                markerHeight="14"
+                                refX="20"
+                                refY="7"
+                                orient="auto"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M20,7 L8,1 M20,7 L8,13 M14,3 L14,11"
+                                    class="er-marker-line"
+                                />
+                            </marker>
+                            <marker
+                                id="one-or-many-start-marker"
+                                markerWidth="20"
+                                markerHeight="14"
+                                refX="20"
+                                refY="7"
+                                orient="auto-start-reverse"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M20,7 L8,1 M20,7 L8,13 M14,3 L14,11"
+                                    class="er-marker-line"
+                                />
+                            </marker>
+                            <marker
+                                id="zero-or-one-end-marker"
+                                markerWidth="26"
+                                markerHeight="14"
+                                refX="26"
+                                refY="7"
+                                orient="auto"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path d="M20,3 L20,11" class="er-marker-line" />
+                                <circle cx="10" cy="7" r="4" class="er-marker-circle" />
+                            </marker>
+                            <marker
+                                id="zero-or-one-start-marker"
+                                markerWidth="26"
+                                markerHeight="14"
+                                refX="26"
+                                refY="7"
+                                orient="auto-start-reverse"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path d="M20,3 L20,11" class="er-marker-line" />
+                                <circle cx="10" cy="7" r="4" class="er-marker-circle" />
+                            </marker>
+                            <marker
+                                id="zero-or-many-end-marker"
+                                markerWidth="26"
+                                markerHeight="14"
+                                refX="26"
+                                refY="7"
+                                orient="auto"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M26,7 L14,1 M26,7 L14,13"
+                                    class="er-marker-line"
+                                />
+                                <circle cx="7" cy="7" r="4" class="er-marker-circle" />
+                            </marker>
+                            <marker
+                                id="zero-or-many-start-marker"
+                                markerWidth="26"
+                                markerHeight="14"
+                                refX="26"
+                                refY="7"
+                                orient="auto-start-reverse"
+                                markerUnits="userSpaceOnUse"
+                            >
+                                <path
+                                    d="M26,7 L14,1 M26,7 L14,13"
+                                    class="er-marker-line"
+                                />
+                                <circle cx="7" cy="7" r="4" class="er-marker-circle" />
+                            </marker>
                         </defs>
                         <!-- Grid background — covers infinite canvas, pointer-events:none so it doesn't block interaction -->
                         <rect
